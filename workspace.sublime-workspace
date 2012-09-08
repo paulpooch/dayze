@@ -254,6 +254,14 @@
 				"buffer_size": 482,
 				"line_ending": "Windows"
 			}
+		},
+		{
+			"file": "package.json",
+			"settings":
+			{
+				"buffer_size": 155,
+				"line_ending": "Windows"
+			}
 		}
 	],
 	"build_system": "",
@@ -387,7 +395,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -402,14 +410,40 @@
 						"selection":
 						[
 							[
-								180,
-								180
+								197,
+								197
 							]
 						],
 						"settings":
 						{
 							"auto_name": "",
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "package.json",
+					"settings":
+					{
+						"buffer_size": 155,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								129,
+								129
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
