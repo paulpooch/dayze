@@ -1,0 +1,11 @@
+{
+  "name": "dayze",
+  "description": "",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.0.0rc4",
+    "handlebars": "1.0.6-2",
+    "less": "1.3.0"
+  }
+}

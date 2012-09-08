@@ -1,0 +1,481 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"req",
+				"require"
+			],
+			[
+				"data",
+				"data-index"
+			],
+			[
+				"hypem",
+				"hypem_rip"
+			],
+			[
+				"track",
+				"trackArray"
+			],
+			[
+				"business",
+				"businessVal"
+			],
+			[
+				"fr",
+				"friends"
+			],
+			[
+				"so",
+				"sortFriends"
+			],
+			[
+				"next",
+				"nextButton"
+			],
+			[
+				"cont",
+				"container"
+			],
+			[
+				"sorr",
+				"sortedFriends"
+			],
+			[
+				"friends-",
+				"friends-container"
+			],
+			[
+				"friend",
+				"friendIndex"
+			],
+			[
+				"sort",
+				"sortedFriends"
+			],
+			[
+				"frien",
+				"friendIndex"
+			],
+			[
+				"con",
+				"container"
+			],
+			[
+				"container",
+				"containerLeft"
+			],
+			[
+				"prev",
+				"prevButton"
+			],
+			[
+				"containe",
+				"containerLeft"
+			],
+			[
+				"mask",
+				"maskLeft"
+			],
+			[
+				"get",
+				"getFullYear"
+			],
+			[
+				"milli",
+				"millisUntilBirthday"
+			],
+			[
+				"today",
+				"todayInMillis"
+			],
+			[
+				"to",
+				"todayInMilli"
+			],
+			[
+				"birt",
+				"birthdayInSeconds"
+			],
+			[
+				"day",
+				"daysUntilBirthday"
+			],
+			[
+				"seconds",
+				"secondsUntilBirthday"
+			],
+			[
+				"todayIn",
+				"todayInSeconds"
+			],
+			[
+				"acce",
+				"accessToken"
+			],
+			[
+				"auth",
+				"authResponse"
+			],
+			[
+				"ba",
+				"background-color"
+			],
+			[
+				"font",
+				"font-size"
+			],
+			[
+				"bu",
+				"businesses"
+			],
+			[
+				"backgr",
+				"background-size"
+			],
+			[
+				"bl",
+				"blackout"
+			],
+			[
+				"initial",
+				"initialTiles"
+			],
+			[
+				"random",
+				"randomTileIndex"
+			],
+			[
+				"randomTile",
+				"randomTileIndex"
+			],
+			[
+				"randomTi",
+				"randomTileIndex"
+			],
+			[
+				"buff",
+				"bufferSize"
+			],
+			[
+				"latest",
+				"latestHash"
+			],
+			[
+				"lates",
+				"latestHash"
+			],
+			[
+				"late",
+				"latestHash"
+			],
+			[
+				"amount",
+				"amountInput"
+			],
+			[
+				"amout",
+				"amountInput"
+			],
+			[
+				"amo",
+				"amountInput"
+			],
+			[
+				"key",
+				"keyCode"
+			],
+			[
+				"fun",
+				"function"
+			],
+			[
+				"name",
+				"nameInput"
+			],
+			[
+				"me",
+				"messageInput"
+			],
+			[
+				"togg",
+				"toggleVideo"
+			],
+			[
+				"remove",
+				"removeComponent"
+			],
+			[
+				"add",
+				"addComponent"
+			],
+			[
+				"_",
+				"_facebookController"
+			],
+			[
+				"Facebook",
+				"FacebookController"
+			],
+			[
+				"Facebo",
+				"FacebookController"
+			],
+			[
+				"on",
+				"onFacebookLoad"
+			],
+			[
+				"acc",
+				"accessToken"
+			],
+			[
+				"left",
+				"left-most"
+			],
+			[
+				"inline",
+				"inline-block"
+			],
+			[
+				"amou",
+				"amount-button"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "server/main.js",
+			"settings":
+			{
+				"buffer_size": 482,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/John/dayze/server/views/home/index.html",
+		"/C/Users/John/dayze/server/views/home/index.hbs",
+		"/C/Users/John/dayze/README.md",
+		"/C/Users/John/dayze/package.json",
+		"/C/Users/John/dayze/.gitignore"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"back",
+			"prev",
+			".cell",
+			"friend-icon",
+			"console",
+			"8",
+			"name",
+			");\n",
+			"button",
+			"submit",
+			"input",
+			"text-in",
+			"#main",
+			";\n",
+			"\n border: 1px solid red;",
+			"#main",
+			".center",
+			"app",
+			"fb-",
+			"\n#",
+			"navig",
+			"#overhang",
+			"yelp",
+			"#header",
+			"hover",
+			"card",
+			"'img",
+			"#latest",
+			"tool",
+			"labe",
+			"\">\n",
+			"label",
+			"\">\n",
+			"blackout",
+			"blanke",
+			"tool",
+			"full",
+			"img",
+			"gifts",
+			"buffer",
+			"amount",
+			"span",
+			"li span",
+			"card",
+			"logo",
+			"card-am",
+			"amount-other",
+			"amount-but",
+			"margin",
+			"video",
+			"fb-",
+			"fullname",
+			"facebook",
+			"5px",
+			"next-but",
+			"ul",
+			"Next",
+			"next",
+			"next-bu",
+			"next",
+			"#next",
+			"bottom",
+			">\n"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"'../img",
+			"buffer",
+			"bufferSize",
+			"buffer"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "server/main.js",
+					"settings":
+					{
+						"buffer_size": 482,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								180,
+								180
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}
