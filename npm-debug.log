@@ -1,0 +1,116 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   'postgres' ]
+2 info using npm@1.1.59
+3 info using node@v0.8.8
+4 verbose node symlink C:\Program Files\nodejs\\node.exe
+5 verbose read json C:\Users\John\dayze\package.json
+6 verbose read json C:\Users\John\dayze\node_modules\express\package.json
+7 verbose read json C:\Users\John\dayze\node_modules\less\package.json
+8 verbose read json C:\Users\John\dayze\package.json
+9 verbose cache add [ 'postgres', null ]
+10 silly cache add name=undefined spec="postgres" args=["postgres",null]
+11 verbose parsed url { pathname: 'postgres', path: 'postgres', href: 'postgres' }
+12 silly lockFile afc848c3-postgres postgres
+13 verbose lock postgres C:\Users\John\AppData\Roaming\npm-cache\afc848c3-postgres.lock
+14 silly lockFile afc848c3-postgres postgres
+15 verbose addNamed [ 'postgres', '' ]
+16 verbose addNamed [ null, '' ]
+17 silly lockFile 3e46e33f-postgres postgres@
+18 verbose lock postgres@ C:\Users\John\AppData\Roaming\npm-cache\3e46e33f-postgres.lock
+19 silly addNameRange { name: 'postgres', range: '', hasData: false }
+20 verbose url raw postgres
+21 verbose url resolving [ 'https://registry.npmjs.org/', './postgres' ]
+22 verbose url resolved https://registry.npmjs.org/postgres
+23 info retry registry request attempt 1 at 16:00:18
+24 verbose etag "F3ZSKKDH5FJO13JMJTORBOJXU"
+25 http GET https://registry.npmjs.org/postgres
+26 http 304 https://registry.npmjs.org/postgres
+27 silly registry.get cb [ 304,
+27 silly registry.get   { server: 'CouchDB/1.2.0 (Erlang OTP/R15B)',
+27 silly registry.get     etag: '"F3ZSKKDH5FJO13JMJTORBOJXU"',
+27 silly registry.get     date: 'Sat, 08 Sep 2012 19:59:29 GMT',
+27 silly registry.get     'content-length': '0' } ]
+28 verbose etag postgres from cache
+29 silly addNameRange number 2 { name: 'postgres', range: '', hasData: true }
+30 silly addNameRange versions [ 'postgres', [ '0.0.1' ] ]
+31 verbose addNamed [ 'postgres', '0.0.1' ]
+32 verbose addNamed [ '0.0.1', '0.0.1' ]
+33 silly lockFile 30cd8b77-postgres-0-0-1 postgres@0.0.1
+34 verbose lock postgres@0.0.1 C:\Users\John\AppData\Roaming\npm-cache\30cd8b77-postgres-0-0-1.lock
+35 verbose read json C:\Users\John\AppData\Roaming\npm-cache\postgres\0.0.1\package\package.json
+36 silly lockFile 30cd8b77-postgres-0-0-1 postgres@0.0.1
+37 silly lockFile 3e46e33f-postgres postgres@
+38 silly resolved [ { name: 'postgres',
+38 silly resolved     version: '0.0.1',
+38 silly resolved     description: 'very basic libpg binding to node',
+38 silly resolved     author: { name: 'Ryan Dahl' },
+38 silly resolved     main: './postgres',
+38 silly resolved     scripts: { install: 'node-waf configure build' },
+38 silly resolved     readme: 'At the moment this is an experiemental project. Grab the latest node (39e6d95\nor better) and do\n\n  node-waf configure build\n\n\nh2. Getting Started\n\n\nYou\'ll need postgres to run this. Here\'s the easy way to do this locally:\n\n  wget http://wwwmaster.postgresql.org/redir/198/h/source/v8.4.2/postgresql-8.4.2.tar.gz \n  tar -zxf postgresql-8.4.2.tar.gz \n  cd postgresql-8.4.2\n  ./configure --prefix=$HOME/local/postgres-8.4.2 && make && make install\n  cd $HOME/local/postgres-8.4.2\n  bin/initdb ./data\n  bin/postgres -D ./data\n\nYou\'ll probably want to add $HOME/local/postgres-8.4.2/bin to your PATH\nenvironment variable.\n  \n  export PATH=$HOME/local/postgres-8.4.2/bin:$PATH\n\nAnd puts few things into the database\n\n  createdb test\n  echo "CREATE TABLE test (a int, b int); INSERT INTO test VALUES (1, 2);" | psql -d test \n\n  cd ~/src/node_postgres\n  node-waf configure \n  node-waf build\n  node test.js\n\n\n',
+38 silly resolved     _id: 'postgres@0.0.1',
+38 silly resolved     _from: 'postgres' } ]
+39 info install postgres@0.0.1 into C:\Users\John\dayze
+40 info installOne postgres@0.0.1
+41 verbose from cache C:\Users\John\AppData\Roaming\npm-cache\postgres\0.0.1\package\package.json
+42 info C:\Users\John\dayze\node_modules\postgres unbuild
+43 verbose read json C:\Users\John\dayze\node_modules\postgres\package.json
+44 verbose tar unpack C:\Users\John\AppData\Roaming\npm-cache\postgres\0.0.1\package.tgz
+45 silly lockFile 2450aa29-John-dayze-node-modules-postgres C:\Users\John\dayze\node_modules\postgres
+46 verbose lock C:\Users\John\dayze\node_modules\postgres C:\Users\John\AppData\Roaming\npm-cache\2450aa29-John-dayze-node-modules-postgres.lock
+47 silly gunzTarPerm modes [ '777', '666' ]
+48 silly gunzTarPerm extractEntry package.json
+49 silly gunzTarPerm extractEntry .npmignore
+50 silly gunzTarPerm extractEntry README
+51 silly gunzTarPerm extractEntry postgres.js
+52 silly gunzTarPerm extractEntry test.js
+53 silly gunzTarPerm extractEntry binding.cc
+54 silly gunzTarPerm extractEntry LICENSE-MIT
+55 silly gunzTarPerm extractEntry type-oids.h
+56 silly gunzTarPerm extractEntry wscript
+57 verbose read json C:\Users\John\dayze\node_modules\postgres\package.json
+58 silly lockFile 2450aa29-John-dayze-node-modules-postgres C:\Users\John\dayze\node_modules\postgres
+59 info preinstall postgres@0.0.1
+60 verbose from cache C:\Users\John\dayze\node_modules\postgres\package.json
+61 verbose readDependencies using package.json deps
+62 verbose from cache C:\Users\John\dayze\node_modules\postgres\package.json
+63 verbose readDependencies using package.json deps
+64 silly resolved []
+65 verbose about to build C:\Users\John\dayze\node_modules\postgres
+66 info build C:\Users\John\dayze\node_modules\postgres
+67 verbose from cache C:\Users\John\dayze\node_modules\postgres\package.json
+68 verbose linkStuff [ false, false, false, 'C:\\Users\\John\\dayze\\node_modules' ]
+69 info linkStuff postgres@0.0.1
+70 verbose linkBins postgres@0.0.1
+71 verbose linkMans postgres@0.0.1
+72 verbose rebuildBundles postgres@0.0.1
+73 info install postgres@0.0.1
+74 verbose unsafe-perm in lifecycle true
+75 silly exec cmd "/c" "node-waf configure build"
+76 silly cmd,/c,node-waf configure build,C:\Users\John\dayze\node_modules\postgres spawning
+77 info postgres@0.0.1 Failed to exec install script
+78 info C:\Users\John\dayze\node_modules\postgres unbuild
+79 verbose from cache C:\Users\John\dayze\node_modules\postgres\package.json
+80 info preuninstall postgres@0.0.1
+81 info uninstall postgres@0.0.1
+82 verbose true,C:\Users\John\dayze\node_modules,C:\Users\John\dayze\node_modules unbuild postgres@0.0.1
+83 info postuninstall postgres@0.0.1
+84 error postgres@0.0.1 install: `node-waf configure build`
+84 error `cmd "/c" "node-waf configure build"` failed with 1
+85 error Failed at the postgres@0.0.1 install script.
+85 error This is most likely a problem with the postgres package,
+85 error not with npm itself.
+85 error Tell the author that this fails on your system:
+85 error     node-waf configure build
+85 error You can get their info via:
+85 error     npm owner ls postgres
+85 error There is likely additional logging output above.
+86 error System Windows_NT 6.1.7600
+87 error command "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "postgres"
+88 error cwd C:\Users\John\dayze
+89 error node -v v0.8.8
+90 error npm -v 1.1.59
+91 error code ELIFECYCLE
+92 verbose exit [ 1, true ]
