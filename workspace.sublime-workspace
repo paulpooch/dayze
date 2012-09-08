@@ -267,7 +267,7 @@
 			"file": "README.md",
 			"settings":
 			{
-				"buffer_size": 273,
+				"buffer_size": 274,
 				"line_ending": "Windows"
 			}
 		}
@@ -418,8 +418,8 @@
 						"selection":
 						[
 							[
-								482,
-								482
+								76,
+								76
 							]
 						],
 						"settings":
@@ -464,15 +464,15 @@
 					"file": "README.md",
 					"settings":
 					{
-						"buffer_size": 273,
+						"buffer_size": 274,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								272,
-								272
+								231,
+								231
 							]
 						],
 						"settings":
