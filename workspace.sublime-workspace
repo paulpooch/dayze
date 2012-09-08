@@ -248,7 +248,7 @@
 	"buffers":
 	[
 		{
-			"file": "server/main.js",
+			"file": "server/app.js",
 			"settings":
 			{
 				"buffer_size": 482,
@@ -260,6 +260,14 @@
 			"settings":
 			{
 				"buffer_size": 155,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "README.md",
+			"settings":
+			{
+				"buffer_size": 273,
 				"line_ending": "Windows"
 			}
 		}
@@ -395,12 +403,12 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "server/main.js",
+					"file": "server/app.js",
 					"settings":
 					{
 						"buffer_size": 482,
@@ -410,8 +418,8 @@
 						"selection":
 						[
 							[
-								197,
-								197
+								482,
+								482
 							]
 						],
 						"settings":
@@ -450,6 +458,32 @@
 						"zoom_level": 1.0
 					},
 					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "README.md",
+					"settings":
+					{
+						"buffer_size": 273,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								272,
+								272
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Markdown/Markdown.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
 				}
 			]
 		}
@@ -460,7 +494,7 @@
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 30.0
 	},
 	"layout":
 	{
