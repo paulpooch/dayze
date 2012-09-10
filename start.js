@@ -3,14 +3,9 @@ var util  = require('util'),
 
 var install = process.exec('npm install', function (error, stdout, stderr) {
 	console.log('Installing dependencies via npm...')
-    if (stderr !== '' || error !== null) {
+    if (error !== null) {
     	console.log('There was a problem with installation!');
-    	if (error !== null) {
-    		console.error('Error(s): ' + error);
-    	}
-    	if (stderr !== '') {
-    		console.error('Error(s): ' + stderr);
-		}
+    	console.error('Error(s): ' + error);
     	console.error('Launch aborted.');
     } else {
 		var start = process.spawn('nodemon', ['server/app.js']);
