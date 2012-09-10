@@ -38,3 +38,4 @@ console.log('\n\
  \\__,_|\\__,_|\\__, /___\\___|   \\_/  \\___(_)___(_)_| \n\
              |___/                                 \n\
 ');
+console.log('\nInstalling dependencies and launching server...')
