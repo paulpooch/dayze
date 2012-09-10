@@ -5,10 +5,16 @@ dayze
 **Installation:**
 
 git clone https://github.com/PhrosTT/dayze.git dayze
+
 cd dayze
+
 npm install
+
 [ npm install nodemon -g ]
+
 nodemon server/app.js
+
+
 
 
 **Auto-restart server:**
