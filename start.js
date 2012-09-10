@@ -2,7 +2,6 @@ var util  = require('util'),
 	process = require('child_process');
 
 var install = process.exec('npm install', function (error, stdout, stderr) {
-	console.log('Installing dependencies via npm...')
     if (error !== null) {
     	console.log('There was a problem with installation!');
     	console.error('Error(s): ' + error);
