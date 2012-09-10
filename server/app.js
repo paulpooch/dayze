@@ -1,16 +1,31 @@
-"use strict";
+'use strict';
 
-var fs = require('fs');
-var express = require('express');
-var app = express();
-var port = 3000;
+var requirejs = require('requirejs');
 
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
-
-app.get('/', function(req, res) {
-	res.render('index');
+requirejs.config({
+	baseUrl: __dirname,
+	nodeRequire: require,
 });
 
-app.listen(port);
-console.log('Listening on port ' + port);
+requirejs(['order!express', 'order!underscore', 'order!backbone'], function(express, _, Backbone) {
+
+	var App = Backbone.Model.extend({
+
+		defaults: {
+			port: 3000;
+		},
+
+		initialize: {
+			this.app = express();
+			this.app.set('views', __dirname + '/views');
+			this.app.set('view engine', 'ejs');
+			this.app.get('/', function(req, res) {
+				res.render('index');
+			});
+			this.app.listen(this.get(port));
+			console.log('Listening on port ' + this.get(port));
+		}
+
+	});
+
+});
