@@ -7,19 +7,26 @@ var install = process.exec('npm install', function (error, stdout, stderr) {
     	console.error('Error(s): ' + error);
     	console.error('Launch aborted.');
     } else {
-		var start = process.spawn('nodemon', ['server/app.js']);
+    	var which = require('which');
+    	which('nodemon', function(error, path) {
+    		if (error !== null) {
+    			console.log('Unable to find nodemon in your PATH. Check that it is installed globally.');
+    		} else {
+				var start = process.spawn(path, ['server/app.js']);
 
-		start.stdout.on('data', function (data) {
-		  console.log('' + data);
-		});
+				start.stdout.on('data', function (data) {
+				  console.log('' + data);
+				});
 
-		start.stderr.on('data', function (data) {
-		  console.log('' + data);
-		});
+				start.stderr.on('data', function (data) {
+				  console.log('' + data);
+				});
 
-		start.on('exit', function (code) {
-		  console.log('child process exited with code ' + code);
-		});
+				start.on('exit', function (code) {
+				  console.log('child process exited with code ' + code);
+				});
+    		}
+    	});
 	}
 });
 
