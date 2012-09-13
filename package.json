@@ -9,7 +9,7 @@
 		"backbone":				"0.9.x",
 		"dust":					"0.3.x",
 		"consolidate":			"0.4.x",
-		"dust-js-linkedin":		"1.1.0",
+		"dustjs-linkedin":		"1.1.x",
 		"dynamo":				"0.2.x",
 		"less":					"1.3.x",
 		"requirejs":			"2.0.x",
