@@ -88,6 +88,8 @@ header      {
             <h1>Dayze</h1>
         </header>
         <div id="calendar">
+
+            <!--
             <div class="weeK">
                 <div class="day">
                     <span class="day_num">17</span>
@@ -135,6 +137,7 @@ header      {
                     <span class="day_num">30</span>
                 </div>
             </div>
+            -->
 
            
         </div>
@@ -172,37 +175,56 @@ window.dayze = (function($) {
     };
 
     var displayWeek = function(weekDate) {
-        dust.render('template_week', {}, function(err, out) {
+
+        var weekDateCopy = new Date(weekDate);
+
+        var days = {};
+        days['d0'] = weekDateCopy.getDate();
+        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+        days['d1'] = weekDateCopy.getDate();
+        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+        days['d2'] = weekDateCopy.getDate();
+        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+        days['d3'] = weekDateCopy.getDate();
+        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+        days['d4'] = weekDateCopy.getDate();
+        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+        days['d5'] = weekDateCopy.getDate();
+        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+        days['d6'] = weekDateCopy.getDate();
+
+        dust.render('template_week', days, function(err, out) {
             if (err != null) {
                 alert('Error rendering template');
             }
             $('#calendar').append(out);
         });
+
     };
 
     var templates = {
         week: [
             '<div class="weeK">',
             '   <div class="day">',
-            '        <span class="day_num">31</span>',
+            '        <span class="day_num">{d0}</span>',
             '    </div>',
             '    <div class="day">',
-            '        <span class="day_num">1</span>',
+            '        <span class="day_num">{d1}</span>',
             '    </div>',
             '    <div class="day">',
-            '        <span class="day_num">2</span>',
+            '        <span class="day_num">{d2}</span>',
             '    </div>',
             '    <div class="day">',
-            '        <span class="day_num">3</span>',
+            '        <span class="day_num">{d3}</span>',
             '    </div>',
             '    <div class="day weekend">',
-            '        <span class="day_num">4</span>',
+            '        <span class="day_num">{d4}</span>',
             '    </div>',
             '    <div class="day weekend">',
-            '        <span class="day_num">5</span>',
+            '        <span class="day_num">{d5}</span>',
             '    </div>',
             '    <div class="day weekend">',
-            '        <span class="day_num">6</span>',
+            '        <span class="day_num">{d6}</span>',
             '    </div>',
             '</div>'].join('')
     };
