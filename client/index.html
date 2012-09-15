@@ -89,71 +89,49 @@ header      {
         <header>
             <h1>Dayze</h1>
         </header>
-        <div id="calendar">
-
-            <!--
-            <div class="weeK">
-                <div class="day">
-                    <span class="day_num">17</span>
-                </div>
-                <div class="day">
-                    <span class="day_num">18</span>
-                </div>
-                <div class="day">
-                    <span class="day_num">19</span>
-                </div>
-                <div class="day">
-                    <span class="day_num">20</span>
-                </div>
-                <div class="day weekend">
-                    <span class="day_num">21</span>
-                </div>
-                <div class="day weekend">
-                    <span class="day_num">22</span>
-                </div>
-                <div class="day weekend">
-                    <span class="day_num">23</span>
-                </div>
-            </div>
-            
-            <div class="weeK">
-                <div class="day">
-                    <span class="day_num">24</span>
-                </div>
-                <div class="day">
-                    <span class="day_num">25</span>
-                </div>
-                <div class="day">
-                    <span class="day_num">26</span>
-                </div>
-                <div class="day">
-                    <span class="day_num">27</span>
-                </div>
-                <div class="day weekend">
-                    <span class="day_num">28</span>
-                </div>
-                <div class="day weekend">
-                    <span class="day_num">29</span>
-                </div>
-                <div class="day weekend">
-                    <span class="day_num">30</span>
-                </div>
-            </div>
-            -->
-
-           
-        </div>
+        <div id="calendar"></div>
 
         <!-- Put this back in PROD. -->
         <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>-->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js"><\/script>')</script>
 
-        <script src="js/vendor/dust-full-0.3.0.js"></script>
+        <script src="js/vendor/underscore-min.js"></script>
+        <script src="js/vendor/backbone.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
 
+        <!-- TEMPLATES -->
+        <script type="text/html" id='template_week'>
+        <div class="weeK">
+            <div class="day">
+                <span class="day_num"><%= d0 %></span>
+            </div>
+            <div class="day">
+                <span class="day_num"><%= d1 %></span>
+            </div>
+            <div class="day">
+                <span class="day_num"><%= d2 %></span>
+            </div>
+            <div class="day">
+                <span class="day_num"><%= d3 %></span>
+            </div>
+            <div class="day weekend">
+                <span class="day_num"><%= d4 %></span>
+            </div>
+            <div class="day weekend">
+                <span class="day_num"><%= d5 %></span>
+            </div>
+            <div class="day weekend">
+                <span class="day_num"><%= d6 %></span>
+            </div>
+        </div>
+        </script>
+
         <!-- Move to external file in PROD. -->
         <script>
+
+// http://andyet.net/blog/2010/oct/29/building-a-single-page-app-with-backbonejs-undersc/
+// http://sorensen.github.com/aebleskiver/docs/user.model.html
 
 window.dayze = (function($) {
 
@@ -161,16 +139,13 @@ window.dayze = (function($) {
     var WEEK_COUNT = 20;
     var init = function() {
 
-        var weekTemplate = dust.compile(templates.week, 'template_week');
-        dust.loadSource(weekTemplate);
-
         var weekDate = new Date();
         var day = weekDate.getDay();
         var diff = weekDate.getDate() - day;
         weekDate.setDate(diff);
         for (var i = 0; i < WEEK_COUNT; i++) {
             weekDate.setDate(weekDate.getDate() + 7);
-            console.log(weekDate);
+            //console.log(weekDate);
             displayWeek(weekDate);
         }
 
@@ -195,42 +170,62 @@ window.dayze = (function($) {
         weekDateCopy.setDate(weekDateCopy.getDate() + 1);
         days['d6'] = weekDateCopy.getDate();
 
-        dust.render('template_week', days, function(err, out) {
-            if (err != null) {
-                alert('Error rendering template');
+        var template = _.template($("#template_week").html());
+        var templateData = days;
+        $("#calendar").append(template(templateData));
+
+    };
+
+   
+
+    var User = Backbone.Model.extend({
+       
+        initialize: function (spec) {
+            
+            if (!spec || !spec.displayName) {
+                throw "InvalidConstructArgs";
             }
-            $('#calendar').append(out);
-        });
 
-    };
+            // we may also want to store something else as an attribute
+            // for example a unique ID we can use in the HTML to identify this
+            // item's element. We can use the models 'cid' or 'client id for this'.
+            this.set({
+                htmlId: 'user_' + this.cid
+            })
+        },
+       
+        validate: function (attrs) {
+            if (attrs.displayName) {
+                if (!_.isString(attrs.displayName) || attrs.displayName.length === 0) {
+                    return "displayName must be a string with a length";
+                }
+            }
+        }
 
-    var templates = {
-        week: [
-            '<div class="weeK">',
-            '   <div class="day">',
-            '        <span class="day_num">{d0}</span>',
-            '    </div>',
-            '    <div class="day">',
-            '        <span class="day_num">{d1}</span>',
-            '    </div>',
-            '    <div class="day">',
-            '        <span class="day_num">{d2}</span>',
-            '    </div>',
-            '    <div class="day">',
-            '        <span class="day_num">{d3}</span>',
-            '    </div>',
-            '    <div class="day weekend">',
-            '        <span class="day_num">{d4}</span>',
-            '    </div>',
-            '    <div class="day weekend">',
-            '        <span class="day_num">{d5}</span>',
-            '    </div>',
-            '    <div class="day weekend">',
-            '        <span class="day_num">{d6}</span>',
-            '    </div>',
-            '</div>'].join('')
-    };
+    });
+/*    
+    var user = new User({ displayName: 'Anonymous' });
 
+    var UserView = Backbone.View.extend({
+
+        initialize: function (args) {
+            _.bindAll(this, 'changeDisplayName');
+            this.model.bind('change:displayName', this.changeDisplayName);
+        },
+
+        render: function () {
+            // "ich" is ICanHaz.js magic
+            //this.el = ich.user(this.model.toJSON());
+            return this;
+        },
+
+        changeDisplayName: function () {
+            this.$('.display_name').text(this.model.get('displayName'));
+        }
+
+
+    });
+*/
 
 
     $(function() {

@@ -28,8 +28,10 @@ requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express
 			    that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
 			 });
 
+
+
 			// handle requests to root
-			var numClients = 0;
+			var numClients = 10;
 			this.app.get('/', function(req, res) {
 				res.render('index', { numClients: ++numClients });
 			});
@@ -41,6 +43,38 @@ requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express
 
 	});
 
+	var Users = function(app) {
+
+		var path = 'users'
+		// List
+		app.get('/' + path + '.:format', function(req, res) {
+		
+		});
+
+		// Create 
+		app.post('/' + path + '.:format?', function(req, res) {
+		
+		});
+
+		// Read
+		app.get('/' + path + '/:id.:format?', function(req, res) {
+		
+		});
+
+		// Update
+		app.put('/' + path + '/:id.:format?', function(req, res) {
+		
+		});
+
+		// Delete
+		app.del('/' + path + '/:id.:format?', function(req, res) {
+		
+		});
+	
+	};
+
 	new App();
+
+
 
 });
