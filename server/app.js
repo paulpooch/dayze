@@ -4,7 +4,7 @@ var requirejs = require('requirejs');
 
 requirejs.config({
 	baseUrl: __dirname,
-	nodeRequire: require,	// tell requirejs to use node's 'require()'
+	nodeRequire: require	// tell requirejs to use node's 'require()'
 });
 
 requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express, consolidate, _, Backbone) {	// list all dependencies for this scope
