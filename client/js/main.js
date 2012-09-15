@@ -1,3 +1,6 @@
+// http://andyet.net/blog/2010/oct/29/building-a-single-page-app-with-backbonejs-undersc/
+// http://sorensen.github.com/aebleskiver/docs/user.model.html
+
 // Require.js allows us to configure shortcut alias
 require.config({
 	// The shim config allows us to configure dependencies for
@@ -33,7 +36,7 @@ require([
 ], function(jQuery, Modernizr, _, Backbone) {
 
 
-	window.dayze = (function($) {
+	window.Dayze = (function($) {
 
 
 	    var WEEK_COUNT = 20;
