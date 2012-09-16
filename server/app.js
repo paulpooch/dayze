@@ -9,6 +9,10 @@ requirejs.config({
 
 requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express, consolidate, _, Backbone) {	// list all dependencies for this scope
 
+// http://www.senchalabs.org/connect/
+// http://nodetuts.com/tutorials/13-authentication-in-express-sessions-and-route-middleware.html
+//	var MemoryStore = require('connect/middleware/session/memory');
+
 	var App = Backbone.Model.extend({
 
 		defaults: {
@@ -26,14 +30,29 @@ requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express
 			    that.app.set('view engine', 'dust');
 			    that.app.set('views', __dirname + '/views');
 			    that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
+				that.app.use(express.cookieParser());
+				that.app.use(express.session({ 
+					secret: '7G4Q0jRLP2DtCKIL28CGmSzsA2d8nu8u',
+					store: new express.session.MemoryStore({
+						reapInterval: 60000 * 10 
+					}),
+					cookie: { maxAge: 60480000000 }
+				}));
 			 });
-
-
 
 			// handle requests to root
 			var numClients = 10;
 			this.app.get('/', function(req, res) {
-				res.render('index', { numClients: ++numClients });
+				
+				req.session.visitCount = req.session.visitCount ? req.session.visitCount + 1 : 1;
+				
+				var data = { 
+					numClients: ++numClients,
+					visitCount: req.session.visitCount
+				}
+							    
+				res.render('index', data);
+
 			});
 
 			// begin listening

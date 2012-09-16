@@ -4,5 +4,6 @@
 </head>
 <body>
 <p>{numClients} users connected</p>
+<p>{visitCount} visits</p>
 </body>
 </html>
