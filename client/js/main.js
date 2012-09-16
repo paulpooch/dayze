@@ -52,6 +52,10 @@ require([
 	            displayWeek(weekDate);
 	        }
 
+	        $('#calendar').on('click', '.day', function() {
+	        	window.location.hash = 'example';
+	        });
+
 	    };
 
 	    var displayWeek = function(weekDate) {
