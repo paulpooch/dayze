@@ -70,6 +70,8 @@ require([
 	        var day = weekDate.getDay();
 	        var diff = weekDate.getDate() - day;
 	        weekDate.setDate(diff);
+
+	        displayWeek(weekDate);
 	        for (var i = 0; i < initialWeekCount; i++) {
 	            weekDate.setDate(weekDate.getDate() + 7);
 	            //console.log(weekDate);
