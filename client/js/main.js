@@ -35,18 +35,42 @@ require([
 	'plugins'
 ], function(jQuery, Modernizr, _, Backbone) {
 
-
 	window.Dayze = (function($) {
 
+	    var weekEls = [];
+		var MONTH_NAMES = [ "January", "February", "March", "April", "May", "June",
+			    "July", "August", "September", "October", "November", "December" ];
 
-	    var WEEK_COUNT = 20;
+	    /*
+	    var getEl = function() {
+		    var elements = {
+		    	monthNameTitleBar: '#month_name',
+		    	calendar: '#calendar'
+		    };
+	    	var elCache = {};
+	    	return function() {
+	    		var elName = arguments.length && arguments[0];
+	    		var elId = elements[elName];
+				var el = elCache[elName];
+		    	if (el) {
+					console.log('cache hit');
+		    		return el;
+		    	}
+		    	el = $(elId);
+		    	elCache[elName] = el;
+		    	console.log('cache miss');
+		    	return el;
+	    	};
+	    }();
+	    */
+
 	    var init = function() {
-
+	    	var initialWeekCount = 20;
 	        var weekDate = new Date();
 	        var day = weekDate.getDay();
 	        var diff = weekDate.getDate() - day;
 	        weekDate.setDate(diff);
-	        for (var i = 0; i < WEEK_COUNT; i++) {
+	        for (var i = 0; i < initialWeekCount; i++) {
 	            weekDate.setDate(weekDate.getDate() + 7);
 	            //console.log(weekDate);
 	            displayWeek(weekDate);
@@ -56,34 +80,63 @@ require([
 	        	window.location.hash = 'example';
 	        });
 
-	    };
+		    $(window).scroll(function () { 
+		      handleScroll();
+		    });
 
-	    var displayWeek = function(weekDate) {
-
-	        var weekDateCopy = new Date(weekDate);
-
-	        var days = {};
-	        days['d0'] = weekDateCopy.getDate();
-	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
-	        days['d1'] = weekDateCopy.getDate();
-	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
-	        days['d2'] = weekDateCopy.getDate();
-	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
-	        days['d3'] = weekDateCopy.getDate();
-	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
-	        days['d4'] = weekDateCopy.getDate();
-	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
-	        days['d5'] = weekDateCopy.getDate();
-	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
-	        days['d6'] = weekDateCopy.getDate();
-
-	        var template = _.template($("#template_week").html());
-	        var templateData = days;
-	        $("#calendar").append(template(templateData));
+			var firstVisibleWeek = weekEls[0].timestamp;
+			var currentMonth = MONTH_NAMES[firstVisibleWeek.getMonth()];
+			$('#month_name').text(currentMonth);
 
 	    };
 
-	   
+	    var handleScroll = function() {
+	    	// We can use this caching style if we need to setup the vars at time of first call.
+	    	if (!handleScroll.heightOfOneWeek) {
+		    	handleScroll.heightOfOneWeek = $('#calendar .day_wrap:eq(0)').height();
+		    	handleScroll.weekPlaceHolder = $('#month_name');
+			    handleScroll.prevY = $(window).scrollTop();
+			};
+			var scrollTop = $(window).scrollTop();
+		    if (Math.abs(scrollTop - handleScroll.prevY) > handleScroll.heightOfOneWeek / 2) {
+				var hiddenWeekCount = Math.ceil(scrollTop / handleScroll.heightOfOneWeek);
+			    var firstVisibleWeek = weekEls[hiddenWeekCount].timestamp;
+			    var currentMonth = MONTH_NAMES[firstVisibleWeek.getMonth()];
+			    handleScroll.prevY = $(window).scrollTop();
+			    handleScroll.weekPlaceHolder.text(currentMonth);
+			    console.log('update ' + currentMonth);
+		    }
+	    };
+
+	    var displayWeek = (function(weekDate) {
+	    	// We can use this caching style if we can setup vars at load time.
+			var template = _.template($("#template_week").html());
+			var calendar =  $("#calendar");
+	    	var fn = function(weekDate) {
+		        var weekDateCopy = new Date(weekDate);
+		        var days = {};
+		        days['d0'] = weekDateCopy.getDate();
+		        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+		        days['d1'] = weekDateCopy.getDate();
+		        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+		        days['d2'] = weekDateCopy.getDate();
+		        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+		        days['d3'] = weekDateCopy.getDate();
+		        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+		        days['d4'] = weekDateCopy.getDate();
+		        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+		        days['d5'] = weekDateCopy.getDate();
+		        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
+		        days['d6'] = weekDateCopy.getDate();
+		        var el = template(days);
+		        weekEls.push({
+		        	htmlEl: el,
+		        	timestamp: new Date(weekDate)
+		        });
+		       calendar.append(el);
+	    	};
+	    	return fn;
+	    })();
 
 	    var User = Backbone.Model.extend({
 	       
