@@ -24,6 +24,7 @@ require.config({
 		text: 'vendor/require/text',
 		modernizr: 'vendor/modernizr/modernizr',
 		plugins: 'plugins'
+
 	}
 });
 
@@ -32,14 +33,17 @@ require([
 	'modernizr',
 	'underscore',
 	'backbone',
-	'plugins'
-], function(jQuery, Modernizr, _, Backbone) {
+	'plugins',
+	'models/GoogleOAuth',
+	'models/UserModel',
+	'views/UserView',
+	'Router'
+], function(jQuery, Modernizr, _, Backbone, plugins, GoogleOAuth, UserModel, UserView, Router) {
 
 	window.Dayze = (function($) {
 
 	    var weekEls = [];
-		var MONTH_NAMES = [ "January", "February", "March", "April", "May", "June",
-			    "July", "August", "September", "October", "November", "December" ];
+		var MONTH_NAMES = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 
 	    /*
 	    var getEl = function() {
@@ -140,53 +144,7 @@ require([
 	    	return fn;
 	    })();
 
-	    var User = Backbone.Model.extend({
-	       
-	        initialize: function (spec) {
-	            
-	            if (!spec || !spec.displayName) {
-	                throw "InvalidConstructArgs";
-	            }
-
-	            // we may also want to store something else as an attribute
-	            // for example a unique ID we can use in the HTML to identify this
-	            // item's element. We can use the models 'cid' or 'client id for this'.
-	            this.set({
-	                htmlId: 'user_' + this.cid
-	            })
-	        },
-	       
-	        validate: function (attrs) {
-	            if (attrs.displayName) {
-	                if (!_.isString(attrs.displayName) || attrs.displayName.length === 0) {
-	                    return "displayName must be a string with a length";
-	                }
-	            }
-	        }
-
-	    });
-	    
-	    var user = new User({ displayName: 'Anonymous' });
-
-	    var UserView = Backbone.View.extend({
-
-	        initialize: function (args) {
-	            _.bindAll(this, 'changeDisplayName');
-	            this.model.bind('change:displayName', this.changeDisplayName);
-	        },
-
-	        render: function () {
-	            // "ich" is ICanHaz.js magic
-	            //this.el = ich.user(this.model.toJSON());
-	            return this;
-	        },
-
-	        changeDisplayName: function () {
-	            this.$('.display_name').text(this.model.get('displayName'));
-	        }
-
-
-	    });
+	    var user = new UserModel({ displayName: 'Anonymous' });
 
 
 	    $(function() {
