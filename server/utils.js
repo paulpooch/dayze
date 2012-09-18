@@ -3,15 +3,9 @@
 // UTILS
 //
 ////////////////////////////////////////////////////////////////////////////////
-define(function() {
+define(['q'], function(Q) {
 
 	var utils = {};
-
-	utils.sleep = function(seconds, callback) {
-		var startTime = new Date().getTime();
-		while (new Date().getTime() < startTime + (seconds * 1000));
-		callback();
-  	};
 
   	utils.getNowIso = function() {
   		return (new Date().toISOString());

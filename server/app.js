@@ -4,6 +4,8 @@
 // dynamodb = https://github.com/teleportd/node-dynamodb
 // node-uuid = https://github.com/broofa/node-uuid
 // q = https://github.com/kriskowal/q
+//	   https://github.com/bellbind/using-promise-q
+// 	   http://www.slideshare.net/domenicdenicola/callbacks-promises-and-coroutines-oh-my-the-evolution-of-asynchronicity-in-javascript
 ///////////////////////////////////////////////////////////////////////////////
 
 var requirejs = require('requirejs');

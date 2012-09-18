@@ -9,12 +9,14 @@ define([
 	'dynamodb',
 	'config',
 	'utils',
-	'node-uuid'
+	'node-uuid',
+	'q'
 ], function(
 	DynamoDB,
 	Config,
 	Utils,
-	Uuid
+	Uuid,
+	Q
 ) {
 
 	var storage = {};
@@ -29,30 +31,54 @@ define([
 
 		// Users.resetTable ///////////////////////////////////////////////////
 		users.resetTable = function() {
+
 			// remove, pause, create.
 			var create = function() {
+				var deferred = Q.defer();
 				ddb.createTable(Config.TABLE_USERS, {
 					hash: ['userId', ddb.schemaTypes().string]
 				}, {
 					read: 10, 
 					write: 10
 				}, function(err, details) {
-					console.log(err, details);
-				});
-			};
-			var remove = function() {
-				ddb.deleteTable(Config.TABLE_USERS, function(err, tableDetails) {
 					if (err) {
-						console.log(err);
+						deferred.reject(new Error(err));
 					} else {
-						console.log('Users table deleted.  Waiting before re-creating.')
-						Utils.sleep(20, function() {
-							create();
-						});
+						deferred.resolve(details);
 					}
 				});
+				return deferred.promise;
 			};
-			remove();
+
+			var remove = function() {
+				var deferred = Q.defer();
+				ddb.deleteTable(Config.TABLE_USERS, function(err, details) {
+					if (err) {
+						//deferred.reject(err);
+						deferred.resolve(err);
+					} else {
+						deferred.resolve(details);
+					}
+				});
+				return deferred.promise;
+			};
+
+			remove()
+			.then(function(details) {
+				console.log('Users table deleted.  Waiting before re-creating.');
+				console.log(details);
+			})
+			.delay(20000)
+			.then(create)
+			.then(function(details) {
+				console.log('Users table created.');
+				console.log(details);
+			})
+			.fail(function(err) {
+				console.log(err);
+			})
+			.end();
+
 		};
 
 		// Users.createTempUser
