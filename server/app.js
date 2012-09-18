@@ -1,5 +1,11 @@
 'use strict';
 
+// PACKAGE DOCUMENTATION //////////////////////////////////////////////////////
+// dynamodb = https://github.com/teleportd/node-dynamodb
+// node-uuid = https://github.com/broofa/node-uuid
+// q = https://github.com/kriskowal/q
+///////////////////////////////////////////////////////////////////////////////
+
 var requirejs = require('requirejs');
 
 requirejs.config({
@@ -46,18 +52,28 @@ requirejs([
 			    that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
 				that.app.use(express.cookieParser());
 				that.app.use(express.session({ 
-					secret: '7G4Q0jRLP2DtCKIL28CGmSzsA2d8nu8u',
+					secret: Config.COOKIE_SECRET_HASH,
 					store: new express.session.MemoryStore({
 						reapInterval: 60000 * 10 
 					}),
-					cookie: { maxAge: 60480000000 }
+					cookie: { maxAge: Config.COOKIE_MAX_AGE }
 				}));
 			 });
 
 			// handle requests to root
-			var numClients = 10;
 			this.app.get('/', function(req, res) {
-				
+
+				if (req.session.cookieId) {
+					//var user = Storage.Users.getUserFromCookie(req.session.cookieId);
+				} else {
+
+					// Going to insert Q here.
+					//var tempUserObj = Storage.Users.createTempUser();
+					//var cookieId = tempUserObj.cookieId;
+					//var user = tempUserObj.user;
+
+				}
+
 				req.session.visitCount = req.session.visitCount ? req.session.visitCount + 1 : 1;
 				
 				var data = { 

@@ -2,15 +2,19 @@
 // 
 // STORAGE
 //
+// https://github.com/teleportd/node-dynamodb/blob/master/lib/ddb.js
+//
 ////////////////////////////////////////////////////////////////////////////////
 define([
 	'dynamodb',
 	'config',
-	'utils'
+	'utils',
+	'node-uuid'
 ], function(
 	DynamoDB,
 	Config,
-	Utils
+	Utils,
+	Uuid
 ) {
 
 	var storage = {};
@@ -51,6 +55,36 @@ define([
 			remove();
 		};
 
+		// Users.createTempUser
+		users.createTempUser = function() {
+
+			var cookieId = Utils.generatePassword(20);
+			var userId = Uuid.v4();
+
+			var user = { 
+				userId: userId,
+				cookieId: cookieId,
+				displayName: '',
+				passwordHash: '',
+				passwordSalt: '',
+				createTime: Utils.getNowIso()
+			};
+
+			ddb.putItem(Config.TABLE_USERS, user, {}, function(err, res, cap) {
+				if (err) {
+					console.log(err);
+					throw err;
+				} else {
+					console.log('createTempUser successful.', res, cap);
+					return {
+						cookieId: cookieId,
+						user: user
+					};
+				}
+			});
+
+		};
+		
 		return users;
 
 	})();
