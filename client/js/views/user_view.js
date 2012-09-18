@@ -1,9 +1,14 @@
 define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 
+	var _app;
+
 	var UserView = Backbone.View.extend({
 
-	    initialize: function (args) {
-	        _.bindAll(this, 'changeDisplayName');
+	    initialize: function (options) {
+	    	var options = options || {};
+			_app = options.app;
+
+	        _.bindAll(this);
 	        this.model.bind('change:displayName', this.changeDisplayName);
 	    },
 

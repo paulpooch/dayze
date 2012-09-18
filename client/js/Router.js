@@ -2,18 +2,18 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 
 	var Router = Backbone.Router.extend({
 
-		defaults: function() {
-			return {
-				pushState: true
-			};
+		initialize: function(options) {
+			var options = options || {};
+			var pushState = options.pushState || 'true';
+			this.registerListeners();
 		},
 
-		initialize: function(options) {
-			option = options || {};
-			this.set('pushState', options.pushState || this.get('pushState'));
-
-			Backbone.history.start({ pushState: this.get('pushState') });
-			this.registerListeners();
+		routes: {
+			/* TODO: customize */
+			"help/:page":         "help",
+			"download/*path":     "download",
+			"folder/:name":       "openFolder",
+			"folder/:name-:mode": "openFolder"
 		},
 
 		registerListeners: function() {
@@ -31,6 +31,7 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			});
 
 		}
+	});
 
 	return Router;
 

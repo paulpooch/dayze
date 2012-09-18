@@ -10,7 +10,7 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 	        	clientId: 	'433322211111.apps.googleusercontent.com',
 	        	redirect: 	'http://localhost:8888/MAMP/html5/oauth/',
 	        	type: 		'token',
-	        	url: 		this.oAuthUrl + 'scope=' + this.scope + '&client_id=' + this.clientId + '&redirect_uri=' + this.redirect + '&response_type=' + this.type;
+	        	url: 		this.oAuthUrl + 'scope=' + this.scope + '&client_id=' + this.clientId + '&redirect_uri=' + this.redirect + '&response_type=' + this.type
         	};
     	},
 
