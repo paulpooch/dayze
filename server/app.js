@@ -7,7 +7,21 @@ requirejs.config({
 	nodeRequire: require	// tell requirejs to use node's 'require()'
 });
 
-requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express, consolidate, _, Backbone) {	// list all dependencies for this scope
+requirejs([
+		'express', 
+		'consolidate', 
+		'underscore', 
+		'backbone', 
+		'config',
+		'storage'
+	], function(
+		express, 
+		consolidate,
+		_,
+		Backbone,
+		Config,
+		Storage
+	) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
 // http://nodetuts.com/tutorials/13-authentication-in-express-sessions-and-route-middleware.html
@@ -54,6 +68,8 @@ requirejs(['express', 'consolidate', 'underscore', 'backbone'], function(express
 				res.render('index', data);
 
 			});
+
+			//Storage.Users.resetTable();
 
 			// begin listening
 			this.app.listen(this.get('port'));

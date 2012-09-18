@@ -34,39 +34,16 @@ require([
 	'underscore',
 	'backbone',
 	'plugins',
-	'models/GoogleOAuth',
-	'models/UserModel',
-	'views/UserView',
-	'Router'
+	'models/google_o_auth',
+	'models/user_model',
+	'views/user_view',
+	'router'
 ], function(jQuery, Modernizr, _, Backbone, plugins, GoogleOAuth, UserModel, UserView, Router) {
 
 	window.Dayze = (function($) {
 
 	    var weekEls = [];
 		var MONTH_NAMES = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
-
-	    /*
-	    var getEl = function() {
-		    var elements = {
-		    	monthNameTitleBar: '#month_name',
-		    	calendar: '#calendar'
-		    };
-	    	var elCache = {};
-	    	return function() {
-	    		var elName = arguments.length && arguments[0];
-	    		var elId = elements[elName];
-				var el = elCache[elName];
-		    	if (el) {
-					console.log('cache hit');
-		    		return el;
-		    	}
-		    	el = $(elId);
-		    	elCache[elName] = el;
-		    	console.log('cache miss');
-		    	return el;
-	    	};
-	    }();
-	    */
 
 	    var init = function() {
 	    	var initialWeekCount = 20;
