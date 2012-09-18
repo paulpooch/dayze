@@ -34,11 +34,11 @@ require([
 	'underscore',
 	'backbone',
 	'plugins',
-	'models/google_o_auth',
+	'models/google_o_auth_model',
 	'models/user_model',
 	'views/user_view',
 	'router'
-], function(jQuery, Modernizr, _, Backbone, plugins, GoogleOAuth, UserModel, UserView, Router) {
+], function(jQuery, Modernizr, _, Backbone, plugins, GoogleOAuthModel, UserModel, UserView, Router) {
 
 	window.Dayze = (function($) {
 
