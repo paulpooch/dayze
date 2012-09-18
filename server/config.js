@@ -19,10 +19,10 @@ define(function() {
 		google: {
 			clientId: '495360231026.apps.googleusercontent.com'
 		},
-		facebook {
+		facebook: {
 
 		},
-		twitter {
+		twitter: {
 
 		}
 	};
