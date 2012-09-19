@@ -12,24 +12,20 @@ define([
 	'router'
 ], function(jQuery, Modernizr, _, Backbone, plugins, GoogleOAuthModel, UserModel, UserView, CalendarModel, CalendarView, Router) {
 
-	var _router;
-	var _userModel, _calendarModel;
-	var _userView, _calendarView;
-
-	var _$header;
-	var _$container;
-
-	var _getHeader = function() {
-		return _$header;
-	};
-
-	var _getContainer = function() {
-		return _$container;
-	};
-
 	var App = function() {
 
+		var _router;
+		var _userModel, _calendarModel;
+		var _userView, _calendarView;
+
+		var _$header;
+		var _$container;
+
 		var _initialize = function() {
+
+			// customize sync function
+			Backbone.sync = _sync;
+
 			var that = this;
 			$(function() { _domReady.call(that); });
 		};
@@ -53,11 +49,20 @@ define([
 			_calendarView.render();
 		};
 
+		var _sync = function(method, model, options) {
+
+			var methodMap = {
+				'create': 'POST',
+				'update': 'PUT',
+				'delete': 'DELETE',
+				'read':   'GET'
+			};
+
+		};
+
 		// expose public methods
 		return {
-			initialize: _initialize,
-			getHeader: _getHeader,
-			getContainer: _getContainer
+			initialize: _initialize
 		};
 	};
 
