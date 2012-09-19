@@ -28,7 +28,6 @@ require.config({
 
 require(['app'], function(App) {
 
-
 	window.Dayze = new App();
 	window.Dayze.initialize();
 

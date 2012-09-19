@@ -19,15 +19,13 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 		initialize: function(options) {
 			var options = options || {};
 			_app = options.app;
-			// model automatically get assigned
 
 			_.bindAll(this); // binds all event callbacks to 'this'
 
 			//this.model.bind('change', render);
 			_$window = $(window);
 			_$calendar = this.$el.find('#calendar');
-			_$monthName = this.$el.find('#month_name');
-			_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
+			_$monthName = $('#month_name');
 			_prevY = _$window.scrollTop();
 			_weekElements = [];
 
@@ -42,7 +40,7 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 		},
 
 		render: function() {
-			var initialWeekCount = 20;
+			var initialWeekCount = 30;
 			var weekDate = new Date();
 			var day = weekDate.getDay();
 			var diff = weekDate.getDate() - day;
@@ -61,6 +59,10 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 
 		handleScroll: function() {
 			var scrollTop = _$window.scrollTop();
+			if (!_heightOfOneWeek) {
+				_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
+				console.log(_heightOfOneWeek);
+			}
 			if (Math.abs(scrollTop - _prevY) > _heightOfOneWeek / 2) {
 				var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);
 				var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
