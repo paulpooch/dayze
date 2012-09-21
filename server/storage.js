@@ -19,18 +19,18 @@ define([
 	Q
 ) {
 
-	var storage = {};
+	var Storage = {};
 	var ddb = DynamoDB.ddb(Config.DYNAMODB_CREDENTIALS);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Users
 	///////////////////////////////////////////////////////////////////////////
-	storage.Users = (function() {
+	Storage.Users = (function() {
 	
-		var users = {};
+		var Users = {};
 
 		// Users.resetTable ///////////////////////////////////////////////////
-		users.resetTable = function() {
+		Users.resetTable = function() {
 
 			// remove, pause, create.
 			var create = function() {
@@ -82,39 +82,64 @@ define([
 		};
 
 		// Users.createTempUser
-		users.createTempUser = function() {
+		Users.createTempUser = function() {
+			var deferred = Q.defer();
 
-			var cookieId = Utils.generatePassword(20);
+			var cookieId = Utils.generatePassword(20, 2);
 			var userId = Uuid.v4();
 
 			var user = { 
 				userId: userId,
 				cookieId: cookieId,
-				displayName: '',
-				passwordHash: '',
-				passwordSalt: '',
+				//displayName: '',
+				//passwordHash: '',
+				//passwordSalt: '',
 				createTime: Utils.getNowIso()
 			};
 
 			ddb.putItem(Config.TABLE_USERS, user, {}, function(err, res, cap) {
 				if (err) {
 					console.log(err);
-					throw err;
+					deferred.reject(new Error(err));
 				} else {
 					console.log('createTempUser successful.', res, cap);
-					return {
+					var result = {
 						cookieId: cookieId,
 						user: user
 					};
+					console.log(result.cookieId, result.user);
+					deferred.resolve(result);
 				}
 			});
 
+			return deferred.promise;
 		};
-		
-		return users;
+
+
+		Users.getUserFromCookie = function(cookieId) {
+			var deferred = Q.defer();
+			var options = {
+				filter: {
+					cookieId: {
+						eq: cookieId
+					}
+				}
+			};
+			ddb.scan(Config.TABLE_USERS, options, function(err, res) {
+				if (err) {
+					deferred.reject(new Error(err));
+				} else {
+					deferred.resolve(res);
+				}
+			});
+			return deferred.promise;
+		};
+
+
+		return Users;
 
 	})();
 
-	return storage;
+	return Storage;
 
 });

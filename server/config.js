@@ -5,17 +5,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 define(function() {
 
-	var config = {};
+	var Config = {};
 
-	config.COOKIE_SECRET_HASH = '7G4Q0jRLP2DtCKIL28CGmSzsA2d8nu8u';
-	config.COOKIE_MAX_AGE = 60480000000;
+	Config.COOKIE_SECRET_HASH = '7G4Q0jRLP2DtCKIL28CGmSzsA2d8nu8u';
+	Config.COOKIE_MAX_AGE = 60480000000;
 
-	config.DYNAMODB_CREDENTIALS = {
+	Config.DYNAMODB_CREDENTIALS = {
 		accessKeyId: 'AKIAINHDEIZ3QVSHQ3PA', 
 		secretAccessKey: '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'
 	};
 			
-	config.OAUTH_CREDENTIALS = {
+	Config.OAUTH_CREDENTIALS = {
 		google: {
 			clientId: '495360231026.apps.googleusercontent.com'
 		},
@@ -28,8 +28,8 @@ define(function() {
 	};
 
 	// Tables
-	config.TABLE_USERS = 'DAYZE_USERS';
+	Config.TABLE_USERS = 'DAYZE_USERS';
 
-	return config;
+	return Config;
 
 });

@@ -5,13 +5,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 define(['q'], function(Q) {
 
-	var utils = {};
+	var Utils = {};
 
-  	utils.getNowIso = function() {
+  	Utils.getNowIso = function() {
   		return (new Date().toISOString());
   	};
 
-  	utils.generatePassword = function(pLength, pLevel) {
+  	Utils.generatePassword = function(pLength, pLevel) {
 		var length = (typeof pLength == 'undefined') ? 32 : pLength;
 		var level = (typeof pLevel == 'undefined') ? 3 : pLevel;
 		var validChars = [
@@ -31,6 +31,6 @@ define(['q'], function(Q) {
 		return password;
 	};
 
-  	return utils;
+  	return Utils;
 
 });
