@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 var requirejs = require('requirejs');
+var HTML_DEV_MODE = true; // Don't hit dynamo when playing with html/css/js
 
 requirejs.config({
 	baseUrl: __dirname,
@@ -72,12 +73,6 @@ requirejs([
 			// handle requests to root
 			this.app.get('/', function(req, res) {
 
-				// Keep in mind req.session storage won't work once we have multiple app servers.
-				
-				req.session.visitCount = req.session.visitCount ? req.session.visitCount + 1 : 1;
-
-				Utils.log('cookies', req.signedCookies);
-
 				var proceedWithUser = function(user) {
 					Utils.log('Pulled user', user);
 					var data = {};
@@ -99,20 +94,25 @@ requirejs([
 					.end();
 				}
 
-				if (req.signedCookies.cookieId) {				
-					Utils.log('User has cookie.', req.signedCookies.cookieId);
-					Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
-					.then(proceedWithUser)
-					.fail(function(err) {
-						Utils.log('getUserWithCookieId failed.', err);
-						// Couldn't find cookieId in db.
-						createAnonymousUser();
-					})
-					.end();
+				if (HTML_DEV_MODE) {
+					var data = {};
+					res.render('index', data);
 				} else {
-					// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
-					Utils.log('User does not have cookie.');
-					createAnonymousUser();
+					if (req.signedCookies.cookieId) {				
+						Utils.log('User has cookie.', req.signedCookies.cookieId);
+						Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
+						.then(proceedWithUser)
+						.fail(function(err) {
+							Utils.log('getUserWithCookieId failed.', err);
+							// Couldn't find cookieId in db.
+							createAnonymousUser();
+						})
+						.end();
+					} else {
+						// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
+						Utils.log('User does not have cookie.');
+						createAnonymousUser();
+					}
 				}
 
 			}); // End '/'
