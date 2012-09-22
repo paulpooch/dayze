@@ -33,85 +33,94 @@ define([
 		Users.resetTables = function() {
 
 			var createUsersTable = function() {
-				return Q.ncall(
-					ddb.createTable,
-					this,
-					Config.TABLE_USERS,
-					{
-						hash: ['userId', ddb.schemaTypes().string]
-					},
-					{
-						read: Config.DYNAMO_DEFAULT_READ_PER_SEC, 
-						write: Config.DYNAMO_DEFAULT_WRITE_PER_SEC
+				var deferred = Q.defer();
+				ddb.createTable(Config.TABLE_USERS, {
+					hash: ['userId', ddb.schemaTypes().string]
+				}, {
+					read: Config.DYNAMO_DEFAULT_READ_PER_SEC, 
+					write: Config.DYNAMO_DEFAULT_WRITE_PER_SEC
+				}, function(err, details) {
+					if (err) {
+						deferred.reject(new Error(err));
+					} else {
+						deferred.resolve(details);
 					}
-				);
+				});
+				return deferred.promise;
 			};
 
 			var removeUsersTable = function() {
-				return Q.ncall(
-					ddb.deleteTable,
-					this,
-					Config.TABLE_USERS
-				);
+				var deferred = Q.defer();
+				ddb.deleteTable(Config.TABLE_USERS, function(err, details) {
+					if (err) {
+						// We're ok with it not deleting... maybe it didn't exist.
+						deferred.resolve(err);
+					} else {
+						deferred.resolve(details);
+					}
+				});
+				return deferred.promise;
 			};
 
 			var createUsersByCookieTable = function() {
-				return Q.ncall(
-					ddb.createTable,
-					this,
-					Config.TABLE_USERS_BY_COOKIE, 
-					{
-						hash: ['cookieId', ddb.schemaTypes().string]
-					},
-					{
-						read: Config.DYNAMO_DEFAULT_READ_PER_SEC, 
-						write: Config.DYNAMO_DEFAULT_WRITE_PER_SEC
+				var deferred = Q.defer();
+				ddb.createTable(Config.TABLE_USERS_BY_COOKIE, {
+					hash: ['cookieId', ddb.schemaTypes().string]
+				}, {
+					read: Config.DYNAMO_DEFAULT_READ_PER_SEC, 
+					write: Config.DYNAMO_DEFAULT_WRITE_PER_SEC
+				}, function(err, details) {
+					if (err) {
+						deferred.reject(new Error(err));
+					} else {
+						deferred.resolve(details);
 					}
-				);
+				});
+				return deferred.promise;
 			};
 
 			var removeUsersByCookieTable = function() {
-				return Q.ncall(
-					ddb.deleteTable,
-					this,
-					Config.TABLE_USERS_BY_COOKIE
-				);
+				var deferred = Q.defer();
+				ddb.deleteTable(Config.TABLE_USERS_BY_COOKIE, function(err, details) {
+					if (err) {
+						// We're ok with it not deleting... maybe it didn't exist.
+						deferred.resolve(err);
+					} else {
+						deferred.resolve(details);
+					}
+				});
+				return deferred.promise;
 			};
 
-			
 			removeUsersTable()
-			.then(function(res) {
-				console.log('Users table removed.');
-				console.log(res);
+			.then(function(details) {
+				console.log('Users table deleted.  Waiting before re-creating.');
+				console.log(details);
 			})
-			.delay(60000)
-
+			.delay(20000)
 			.then(createUsersTable)
-			.then(function(res) {
+			.then(function(details) {
 				console.log('Users table created.');
-				console.log(res);
-			})
-			.delay(10000)
-			
-			.then(removeUsersByCookieTable)
-			.then(function(res) {
-				console.log('UsersByCookie table removed.');
-				console.log(res);
-			})
-			.delay(60000)
-			
-			.then(createUsersByCookieTable)
-			.then(function(res) {
-				console.log('UsersByCookie table created.');
-				console.log(res);
+				console.log(details);
 			})
 
+			.then(removeUsersByCookieTable)
+			.then(function(details) {
+				console.log('UsersByCookie deleted.  Waiting before re-creating.');
+				console.log(details);
+			})
+			.delay(20000)
+			.then(createUsersByCookieTable)
+			.then(function(details) {
+				console.log('UsersByCookie table created.');
+				console.log(details);
+			})
+			
 			.fail(function(err) {
-				console.log('Error.', err);
+				console.log(err);
 			})
 			.end();
 
-			
 		};
 
 		// Users.createTempUser
@@ -167,7 +176,7 @@ define([
 						def2.reject(new Error(err));
 					} else {
 						console.log('putCookie successful.', res, cap);
-						console.log(cookie.cookieId, cookie.user);
+						console.log(result.cookieId, result.user);
 						def2.resolve(putUserResult);
 					}
 				});
@@ -182,72 +191,34 @@ define([
 				deferred.resolve(putUserResult);
 			})
 			.fail(function(err) {
-				deferred.reject(new Error(err));
+				deferred.resolve(putUserResult);
 			})
 			.end();
 			
+
 			return deferred.promise;
 		};
 
 
-		Users.getUserWithCookieId = function(cookieId) {
+		Users.getUserFromCookie = function(cookieId) {
 			var deferred = Q.defer();
-
-			// ddb.getItem(Config.TABLE_USERS_BY_COOKIE, cookieId, null, {}, function(err, res, cap) {
-			// 	console.log(err, res, cap);
-			// });
-
-			var getUserIdWithCookieId = function(cookieId) {
-				return Q.ncall(
-					ddb.getItem,
-					this,
-					Config.TABLE_USERS_BY_COOKIE,
-					cookieId,
-					null,
-					{}
-				);
+			var options = {
+				filter: {
+					cookieId: {
+						eq: cookieId
+					}
+				}
 			};
-
-			var getUserWithUserId = function(res) {
-				return Q.ncall(
-					ddb.getItem,
-					this,
-					Config.TABLE_USERS,
-					res[0].userId,
-					null,
-					{}
-				);
-			};
-
-			getUserIdWithCookieId(cookieId)
-			.then(getUserWithUserId)
-			.then(function(res) {
-				deferred.resolve(res);
-			})
-			.fail(function(err) {
-				deferred.reject(new Error(err));
-			})
-			.end();
-
+			ddb.scan(Config.TABLE_USERS, options, function(err, res) {
+				if (err) {
+					deferred.reject(new Error(err));
+				} else {
+					deferred.resolve(res);
+				}
+			});
 			return deferred.promise;
 		};
 
-		/* SCAN EXAMPLE			
-		var options = {
-			filter: {
-				cookieId: {
-					eq: cookieId
-				}
-			}
-		};
-		ddb.scan(Config.TABLE_USERS_BY_COOKIE, options, function(err, res) {
-			if (err) {
-				deferred.reject(new Error(err));
-			} else {
-				deferred.resolve(res);
-			}
-		});
-		*/
 
 		return Users;
 

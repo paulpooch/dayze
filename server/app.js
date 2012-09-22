@@ -3,9 +3,11 @@
 // PACKAGE DOCUMENTATION //////////////////////////////////////////////////////
 // dynamodb = https://github.com/teleportd/node-dynamodb
 // node-uuid = https://github.com/broofa/node-uuid
-// q = https://github.com/kriskowal/q
-//	   https://github.com/bellbind/using-promise-q
-// 	   http://www.slideshare.net/domenicdenicola/callbacks-promises-and-coroutines-oh-my-the-evolution-of-asynchronicity-in-javascript
+// q = 	https://github.com/kriskowal/q
+//	   	https://github.com/bellbind/using-promise-q
+// 	   	http://www.slideshare.net/domenicdenicola/callbacks-promises-and-coroutines-oh-my-the-evolution-of-asynchronicity-in-javascript
+//		http://erickrdch.com/2012/06/how-to-wait-for-2-asynchronous-responses-on-nodejs-commonjs-promises.html
+//	 	http://howtonode.org/promises
 ///////////////////////////////////////////////////////////////////////////////
 
 var requirejs = require('requirejs');
@@ -21,14 +23,16 @@ requirejs([
 		'underscore', 
 		'backbone', 
 		'config',
-		'storage'
+		'storage',
+		'utils'
 	], function(
 		express, 
 		consolidate,
 		_,
 		Backbone,
 		Config,
-		Storage
+		Storage,
+		Utils
 	) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -40,7 +44,7 @@ requirejs([
 	var App = Backbone.Model.extend({
 
 		defaults: {
-			port: 3000
+			port: 80
 		},
 
 		initialize: function() {
@@ -53,6 +57,7 @@ requirejs([
 			this.app.configure(function() {
 			    that.app.set('view engine', 'dust');
 			    that.app.set('views', __dirname + '/views');
+			    that.app.use(express.static(__dirname + '/public'));
 			    that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
 				that.app.use(express.cookieParser(Config.COOKIE_SECRET_HASH));
 				that.app.use(express.session({ 
@@ -71,63 +76,53 @@ requirejs([
 				
 				req.session.visitCount = req.session.visitCount ? req.session.visitCount + 1 : 1;
 
-				console.log('cookies', req.signedCookies);
+				Utils.log('cookies', req.signedCookies);
 
-				if (req.signedCookies.cookieId) {
-				
-					console.log('User has cookie.', req.signedCookies.cookieId);
+				var proceedWithUser = function(user) {
+					Utils.log('Pulled user', user);
+					var data = {};
+					res.render('index', data);
+				};
 
-					Storage.Users.getUserFromCookie(req.signedCookies.cookieId)
-					.then(function(user) {
-						console.log('getUserFromCookie successful.', user);
-
-						var data = { 
-							numClients: 1,
-							visitCount: req.session.visitCount
-						}
-									    
-						res.render('index', data);
-
-					})
-					.fail(function(err) {
-						console.log('getUserFromCookie failed.', err);
-					})
-					.end();
-				
-				} else {
-
-					// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
-
-					console.log('User does not have cookie.');
-
+				var createAnonymousUser = function() {
 					Storage.Users.createTempUser()
 					.then(function(tempUserObj) {
-
 						var cookieId = tempUserObj.cookieId;
-						var user = tempUserObj.user;
+						// Set cookie.
 						res.cookie('cookieId', cookieId, { signed: true });
-
-						var data = { 
-							numClients: 1,
-							visitCount: req.session.visitCount
-						}
-									    
-						res.render('index', data);
-
+						var user = tempUserObj.user;
+						proceedWithUser(user);
+					})
+					.fail(function(err) {
+						Utils.log('createTempUser failed.', err);
 					})
 					.end();
-
 				}
 
+				if (req.signedCookies.cookieId) {				
+					Utils.log('User has cookie.', req.signedCookies.cookieId);
+					Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
+					.then(proceedWithUser)
+					.fail(function(err) {
+						Utils.log('getUserWithCookieId failed.', err);
+						// Couldn't find cookieId in db.
+						createAnonymousUser();
+					})
+					.end();
+				} else {
+					// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
+					Utils.log('User does not have cookie.');
+					createAnonymousUser();
+				}
 
+			}); // End '/'
 
-			});
-
-			//Storage.Users.resetTable();
+			// To clear all data use this.  Warning: seriously deletes everything.	
+			//Storage.Users.resetTables();
 
 			// begin listening
 			this.app.listen(this.get('port'));
-			console.log('Listening on port ' + this.get('port'));
+			Utils.log('Listening on port ' + this.get('port'));
 		}
 
 	});
