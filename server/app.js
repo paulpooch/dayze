@@ -25,7 +25,9 @@ requirejs([
 		'backbone', 
 		'config',
 		'storage',
-		'utils'
+		'utils',
+		// Get models shared by client
+		'public/js/models/account_model'
 	], function(
 		express, 
 		consolidate,
@@ -33,7 +35,8 @@ requirejs([
 		Backbone,
 		Config,
 		Storage,
-		Utils
+		Utils,
+		AccountModel
 	) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -72,53 +75,11 @@ requirejs([
 
 			// handle requests to root
 			this.app.get('/', function(req, res) {
+				var data = {};
+				res.render('index', data);	
+			});
 
-				var proceedWithUser = function(user) {
-					Utils.log('Pulled user', user);
-					var data = {};
-					res.render('index', data);
-				};
-
-				var createAnonymousUser = function() {
-					Storage.Users.createTempUser()
-					.then(function(tempUserObj) {
-						var cookieId = tempUserObj.cookieId;
-						// Set cookie.
-						res.cookie('cookieId', cookieId, { signed: true });
-						var user = tempUserObj.user;
-						proceedWithUser(user);
-					})
-					.fail(function(err) {
-						Utils.log('createTempUser failed.', err);
-					})
-					.end();
-				}
-
-				if (HTML_DEV_MODE) {
-					var data = {};
-					res.render('index', data);
-				} else {
-					if (req.signedCookies.cookieId) {				
-						Utils.log('User has cookie.', req.signedCookies.cookieId);
-						Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
-						.then(proceedWithUser)
-						.fail(function(err) {
-							Utils.log('getUserWithCookieId failed.', err);
-							// Couldn't find cookieId in db.
-							createAnonymousUser();
-						})
-						.end();
-					} else {
-						// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
-						Utils.log('User does not have cookie.');
-						createAnonymousUser();
-					}
-				}
-
-			}); // End '/'
-
-			// To clear all data use this.  Warning: seriously deletes everything.	
-			//Storage.Users.resetTables();
+			var accountRestApi = new AccountRestApi(this.app);
 
 			// begin listening
 			this.app.listen(this.get('port'));
@@ -127,12 +88,63 @@ requirejs([
 
 	});
 
-	var Users = function(app) {
+	var AccountRestApi = function(app) {
 
-		var path = 'users'
+		var path = 'account';
+		// List
+		app.get('/' + path, function(req, res) {
+
+			var proceedWithUser = function(user) {
+				Utils.log('Pulled user', user);
+
+				var acct = new AccountModel(user);
+
+				res.send(acct);
+			};
+
+			var createAnonymousUser = function() {
+				Storage.Users.createTempUser()
+				.then(function(tempUserObj) {
+					var cookieId = tempUserObj.cookieId;
+					// Set cookie.
+					res.cookie('cookieId', cookieId, { signed: true });
+					var user = tempUserObj.user;
+					proceedWithUser(user);
+				})
+				.fail(function(err) {
+					Utils.log('createTempUser failed.', err);
+				})
+				.end();
+			}
+
+			if (req.signedCookies.cookieId) {				
+				Utils.log('User has cookie.', req.signedCookies.cookieId);
+				Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
+				.then(proceedWithUser)
+				.fail(function(err) {
+					Utils.log('getUserWithCookieId failed.', err);
+					// Couldn't find cookieId in db.
+					createAnonymousUser();
+				})
+				.end();
+			} else {
+				// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
+				Utils.log('User does not have cookie.');
+				createAnonymousUser();
+			}
+
+		});
+
+		console.log('account rest');
+
+	};
+
+	var UsersRestApi = function(app) {
+
+		var path = 'users';
 		// List
 		app.get('/' + path + '.:format', function(req, res) {
-		
+
 		});
 
 		// Create 
