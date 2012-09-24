@@ -25,9 +25,7 @@ requirejs([
 		'backbone', 
 		'config',
 		'storage',
-		'utils',
-		// Get models shared by client
-		'public/js/models/account_model'
+		'utils'
 	], function(
 		express, 
 		consolidate,
@@ -35,8 +33,7 @@ requirejs([
 		Backbone,
 		Config,
 		Storage,
-		Utils,
-		AccountModel
+		Utils
 	) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -73,7 +70,7 @@ requirejs([
 				}));
 			 });
 
-			// handle requests to root
+			// handle requests to roots
 			this.app.get('/', function(req, res) {
 				var data = {};
 				res.render('index', data);	
@@ -97,9 +94,11 @@ requirejs([
 			var proceedWithUser = function(user) {
 				Utils.log('Pulled user', user);
 
-				var acct = new AccountModel(user);
-
-				res.send(acct);
+				var sanitizedUser = { 
+					displayName: user.displayName,
+					isRegistered: user.isRegistered
+				};
+				res.send(sanitizedUser);
 			};
 
 			var createAnonymousUser = function() {

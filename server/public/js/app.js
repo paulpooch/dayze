@@ -4,14 +4,18 @@ define([
 	'underscore',
 	'backbone',
 	'plugins',
+
 	'collections/user_collection',
-	'collections/account_collection',
+	
 	'models/google_o_auth_model',
 	'models/user_model',
 	'models/calendar_model',
+	'models/account_model',
+
 	'views/user_view',
 	'views/calendar_view',
 	'views/account_view',
+	
 	'router'
 ], function(
 	jQuery,
@@ -19,14 +23,18 @@ define([
 	_,
 	Backbone,
 	plugins,
+
 	UserCollection,
-	AccountCollection,
+	
 	GoogleOAuthModel,
 	UserModel,
 	CalendarModel,
+	AccountModel,
+	
 	UserView,
 	CalendarView,
 	AccountView,
+	
 	Router
 ) {
 
@@ -56,17 +64,20 @@ define([
 			_router = new Router({ app: this });
 
 			// models
-			_userModel = new UserModel({ app: this, displayName: 'Anonymous' });
+			//_userModel = new UserModel({ app: this, displayName: 'Anonymous' });
 			_calendarModel = new CalendarModel({ app: this });
+			_accountModel = new AccountModel();
 			
 			// views
-			_userView = new UserView({ app: this, model: _userModel, el: _$container.get() });
+			//_userView = new UserView({ app: this, model: _userModel, el: _$container.get() });
 			_calendarView = new CalendarView({ app: this, model: _calendarModel, el: _$container.get() });
-			_accountView = new AccountView({ app: this, model: _userModel, el: $('#template_account') });
+			_accountView = new AccountView({ app: this, model: _accountModel, el: $('#user_controls') });
 
 			// start
 			Backbone.history.start({ 'pushState': true });
+
 			_calendarView.render();
+			_accountModel.fetch()
 		};
 
 		var _sync = function(method, model, options) {

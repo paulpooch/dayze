@@ -1,34 +1,38 @@
 define([
 	'jquery',
 	'underscore',
-	'backbone'
+	'backbone',
+	'text!templates/account_template.html',
 ], function(
 	jQuery,
 	_,
-	Backbone
+	Backbone,
+	AccountTemplate
 ) {
 
 	var _app;
 
 	var AccountView = Backbone.View.extend({
 
+		template: _.template(AccountTemplate),
+
 	    initialize: function (options) {
 	    	var options = options || {};
 			_app = options.app;
-
 	        _.bindAll(this);
-	        this.model.bind('change:displayName', this.changeDisplayName);
+	        this.model.on('change', this.render, this);
+	        this.render();
+	        //this.model.bind('change:displayName', this.changeDisplayName);
+
 	    },
 
 	    render: function () {
-	        // "ich" is ICanHaz.js magic
-	        //this.el = ich.user(this.model.toJSON());
-	        return this;
+	    	this.$el.html(this.template(this.model.toJSON()));
 	    },
 
-	    changeDisplayName: function () {
-	        this.$('.display_name').text(this.model.get('displayName'));
-	    }
+	    // changeDisplayName: function () {
+	    //     this.$('.display_name').text(this.model.get('displayName'));
+	    // }
 
 
 	});

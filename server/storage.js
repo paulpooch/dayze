@@ -128,6 +128,7 @@ define([
 				var user = { 
 					userId: userId,
 					cookieId: cookieId,
+					isRegistered: 0,
 					//displayName: '',
 					//passwordHash: '',
 					//passwordSalt: '',
