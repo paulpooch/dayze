@@ -17,6 +17,7 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 		},
 
 		initialize: function(options) {
+			console.log('calendar view init');
 			var options = options || {};
 			_app = options.app;
 

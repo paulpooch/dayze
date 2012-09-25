@@ -14,6 +14,11 @@ require.config({
 				'jquery'
 			],
 			exports: 'Backbone'
+		},
+		'bootstrap': {
+			deps: [
+				'jquery'
+			]
 		}
 	},
 	paths: {
@@ -22,6 +27,7 @@ require.config({
 		backbone: 'vendor/backbone/backbone',
 		text: 'vendor/require/text',
 		modernizr: 'vendor/modernizr/modernizr',
+		bootstrap: 'vendor/bootstrap/bootstrap',
 		plugins: 'plugins'
 	}
 });

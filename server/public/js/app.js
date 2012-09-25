@@ -4,6 +4,7 @@ define([
 	'underscore',
 	'backbone',
 	'plugins',
+	'bootstrap',
 
 	'collections/user_collection',
 	
@@ -23,6 +24,7 @@ define([
 	_,
 	Backbone,
 	plugins,
+	Bootstrap,
 
 	UserCollection,
 	
@@ -75,7 +77,6 @@ define([
 
 			// start
 			//Backbone.history.start({ 'pushState': true });
-
 			_calendarView.render();
 			_accountModel.fetch()
 		};
