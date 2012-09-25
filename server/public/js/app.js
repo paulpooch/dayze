@@ -61,7 +61,7 @@ define([
 			_$container = $('#container');
 
 			// router
-			_router = new Router({ app: this });
+			//_router = new Router({ app: this });
 
 			// models
 			//_userModel = new UserModel({ app: this, displayName: 'Anonymous' });
@@ -74,7 +74,7 @@ define([
 			_accountView = new AccountView({ app: this, model: _accountModel, el: $('#user_controls') });
 
 			// start
-			Backbone.history.start({ 'pushState': true });
+			//Backbone.history.start({ 'pushState': true });
 
 			_calendarView.render();
 			_accountModel.fetch()
