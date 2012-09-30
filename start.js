@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////////////////////////////////
+// START
+///////////////////////////////////////////////////////////////////////////////
+
 var util  = require('util'),
 	process = require('child_process');
 
@@ -12,7 +16,7 @@ var install = process.exec('npm install', function (error, stdout, stderr) {
     		if (error !== null) {
     			console.log('Unable to find nodemon in your PATH. Check that it is installed globally.');
     		} else {
-				var start = process.spawn(path, ['server/app.js']);
+				var start = process.spawn(path, ['server/app_server.js']);
 
 				start.stdout.on('data', function (data) {
 				  console.log('' + data);

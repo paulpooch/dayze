@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////////////////////////////////
+// MAIN
+///////////////////////////////////////////////////////////////////////////////
+
 // http://andyet.net/blog/2010/oct/29/building-a-single-page-app-with-backbonejs-undersc/
 // http://sorensen.github.com/aebleskiver/docs/user.model.html
 
@@ -32,7 +36,7 @@ require.config({
 	}
 });
 
-require(['app'], function(App) {
+require(['app_client'], function(App) {
 
 	window.Dayze = new App();
 	window.Dayze.initialize();

@@ -1,13 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
-// CALENDAR MODEL
+// EVENT MODEL
 ///////////////////////////////////////////////////////////////////////////////
 define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 
-	var CalendarModel = Backbone.Model.extend({
+	var EventModel = Backbone.Model.extend({
 
-		defaults: {
-			monthNames: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
-		},
+		defaults: { },
 
 		initialize: function() {
 
@@ -15,6 +13,6 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 
 	});
 
-	return CalendarModel;
+	return EventModel;
 
 });

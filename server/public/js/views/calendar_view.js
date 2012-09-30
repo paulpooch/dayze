@@ -1,14 +1,32 @@
-define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
+///////////////////////////////////////////////////////////////////////////////
+// CALENDAR VIEW
+///////////////////////////////////////////////////////////////////////////////
+define([
+	'jquery',
+	'underscore',
+	'backbone',
 
-	var _app;
+	'text!templates/week_template.html'
+], function(
+	jQuery,
+	_,
+	Backbone,
 
-	var _$window;
-	var _$calendar;
-	var _$monthName;
-	var _heightOfOneWeek;
-	var _prevY;
-	var _weekElements;
-	var _template;
+	WeekTemplate
+) {
+
+	var _app,
+		_calendarModel,
+		
+		_heightOfOneWeek,
+		_prevY,
+		_weekElements,
+		_template,
+
+		_$window,
+		_$calendar,
+		_$monthName;
+	
 
 	var CalendarView = Backbone.View.extend({
 
@@ -20,6 +38,7 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			console.log('calendar view init');
 			var options = options || {};
 			_app = options.app;
+			_calendarModel = options.model;
 
 			_.bindAll(this); // binds all event callbacks to 'this'
 
@@ -31,13 +50,11 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			_weekElements = [];
 
 			// can't be registered within View.events
-			_$window.scroll(this.handleScroll);
+			_$window.scroll(this.onScroll);
 		},
 
-		events: function() {
-			return {
-				'click .day': 'showDay'
-			};
+		events: {
+			'click .day': 'onDayClick'
 		},
 
 		render: function() {
@@ -47,10 +64,10 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			var diff = weekDate.getDate() - day;
 			weekDate.setDate(diff);
 
-			this.showWeek(weekDate);
+			this.renderWeek(weekDate);
 			for (var i = 0; i < initialWeekCount; i++) {
 			    weekDate.setDate(weekDate.getDate() + 7);
-			    this.showWeek(weekDate);
+			    this.renderWeek(weekDate);
 			}
 
 			var firstVisibleWeek = _weekElements[0].timestamp;
@@ -58,7 +75,7 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			_$monthName.text(currentMonth);
 		},
 
-		handleScroll: function() {
+		onScroll: function() {
 			var scrollTop = _$window.scrollTop();
 			if (!_heightOfOneWeek) {
 				_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
@@ -74,13 +91,14 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			}
 		},
 
-		showDay: function() {
-			console.log('showDay()');
+		onDayClick: function() {
+			_calendarModel.onDayClick();
 		},
 
-		showWeek: function(weekDate) {
+		renderWeek: function(weekDate) {
 			if (!_template) {
-				_template = _.template($("#template_week").html());
+				//_template = _.template($("#template_week").html());
+				_template = _.template(WeekTemplate);
 			}
 			var weekDateCopy = new Date(weekDate);
 	        var days = {};
