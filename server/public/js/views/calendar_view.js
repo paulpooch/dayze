@@ -16,7 +16,6 @@ define([
 ) {
 
 	var _app,
-		_calendarModel,
 		
 		_heightOfOneWeek,
 		_prevY,
@@ -35,12 +34,13 @@ define([
 		},
 
 		initialize: function(options) {
+			// This is really important.
+			// Binds all event callbacks to 'this'.
+			_.bindAll(this);
+
 			console.log('calendar view init');
 			var options = options || {};
 			_app = options.app;
-			_calendarModel = options.model;
-
-			_.bindAll(this); // binds all event callbacks to 'this'
 
 			//this.model.bind('change', render);
 			_$window = $(window);
@@ -63,6 +63,11 @@ define([
 			var day = weekDate.getDay();
 			var diff = weekDate.getDate() - day;
 			weekDate.setDate(diff);
+			weekDate = new Date(weekDate.getFullYear(), weekDate.getMonth(), weekDate.getDate(), 0, 0, 0, 0);
+			//weekDate.setHours(0);
+			//weekDate.setMinutes(0);
+			//weekDate.setSeconds(0);
+			//weekDate.setMilliseconds(0);
 
 			this.renderWeek(weekDate);
 			for (var i = 0; i < initialWeekCount; i++) {
@@ -91,8 +96,9 @@ define([
 			}
 		},
 
-		onDayClick: function() {
-			_calendarModel.onDayClick();
+		onDayClick: function(e) {
+			var dayCode = $(e.target).data('day-code');
+			this.model.onDayClick(dayCode);
 		},
 
 		renderWeek: function(weekDate) {
@@ -101,21 +107,31 @@ define([
 				_template = _.template(WeekTemplate);
 			}
 			var weekDateCopy = new Date(weekDate);
+
 	        var days = {};
+	        var dayCodes = {};
 	        days['d0'] = weekDateCopy.getDate();
+	        dayCodes['d0'] = weekDateCopy.toISOString().split('T')[0];
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d1'] = weekDateCopy.getDate();
+	       	dayCodes['d1'] = weekDateCopy.toISOString().split('T')[0];
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d2'] = weekDateCopy.getDate();
+	     	dayCodes['d2'] = weekDateCopy.toISOString().split('T')[0];
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d3'] = weekDateCopy.getDate();
+	        dayCodes['d3'] = weekDateCopy.toISOString().split('T')[0];
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d4'] = weekDateCopy.getDate();
+	        dayCodes['d4'] = weekDateCopy.toISOString().split('T')[0];
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d5'] = weekDateCopy.getDate();
+	        dayCodes['d5'] = weekDateCopy.toISOString().split('T')[0];
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d6'] = weekDateCopy.getDate();
-	        var el = _template(days);
+	        dayCodes['d6'] = weekDateCopy.toISOString().split('T')[0];
+	        
+	        var el = _template({ days: days, dayCodes: dayCodes });
 	        _weekElements.push({
 	        	htmlEl: el,
 	        	timestamp: new Date(weekDate)

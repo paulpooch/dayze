@@ -6,31 +6,34 @@ define([
 	'underscore',
 	'backbone',
 
-	'views/user_view',
-	'views/calendar_view',
 	'views/account_view',
+	'views/calendar_view',
+	'views/day_view'
 ], function(
 	jQuery,
 	_,
 	Backbone,
 
-	UserView,
+	AccountView,
 	CalendarView,
-	AccountView
+	DayView
 ) {
 
-	var _appModel,
+	var _accountView,
 		_calendarView,
-		_accountView;
+		_dayView;
 
 	var AppView = Backbone.View.extend({
 
 		initialize: function(options) {
 			
 			var options = options || {};
-			_appModel = options.model;
-			_calendarView = new CalendarView({ app: this, model: _appModel.get('calendarModel'), el: $('#container') });
-			_accountView = new AccountView({ app: this, model: _appModel.get('accountModel'), el: $('#user_controls') });
+
+console.log(this.model.get('dayModel').get('dayCode'));
+
+			_calendarView = new CalendarView({ app: this, model: this.model.get('calendarModel'), el: $('#calendar_view_holder') });
+			_accountView = new AccountView({ app: this, model: this.model.get('accountModel'), el: $('#account_view_holder') });
+			_dayView = new DayView({ app: this, model: this.model.get('dayModel'), el: $('#day_view_holder') })
 		
 			this.render();
 		},
