@@ -15,13 +15,27 @@ define([
 	DayTemplate
 ) {
 
-	var _app;
+	var that,
+		_app,
+		_appModel;
 
 	var DayView = Backbone.View.extend({
 
 		template: _.template(DayTemplate),
 
-		defaults: {},
+		events: {
+			'hide #myModal': 'onModalHide',
+			'click #addEventButton': 'onAddEventButtonClick'
+		},
+
+		onModalHide: function() {
+			_appModel.set('dayModalVisible', false);
+		},
+
+		onAddEventButtonClick: function() {
+			var eventText = this.$el.find('#addEventText').val();
+			_appModel.addEvent(eventText);
+		},
 
 		render: function() {
 			console.log('render day');
@@ -40,16 +54,15 @@ define([
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
+			that = this;
 
 			var options = options || {};
 			_app = options.app;
+			_appModel = options.appModel;
 			
 			this.model.on('change:dayCode', this.update);
-		},
-
-		events: function() {
+			this.update();
 		}
-
 
 	});
 

@@ -14,11 +14,13 @@ define([
 	var DayModel = Backbone.Model.extend({
 
 		defaults: {
+			appModel: null,
+			events: null,
 			dayCode: (function() {
 				var d = new Date();
 				return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).toISOString().split('T')[0];
 			})(),
-			displayDate: 'hello'
+			displayDate: ''
 		},
 
 		initialize: function() {

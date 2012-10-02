@@ -27,10 +27,6 @@
 </header>
 <div id="content">
 
-    <h1>
-        <a href="#myModal" role="button" class="btn" data-toggle="modal">Launch Modal</a>
-    </h1>
-
     <div id="calendar_view_holder">
         <div id="calendar"></div>
     </div> 

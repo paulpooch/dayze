@@ -1,4 +1,4 @@
- <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+ <div class="modal hidden fade" id="myModal" tabindex="-1" role="dialog" >
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
         <h3 id="myModalLabel"><%= displayDate %></h3>
@@ -20,7 +20,7 @@
             <form>
                 <legend>Add Event</legend>
                 <div class="input-append">
-                    <input class="span2" id="appendedInputButton" size="16" type="text" placeholder="Event Name"><button class="btn" type="button">Add</button>
+                    <input class="span2" id="addEventText" size="16" type="text" placeholder="Event Name"><button id="addEventButton" class="btn" type="button">Add</button>
                 </div>
             </form>
             <div class="btn-group btn-group-vertical">
