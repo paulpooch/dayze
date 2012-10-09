@@ -49,7 +49,7 @@ requirejs([
 	var App = Backbone.Model.extend({
 
 		defaults: {
-			port: 80
+			port: 8000
 		},
 
 		initialize: function() {

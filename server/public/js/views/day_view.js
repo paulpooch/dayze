@@ -24,21 +24,19 @@ define([
 		template: _.template(DayTemplate),
 
 		events: {
-			'hide #myModal': 'onModalHide',
 			'click #addEventButton': 'onAddEventButtonClick'
-		},
-
-		onModalHide: function() {
-			_appModel.set('dayModalVisible', false);
 		},
 
 		onAddEventButtonClick: function() {
 			var eventText = this.$el.find('#addEventText').val();
-			_appModel.addEvent(eventText);
+			var dayCode = this.model.get('dayCode');
+			console.log(dayCode);
+			_appModel.addEvent(eventText, dayCode);
 		},
 
 		render: function() {
 			console.log('render day');
+			console.log(this.model.toJSON());
 			this.$el.html(this.template(this.model.toJSON()));
 		},
 
@@ -47,6 +45,8 @@ define([
 			console.log('update day view');
 			var dayCode = this.model.get('dayCode');
 			console.log('dayCode is ', dayCode);
+			console.log('calEvents are ', this.model.get('calEvents'));
+			console.log('json', this.model.toJSON());
 			this.render();
 		},
 
@@ -56,11 +56,14 @@ define([
 			_.bindAll(this);
 			that = this;
 
-			var options = options || {};
+			options = options || {};
 			_app = options.app;
 			_appModel = options.appModel;
 			
 			this.model.on('change:dayCode', this.update);
+			this.model.on('change:calEvents', this.update);
+
+
 			this.update();
 		}
 

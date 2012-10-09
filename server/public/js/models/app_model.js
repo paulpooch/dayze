@@ -11,6 +11,8 @@ define([
 	'models/account_model',
 	'models/calendar_model',
 	'models/day_model',
+	'models/event_model'
+
 ], function(
 	jQuery,
 	_,
@@ -20,10 +22,13 @@ define([
 
 	AccountModel,
 	CalendarModel,
-	DayModel
+	DayModel,
+	EventModel
+
 ) {
 
-	var _app,
+	var that,
+		_app,
 		_eventCollection,
 		_accountModel,
 		_calendarModel,
@@ -38,44 +43,48 @@ define([
 			calendarModel: null,
 			dayModel: null
 		},
-		       
-	    initialize: function(options) {
-	    	var options = options || {};
-	    	_app = options.app;
 
-	    	_eventCollection = new EventCollection();
+		initialize: function(options) {
+			// This is really important.
+			// Binds all event callbacks to 'this'.
+			_.bindAll(this);
+			that = this;
 
-	    	_accountModel = new AccountModel();
+			options = options || {};
+			_app = options.app;
+
+			_eventCollection = new EventCollection();
+			this.set('eventCollection', _eventCollection);
+	
+			_accountModel = new AccountModel();
 			_calendarModel = new CalendarModel({ app: options.app, appModel: this });
 			_dayModel = new DayModel({ app: options.app, appModel: this });
-	    	
-	    	this.set('accountModel', _accountModel);
-	    	this.set('calendarModel', _calendarModel);
-	    	this.set('dayModel', _dayModel);
+			
+			this.set('accountModel', _accountModel);
+			this.set('calendarModel', _calendarModel);
+			this.set('dayModel', _dayModel);
 
-	    	_accountModel.fetch();
-	    },
+			_accountModel.fetch();
+		},
 
-	    addEvent: function(eventName) {
+		addEvent: function(eventName, eventDayCode) {
+			// Begin here creating event model.
+			var event = new EventModel({ app: _app, appModel: this, name: eventName, dayCode: eventDayCode });
+			_eventCollection.add(event);
 
-	    	// Begin here creating event model.
-	    	var event = new EventModel({ app: options, appModel: this });
+		},
 
+		displayDay: function(dayCode) {
+			console.log('AppModel.displayDay');
+			console.log(dayCode);
+			var events = _eventCollection.get(dayCode);
+			// do something with events
 
-	    },
+			_dayModel.set('events', events);
+			_dayModel.set('dayCode', dayCode);
+			this.set('dayModalVisible', true);
+		}
 
-	    displayDay: function(dayCode) {
-	    	console.log('AppModel.displayDay');
-	    	console.log(dayCode);
-	    	var events = _eventCollection.get(dayCode);
-	    	// do something with events
-
-	    	_dayModel.set('events', events);
-	    	_dayModel.set('dayCode', dayCode);
-	    	this.set('dayModalVisible', true);
-	    }
-
-	   
 	});
 
 	return AppModel;

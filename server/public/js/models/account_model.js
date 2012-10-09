@@ -9,6 +9,8 @@ define([
 	Backbone
 ) {
 
+	var that;
+
 	var AccountModel = Backbone.Model.extend({
 
 		defaults: {
@@ -16,7 +18,12 @@ define([
 		},
 
 		initialize: function(user) {
-			this.set({ displayName: (user && user.displayName) || this.get('displayName') }); 
+			// This is really important.
+			// Binds all event callbacks to 'this'.
+			_.bindAll(this);
+			that = this;
+
+			this.set({ displayName: (user && user.displayName) || this.get('displayName') });
 			console.log('AccountModel created with displayName ', this.get('displayName'));
 		}
 

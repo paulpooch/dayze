@@ -31,7 +31,9 @@
         <div id="calendar"></div>
     </div> 
 
-    <div id="day_view_holder"></div>
+
+	<div id="day_view_holder" class="modal hidden fade" tabindex="-1" role="dialog">
+	</div>
 
 </div>
 </body>

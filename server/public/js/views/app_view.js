@@ -26,14 +26,22 @@ define([
 
 	var AppView = Backbone.View.extend({
 
-		initialize: function(options) {
-			that = this;
+		events: {
+			'hide #day_view_holder': 'onModalHide'
+		},
 
+		onModalHide: function() {
+			console.log('day modal visibility = ', this.model.get('dayModalVisible'));
+			this.model.set('dayModalVisible', false);
+		},
+
+		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
+			that = this;
 			
-			var options = options || {};
+			options = options || {};
 
 			console.log(this.model.get('dayModel').get('dayCode'));
 
@@ -44,9 +52,9 @@ define([
 			this.model.on('change:dayModalVisible', function() {
 				console.log(that.model.get('dayModalVisible'));
 				if (that.model.get('dayModalVisible')) {
-					$('#myModal').modal('show');
+					$('#day_view_holder').modal('show');
 					//window.location.hash = '#myModal';
-				}    	
+				}
 			});
 
 			this.render();

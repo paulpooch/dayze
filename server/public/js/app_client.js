@@ -46,7 +46,7 @@ define([
 			_$header = $('header');
 
 			_appModel = new AppModel({ app: this });
-			_appView = new AppView({ model: _appModel });
+			_appView = new AppView({ model: _appModel, el: $('body') });
 		};
 
 		var _sync = function(method, model, options) {

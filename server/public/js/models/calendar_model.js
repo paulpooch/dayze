@@ -11,7 +11,8 @@ define([
 	Backbone
 ) {
 
-	var _app,
+	var that,
+		_app,
 		_appModel;
 
 	var CalendarModel = Backbone.Model.extend({
@@ -21,6 +22,11 @@ define([
 		},
 
 		initialize: function(options) {
+			// This is really important.
+			// Binds all event callbacks to 'this'.
+			_.bindAll(this);
+			that = this;
+
 			_app = options.app;
 			_appModel = options.appModel;
 		},
