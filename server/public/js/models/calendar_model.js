@@ -25,14 +25,16 @@ define([
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
+			
+			// VARS
 			that = this;
-
 			_app = options.app;
 			_appModel = options.appModel;
+			
 		},
 
 		onDayClick: function(dayCode) {
-			console.log('CalendarModel.onDayClick');
+			//console.log('CalendarModel.onDayClick');
 			_appModel.displayDay(dayCode);
 		}
 

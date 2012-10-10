@@ -38,7 +38,7 @@ define([
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 
-			console.log('calendar view init');
+			//console.log('calendar view init');
 			var options = options || {};
 			_app = options.app;
 
@@ -84,7 +84,7 @@ define([
 			var scrollTop = _$window.scrollTop();
 			if (!_heightOfOneWeek) {
 				_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
-				console.log(_heightOfOneWeek);
+				//console.log(_heightOfOneWeek);
 			}
 			if (Math.abs(scrollTop - _prevY) > _heightOfOneWeek / 2) {
 				var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);
@@ -92,7 +92,7 @@ define([
 				var currentMonth = this.model.get('monthNames')[firstVisibleWeek.getMonth()];
 				_prevY = _$window.scrollTop();
 				_$monthName.text(currentMonth);
-				console.log('update ' + currentMonth);
+				//console.log('update ' + currentMonth);
 			}
 		},
 

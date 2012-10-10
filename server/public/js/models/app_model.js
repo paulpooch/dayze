@@ -75,8 +75,8 @@ define([
 		},
 
 		displayDay: function(dayCode) {
-			console.log('AppModel.displayDay');
-			console.log(dayCode);
+			//console.log('AppModel.displayDay');
+			//console.log(dayCode);
 			var events = _eventCollection.get(dayCode);
 			// do something with events
 

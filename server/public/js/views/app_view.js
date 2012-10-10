@@ -31,7 +31,7 @@ define([
 		},
 
 		onModalHide: function() {
-			console.log('day modal visibility = ', this.model.get('dayModalVisible'));
+			//console.log('day modal visibility = ', this.model.get('dayModalVisible'));
 			this.model.set('dayModalVisible', false);
 		},
 
@@ -43,14 +43,14 @@ define([
 			
 			options = options || {};
 
-			console.log(this.model.get('dayModel').get('dayCode'));
+			//console.log(this.model.get('dayModel').get('dayCode'));
 
 			_calendarView = new CalendarView({ app: this, model: this.model.get('calendarModel'), appModel: this.model, el: $('#calendar_view_holder') });
 			_accountView = new AccountView({ app: this, model: this.model.get('accountModel'), appModel: this.model, el: $('#account_view_holder') });
 			_dayView = new DayView({ app: this, model: this.model.get('dayModel'), appModel: this.model, el: $('#day_view_holder') });
 
 			this.model.on('change:dayModalVisible', function() {
-				console.log(that.model.get('dayModalVisible'));
+				//console.log(that.model.get('dayModalVisible'));
 				if (that.model.get('dayModalVisible')) {
 					$('#day_view_holder').modal('show');
 					//window.location.hash = '#myModal';

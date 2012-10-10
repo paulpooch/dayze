@@ -23,48 +23,69 @@ define([
 
 		template: _.template(DayTemplate),
 
+		render: function() {
+			//console.log('render day');
+			console.log(that.model.toJSON());
+			this.$el.html(that.template(that.model.toJSON()));
+		},
+
+		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			'click #addEventButton': 'onAddEventButtonClick'
+			'click #addEventButton': 'onAddEventButtonClick',
+			'click .event_listing button': 'onEventClick'
 		},
 
 		onAddEventButtonClick: function() {
-			var eventText = this.$el.find('#addEventText').val();
-			var dayCode = this.model.get('dayCode');
-			console.log(dayCode);
+			var eventText = that.$el.find('#addEventText').val();
+			var dayCode = that.model.get('dayCode');
+			//console.log(dayCode);
 			_appModel.addEvent(eventText, dayCode);
 		},
 
-		render: function() {
-			console.log('render day');
-			console.log(this.model.toJSON());
-			this.$el.html(this.template(this.model.toJSON()));
+		onEventClick: function(e) {
+			var id = $(e.target).data('id');
+			console.log(id);
+
+			that.model.setSelectedEvent(id);
+			//var eventText = that.$el.find('#addEventText').val();
+			//var dayCode = that.model.get('dayCode');
+			//console.log(dayCode);
+			//_appModel.addEvent(eventText, dayCode);
+		},
+		// END VIEW EVENTS ////////////////////////////////////////////////////
+
+		// MODEL EVENTS ///////////////////////////////////////////////////////
+		update: function() {
+			//console.log('day view update');
+			//console.log('update day view');
+			var dayCode = that.model.get('dayCode');
+			//console.log('dayCode is ', dayCode);
+			//console.log('calEvents are ', this.model.get('calEvents'));
+			//console.log('json', this.model.toJSON());
+			that.render();
 		},
 
-		update: function() {
-			console.log('day view update');
-			console.log('update day view');
-			var dayCode = this.model.get('dayCode');
-			console.log('dayCode is ', dayCode);
-			console.log('calEvents are ', this.model.get('calEvents'));
-			console.log('json', this.model.toJSON());
-			this.render();
+		onCalEventsChange: function() {
+			console.log('onCalEventsChange');
+			that.update();
 		},
+		// END MODEL EVENTS ///////////////////////////////////////////////////
 
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
+			
+			// VARS
 			that = this;
-
-			options = options || {};
 			_app = options.app;
 			_appModel = options.appModel;
 			
-			this.model.on('change:dayCode', this.update);
-			this.model.on('change:calEvents', this.update);
+			// BINDINGS
+			that.model.on('change:dayCode', that.update);
+			that.model.on('change:calEvents', that.onCalEventsChange);
 
-
-			this.update();
+			that.update();
 		}
 
 	});

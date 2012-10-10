@@ -24,7 +24,7 @@ define([
 			that = this;
 
 			this.set({ displayName: (user && user.displayName) || this.get('displayName') });
-			console.log('AccountModel created with displayName ', this.get('displayName'));
+			//console.log('AccountModel created with displayName ', this.get('displayName'));
 		}
 
 	});

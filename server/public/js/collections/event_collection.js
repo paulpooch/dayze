@@ -28,13 +28,13 @@ define([
 
 		onAdd: function(event) {
 			var dayCode = event.get('dayCode');
-			console.log(event);
+			//console.log(event);
 			var existingEvents = _eventsByDay[dayCode] || [];
-			console.log('existing events =', existingEvents);
+			//console.log('existing events =', existingEvents);
 			existingEvents.push(event);
-			console.log('existingEvents = ', existingEvents);
+			//console.log('existingEvents = ', existingEvents);
 			_eventsByDay[dayCode] = existingEvents;
-			console.log('onAdd, dayCode = ', dayCode);
+			//console.log('onAdd, dayCode = ', dayCode);
 		},
 
 		initialize: function() {
