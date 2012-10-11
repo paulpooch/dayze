@@ -45,6 +45,8 @@ define([
 		var _domReady = function() {
 			_$header = $('header');
 
+			_router = new Router();
+
 			_appModel = new AppModel({ app: this });
 			_appView = new AppView({ model: _appModel, el: $('body') });
 		};

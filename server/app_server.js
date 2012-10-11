@@ -82,6 +82,11 @@ requirejs([
 
 			var accountRestApi = new AccountRestApi(this.app);
 
+			// route catch-all: must appear at the end of all app.get() calls
+			this.app.get('*', function(req, res) {
+				res.render('index');	
+			});
+
 			// begin listening
 			this.app.listen(this.get('port'));
 			Utils.log('Listening on port ' + this.get('port'));
