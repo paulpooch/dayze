@@ -39,7 +39,6 @@ define([
 		},
 
 		setSelectedEvent: function(cid) {
-
 			// Day View should really be using a composite model.
 			// 1 Day Model + 1 Event Model
 			// Figure that out next.
@@ -57,6 +56,17 @@ define([
 			//console.log('events updated in day model', this.get('calEvents'));
 		},
 
+		onEventCollectionAdd: function() {
+			that.checkEventCollectionForNewEvents();
+		},
+
+		onDayCodeChange: function() {
+			var dayCode = that.get('dayCode');
+			var parts = dayCode.split('-');
+			that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString());
+			that.checkEventCollectionForNewEvents();
+		},
+
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
@@ -67,21 +77,9 @@ define([
 			_appModel = options.appModel;
 			_eventCollection = _appModel.get('eventCollection');
 
-			// EVENT HANDLERS
-			var onDayCodeChange = function() {
-				var dayCode = that.get('dayCode');
-				var parts = dayCode.split('-');
-				that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString());
-				that.checkEventCollectionForNewEvents();
-			};
-
-			var onEventCollectionAdd = function() {
-				that.checkEventCollectionForNewEvents();
-			}
-
 			// BINDINGS
-			that.bind('change:dayCode', onDayCodeChange);
-			_eventCollection.bind('add', onEventCollectionAdd);
+			that.bind('change:dayCode', that.onDayCodeChange);
+			_eventCollection.bind('add', that.onEventCollectionAdd);
 
 		}
 

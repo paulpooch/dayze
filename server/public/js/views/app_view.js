@@ -35,6 +35,13 @@ define([
 			this.model.set('dayModalVisible', false);
 		},
 
+		onDayModalVisibleChange: function() {
+			if (that.model.get('dayModalVisible')) {
+				$('#day_view_holder').modal('show');
+				//window.location.hash = '#myModal';
+			}
+		},
+
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
@@ -49,13 +56,7 @@ define([
 			_accountView = new AccountView({ app: this, model: this.model.get('accountModel'), appModel: this.model, el: $('#account_view_holder') });
 			_dayView = new DayView({ app: this, model: this.model.get('dayModel'), appModel: this.model, el: $('#day_view_holder') });
 
-			this.model.on('change:dayModalVisible', function() {
-				//console.log(that.model.get('dayModalVisible'));
-				if (that.model.get('dayModalVisible')) {
-					$('#day_view_holder').modal('show');
-					//window.location.hash = '#myModal';
-				}
-			});
+			this.model.on('change:dayModalVisible', that.onDayModalVisibleChange);
 
 			this.render();
 		},
