@@ -24,7 +24,7 @@
         </form>
         <div class="event_listing">
             <div class="btn-group btn-group-vertical">
-                <% _.each(calEvents, function(item, key, list) { 
+                <% _.each(todaysEvents, function(item, key, list) { 
                     var eventName = item.get('name');
                 %>
                 <button type="button" class="btn" data-id="<%= item.cid %>"><i class="icon-edit"></i><%= eventName %></button>

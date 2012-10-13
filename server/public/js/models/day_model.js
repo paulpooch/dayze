@@ -18,7 +18,7 @@ define([
 	var DayModel = Backbone.Model.extend({
 		// ATTRIBUTES:
 		// appModel
-		// calEvents
+		// todaysEvents
 		//	a collection of EventModels pulled from the master EventCollection in AppModel
 		// dayCode
 		// displayDate
@@ -26,7 +26,7 @@ define([
 
 		defaults: {
 			appModel: null,
-			calEvents: null,
+			todaysEvents: null,
 			dayCode: (function() {
 				var d = new Date();
 				return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).toISOString().split('T')[0];
@@ -48,12 +48,12 @@ define([
 
 		checkEventCollectionForNewEvents: function() {
 			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'))
-			that.set('calEvents', evtColl);
+			that.set('todaysEvents', evtColl);
 			if (evtColl.length > 1) {
-				that.trigger('change:calEvents'); 	// Need a manual trigger since it's always an array.
+				that.trigger('change:todaysEvents'); 	// Need a manual trigger since it's always an array.
 													// Can't detect change.		
 			}
-			//console.log('events updated in day model', this.get('calEvents'));
+			//console.log('events updated in day model', this.get('todaysEvents'));
 		},
 
 		onEventCollectionAdd: function() {

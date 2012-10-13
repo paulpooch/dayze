@@ -56,17 +56,12 @@ define([
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		update: function() {
-			//console.log('day view update');
-			//console.log('update day view');
 			var dayCode = that.model.get('dayCode');
-			//console.log('dayCode is ', dayCode);
-			//console.log('calEvents are ', this.model.get('calEvents'));
-			//console.log('json', this.model.toJSON());
 			that.render();
 		},
 
-		onCalEventsChange: function() {
-			console.log('onCalEventsChange');
+		onTodaysEventsChange: function() {
+			console.log('onTodaysEventsChange');
 			that.update();
 		},
 		// END MODEL EVENTS ///////////////////////////////////////////////////
@@ -83,7 +78,7 @@ define([
 			
 			// BINDINGS
 			that.model.on('change:dayCode', that.update);
-			that.model.on('change:calEvents', that.onCalEventsChange);
+			that.model.on('change:todaysEvents', that.onTodaysEventsChange);
 
 			that.update();
 		}
