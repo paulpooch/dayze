@@ -16,7 +16,7 @@ define([
 		url: '/account',
 
 		initialize: function() {
-			this.fetch();
+		//	this.fetch();
 		}
 
 	});

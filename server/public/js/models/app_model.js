@@ -6,6 +6,7 @@ define([
 	'underscore',
 	'backbone',
 
+	'collections/account_collection',
 	'collections/event_collection',
 
 	'models/account_model',
@@ -18,6 +19,7 @@ define([
 	_,
 	Backbone,
 
+	AccountCollection,
 	EventCollection,
 
 	AccountModel,
