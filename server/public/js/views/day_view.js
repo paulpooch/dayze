@@ -17,7 +17,8 @@ define([
 
 	var that,
 		_app,
-		_appModel;
+		_appModel,
+		_mediator;
 
 	var DayView = Backbone.View.extend({
 
@@ -27,6 +28,7 @@ define([
 			//console.log('render day');
 			console.log(that.model.toJSON());
 			this.$el.html(that.template(that.model.toJSON()));
+			_mediator.renderEventView(this.$el);
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -46,7 +48,9 @@ define([
 			var id = $(e.target).data('id');
 			console.log(id);
 
-			that.model.setSelectedEvent(id);
+			_appModel.setSelectedEvent(id);
+
+			//that.model.setSelectedEvent(id);
 			//var eventText = that.$el.find('#addEventText').val();
 			//var dayCode = that.model.get('dayCode');
 			//console.log(dayCode);
@@ -75,6 +79,7 @@ define([
 			that = this;
 			_app = options.app;
 			_appModel = options.appModel;
+			_mediator = options.mediator;
 			
 			// BINDINGS
 			that.model.on('change:dayCode', that.update);

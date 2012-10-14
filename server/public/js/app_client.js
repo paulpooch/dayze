@@ -10,6 +10,7 @@ define([
 	'bootstrap',
 
 	'router',
+	'mediator',
 	
 	'models/app_model',
 	'views/app_view'
@@ -22,6 +23,7 @@ define([
 	Bootstrap,
 
 	Router,
+	Mediator,
 
 	AppModel,
 	AppView
@@ -29,7 +31,8 @@ define([
 
 	var App = function() {
 
-		var _router, 
+		var _router,
+			_mediator, 
 			_appModel,
 			_appView;
 
@@ -46,9 +49,12 @@ define([
 			_$header = $('header');
 
 			_router = new Router();
+			_mediator = Mediator;
 
-			_appModel = new AppModel({ app: this });
-			_appView = new AppView({ model: _appModel, el: $('body') });
+			_appModel = new AppModel({ app: this, mediator: _mediator });
+			_appView = new AppView({ model: _appModel, el: $('body'), mediator: _mediator });
+			_mediator.setAppModel(_appModel);
+			_mediator.setAppView(_appView);
 		};
 
 		var _sync = function(method, model, options) {

@@ -38,24 +38,7 @@ define([
 			currEventName: ''
 		},
 
-		setSelectedEvent: function(cid) {
-			// Day View should really be using a composite model.
-			// 1 Day Model + 1 Event Model
-			// Figure that out next.
-			var selectedEvent = _eventCollection.getByCid(cid);
-			//this.set('currEventName', selectedEvent.get('name'));
-		},
-
-		checkEventCollectionForNewEvents: function() {
-			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'))
-			that.set('todaysEvents', evtColl);
-			if (evtColl.length > 1) {
-				that.trigger('change:todaysEvents'); 	// Need a manual trigger since it's always an array.
-													// Can't detect change.		
-			}
-			//console.log('events updated in day model', this.get('todaysEvents'));
-		},
-
+		// EVENTS /////////////////////////////////////////////////////////////
 		onEventCollectionAdd: function() {
 			that.checkEventCollectionForNewEvents();
 		},
@@ -65,6 +48,16 @@ define([
 			var parts = dayCode.split('-');
 			that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString());
 			that.checkEventCollectionForNewEvents();
+		},
+		///////////////////////////////////////////////////////////////////////
+
+		checkEventCollectionForNewEvents: function() {
+			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'))
+			that.set('todaysEvents', evtColl);
+			if (evtColl.length > 1) {
+				that.trigger('change:todaysEvents'); 	// Need a manual trigger since it's always an array.
+													// Can't detect change.		
+			}
 		},
 
 		initialize: function(options) {

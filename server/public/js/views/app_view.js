@@ -8,7 +8,8 @@ define([
 
 	'views/account_view',
 	'views/calendar_view',
-	'views/day_view'
+	'views/day_view',
+	'views/event_view'
 ], function(
 	jQuery,
 	_,
@@ -16,10 +17,12 @@ define([
 
 	AccountView,
 	CalendarView,
-	DayView
+	DayView,
+	EventView
 ) {
 
 	var that,
+		_mediator,
 		_accountView,
 		_calendarView,
 		_dayView;
@@ -49,13 +52,15 @@ define([
 			that = this;
 			
 			options = options || {};
-
-			//console.log(this.model.get('dayModel').get('dayCode'));
+			_mediator = options.mediator;
 
 			_calendarView = new CalendarView({ app: this, model: this.model.get('calendarModel'), appModel: this.model, el: $('#calendar_view_holder') });
 			_accountView = new AccountView({ app: this, model: this.model.get('accountModel'), appModel: this.model, el: $('#account_view_holder') });
-			_dayView = new DayView({ app: this, model: this.model.get('dayModel'), appModel: this.model, el: $('#day_view_holder') });
-
+			_eventView = new EventView({ app: this, model: this.model.get('eventModel'), appModel: this.model, el: $('#event_view_holder') });
+			_mediator.setEventView(_eventView);
+			_dayView = new DayView({ app: this, model: this.model.get('dayModel'), appModel: this.model, el: $('#day_view_holder'), mediator: _mediator });
+	
+			
 			this.model.on('change:dayModalVisible', that.onDayModalVisibleChange);
 
 			this.render();
