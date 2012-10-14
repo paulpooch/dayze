@@ -38,6 +38,15 @@ define([
 			currEventName: ''
 		},
 
+		checkEventCollectionForNewEvents: function() {
+			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'))
+			that.set('todaysEvents', evtColl);
+			if (evtColl.length > 1) {
+				that.trigger('change:todaysEvents'); 	// Need a manual trigger since it's always an array.
+													// Can't detect change.		
+			}
+		},
+
 		// EVENTS /////////////////////////////////////////////////////////////
 		onEventCollectionAdd: function() {
 			that.checkEventCollectionForNewEvents();
@@ -50,15 +59,6 @@ define([
 			that.checkEventCollectionForNewEvents();
 		},
 		///////////////////////////////////////////////////////////////////////
-
-		checkEventCollectionForNewEvents: function() {
-			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'))
-			that.set('todaysEvents', evtColl);
-			if (evtColl.length > 1) {
-				that.trigger('change:todaysEvents'); 	// Need a manual trigger since it's always an array.
-													// Can't detect change.		
-			}
-		},
 
 		initialize: function(options) {
 			// This is really important.

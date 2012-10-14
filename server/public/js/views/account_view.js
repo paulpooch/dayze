@@ -15,30 +15,30 @@ define([
 	AccountTemplate
 ) {
 
-	var _app;
-
 	var AccountView = Backbone.View.extend({
 
 		template: _.template(AccountTemplate),
 
-	    initialize: function (options) {
-	    	var options = options || {};
-			_app = options.app;
-	        _.bindAll(this);
-	        this.model.on('change', this.render, this);
-	        this.render();
-	        //this.model.bind('change:displayName', this.changeDisplayName);
-
-	    },
-
-	    render: function () {
+		render: function () {
 	    	this.$el.html(this.template(this.model.toJSON()));
 	    },
 
-	    // changeDisplayName: function () {
-	    //     this.$('.display_name').text(this.model.get('displayName'));
-	    // }
+		// VIEW EVENTS ////////////////////////////////////////////////////////
+		events: {
+			
+		},
+		///////////////////////////////////////////////////////////////////////
 
+		// MODEL EVENTS ///////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+
+	    initialize: function (options) {
+	    	var options = options || {};
+	        _.bindAll(this);
+	        this.model.on('change', this.render, this);
+	        this.render();
+	    }
 
 	});
 

@@ -21,6 +21,11 @@ define([
 			monthNames: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
 		},
 
+		onDayClick: function(dayCode) {
+			//console.log('CalendarModel.onDayClick');
+			_appModel.displayDay(dayCode);
+		},
+
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
@@ -31,11 +36,6 @@ define([
 			_app = options.app;
 			_appModel = options.appModel;
 			
-		},
-
-		onDayClick: function(dayCode) {
-			//console.log('CalendarModel.onDayClick');
-			_appModel.displayDay(dayCode);
 		}
 
 	});

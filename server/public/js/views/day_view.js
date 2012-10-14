@@ -16,7 +16,6 @@ define([
 ) {
 
 	var that,
-		_app,
 		_appModel;
 
 	var DayView = Backbone.View.extend({
@@ -53,7 +52,7 @@ define([
 			//console.log(dayCode);
 			//_appModel.addEvent(eventText, dayCode);
 		},
-		// END VIEW EVENTS ////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		update: function() {
@@ -73,7 +72,6 @@ define([
 			
 			// VARS
 			that = this;
-			_app = options.app;
 			_appModel = options.appModel;
 			
 			// BINDINGS

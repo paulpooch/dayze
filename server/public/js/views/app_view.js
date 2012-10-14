@@ -15,21 +15,27 @@ define([
 
 	var AppView = Backbone.View.extend({
 
+		render: function() {
+			this.model.renderCalendarView();
+		},
+
+		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'hide #day_view_holder': 'onModalHide'
 		},
 
 		onModalHide: function() {
-			//console.log('day modal visibility = ', this.model.get('dayModalVisible'));
 			this.model.set('dayModalVisible', false);
 		},
+		///////////////////////////////////////////////////////////////////////
 
+		// MODEL EVENTS ///////////////////////////////////////////////////////
 		onDayModalVisibleChange: function() {
 			if (that.model.get('dayModalVisible')) {
 				$('#day_view_holder').modal('show');
-				//window.location.hash = '#myModal';
 			}
 		},
+		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
 			// This is really important.
@@ -41,10 +47,6 @@ define([
 			this.model.on('change:dayModalVisible', that.onDayModalVisibleChange);
 
 			this.render();
-		},
-
-		render: function() {
-			this.model.renderCalendarView();
 		}
 
 	});

@@ -15,9 +15,7 @@ define([
 	WeekTemplate
 ) {
 
-	var _app,
-		
-		_heightOfOneWeek,
+	var _heightOfOneWeek,
 		_prevY,
 		_weekElements,
 		_template,
@@ -28,34 +26,6 @@ define([
 	
 
 	var CalendarView = Backbone.View.extend({
-
-		defaults: function() {
-			return { };
-		},
-
-		initialize: function(options) {
-			// This is really important.
-			// Binds all event callbacks to 'this'.
-			_.bindAll(this);
-
-			//console.log('calendar view init');
-			var options = options || {};
-			_app = options.app;
-
-			//this.model.bind('change', render);
-			_$window = $(window);
-			_$calendar = this.$el.find('#calendar');
-			_$monthName = $('#month_name');
-			_prevY = _$window.scrollTop();
-			_weekElements = [];
-
-			// can't be registered within View.events
-			_$window.scroll(this.onScroll);
-		},
-
-		events: {
-			'click .day': 'onDayClick'
-		},
 
 		render: function() {
 			var initialWeekCount = 30;
@@ -80,6 +50,21 @@ define([
 			_$monthName.text(currentMonth);
 		},
 
+		// VIEW EVENTS ////////////////////////////////////////////////////////
+		events: {
+			'click .day': 'onDayClick'
+		},
+
+		onDayClick: function(e) {
+			var dayCode = $(e.target).data('day-code');
+			this.model.onDayClick(dayCode);
+		},
+		///////////////////////////////////////////////////////////////////////
+		
+		// MODEL EVENTS ///////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+		
 		onScroll: function() {
 			var scrollTop = _$window.scrollTop();
 			if (!_heightOfOneWeek) {
@@ -94,11 +79,6 @@ define([
 				_$monthName.text(currentMonth);
 				//console.log('update ' + currentMonth);
 			}
-		},
-
-		onDayClick: function(e) {
-			var dayCode = $(e.target).data('day-code');
-			this.model.onDayClick(dayCode);
 		},
 
 		renderWeek: function(weekDate) {
@@ -137,7 +117,26 @@ define([
 	        	timestamp: new Date(weekDate)
 	        });
 	       _$calendar.append(el);
-		}
+		},
+
+		initialize: function(options) {
+			// This is really important.
+			// Binds all event callbacks to 'this'.
+			_.bindAll(this);
+
+			//console.log('calendar view init');
+			var options = options || {};
+
+			//this.model.bind('change', render);
+			_$window = $(window);
+			_$calendar = this.$el.find('#calendar');
+			_$monthName = $('#month_name');
+			_prevY = _$window.scrollTop();
+			_weekElements = [];
+
+			// can't be registered within View.events
+			_$window.scroll(this.onScroll);
+		}	
 
 	});
 

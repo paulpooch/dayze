@@ -16,6 +16,10 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			};
 		},
 
+		registerListeners: function() {
+
+		},
+
 		initialize: function() {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
@@ -26,10 +30,6 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 https://developers.google.com/accounts/docs/OAuth2Login
 https://developers.google.com/accounts/docs/OAuth2
 			*/
-		},
-
-		registerListeners: function() {
-
 		}
 
 	});

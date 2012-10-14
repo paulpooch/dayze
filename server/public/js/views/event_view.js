@@ -16,7 +16,6 @@ define([
 ) {
 
 	var that,
-		_app,
 		_appModel;
 
 	var EventView = Backbone.View.extend({
@@ -32,14 +31,14 @@ define([
 		events: {
 			
 		},
-		// END VIEW EVENTS ////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		update: function() {
 			
 			that.render();
 		},
-		// END MODEL EVENTS ///////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////
 
 		setModel: function(m) {
 			that.model = m;
@@ -58,7 +57,6 @@ define([
 			
 			// VARS
 			that = this;
-			_app = options.app;
 			_appModel = options.appModel;
 			
 			// BINDINGS

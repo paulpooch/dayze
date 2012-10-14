@@ -59,6 +59,16 @@ define([
 
 	var AppModel = Backbone.Model.extend({
 
+		// Try to put every value in here so stuff is more obvious.
+		defaults: {
+			dayModalVisible: false,
+			eventCollection: null,
+			accountModel: null,
+			calendarModel: null,
+			dayModel: null,
+			eventModel: null
+		},
+
 		renderEventView: function(dayViewEl) {
 			var eventViewEl = dayViewEl.find('#event_view_holder');
 			_eventView.setElAndRender(eventViewEl);
@@ -87,16 +97,6 @@ define([
 			that.set('dayModalVisible', true);
 		},
 
-		// Try to put every value in here so stuff is more obvious.
-		defaults: {
-			dayModalVisible: false,
-			eventCollection: null,
-			accountModel: null,
-			calendarModel: null,
-			dayModel: null,
-			eventModel: null
-		},
-
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
@@ -119,10 +119,10 @@ define([
 			that.set('dayModel', _dayModel);
 			that.set('eventModel', _eventModel);
 
-			_accountView = new AccountView({ app: that, model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
-			_calendarView = new CalendarView({ app: that, model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
-			_eventView = new EventView({ app: that, model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
-			_dayView = new DayView({ app: that, model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
+			_accountView = new AccountView({ model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
+			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
+			_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
+			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 			
 			_accountModel.fetch();
