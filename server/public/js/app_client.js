@@ -1,6 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // APP CLIENT
 ///////////////////////////////////////////////////////////////////////////////
+
+// DEVELOPMENT RULES
+// 1. ALWAYS USE 'that'.  NEVER 'this'.
+// 2. EXPLICITY DECLARE ALL ATTRIBUTES IN MODEL defaults.
+
 define([
 	'jquery',
 	'modernizr',
@@ -10,10 +15,8 @@ define([
 	'bootstrap',
 
 	'router',
-	'mediator',
 	
 	'models/app_model',
-	'views/app_view'
 ], function(
 	jQuery,
 	Modernizr,
@@ -23,38 +26,25 @@ define([
 	Bootstrap,
 
 	Router,
-	Mediator,
 
-	AppModel,
-	AppView
+	AppModel
 ) {
 
 	var App = function() {
 
-		var _router,
-			_mediator, 
-			_appModel,
-			_appView;
+		var _router, 
+			_appModel;
 
 		var _initialize = function() {
-
 			// customize sync function
 			Backbone.sync = _sync;
-
 			var that = this;
 			$(function() { _domReady.call(that); });
 		};
 
 		var _domReady = function() {
-			_$header = $('header');
-
 			_router = new Router();
-			_mediator = Mediator;
-
-			_appModel = new AppModel({ app: this, mediator: _mediator });
-			_appView = new AppView({ model: _appModel, el: $('body'), mediator: _mediator });
-			_mediator.setAppModel(_appModel);
-			_mediator.setAppView(_appView);
+			_appModel = new AppModel({ app: this });
 		};
 
 		var _sync = function(method, model, options) {

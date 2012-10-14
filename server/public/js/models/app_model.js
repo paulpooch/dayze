@@ -6,18 +6,26 @@ define([
 	'underscore',
 	'backbone',
 
+	'views/app_view',
+
 	'collections/account_collection',
 	'collections/event_collection',
 
 	'models/account_model',
 	'models/calendar_model',
 	'models/day_model',
-	'models/event_model'
+	'models/event_model',
 
+	'views/account_view',
+	'views/calendar_view',
+	'views/day_view',
+	'views/event_view'
 ], function(
 	jQuery,
 	_,
 	Backbone,
+
+	AppView,
 
 	AccountCollection,
 	EventCollection,
@@ -25,26 +33,59 @@ define([
 	AccountModel,
 	CalendarModel,
 	DayModel,
-	EventModel
+	EventModel,
 
+	AccountView,
+	CalendarView,
+	DayView,
+	EventView
 ) {
 
 	var that,
 		_app,
-		_mediator,
+		_appView,
+
 		_eventCollection,
+		
 		_accountModel,
 		_calendarModel,
-		_dayModel;
+		_dayModel,
+		_eventModel,
+
+		_accountView,
+		_calendarView,
+		_dayView,
+		_eventView;
 
 	var AppModel = Backbone.Model.extend({
-		// ATTRIBUTES:
-		// dayModalVisible
-		// eventCollection
-		// accountModel
-		// calendarModel
-		// dayModel
-		// eventModel
+
+		renderEventView: function(dayViewEl) {
+			var eventViewEl = dayViewEl.find('#event_view_holder');
+			_eventView.setElAndRender(eventViewEl);
+		},
+
+		renderCalendarView: function() {
+			_calendarView.render();
+		},
+
+		addEvent: function(eventName, eventDayCode) {
+			// Begin here creating event model.
+			var event = new EventModel({ app: _app, appModel: that, name: eventName, dayCode: eventDayCode });
+			_eventCollection.add(event);
+		},
+
+		setSelectedEvent: function(cid) {
+			var selectedEventModel = _eventCollection.getByCid(cid);
+			_eventView.setModel(selectedEventModel);
+		},
+
+		displayDay: function(dayCode) {
+			var events = _eventCollection.get(dayCode);
+			
+			_dayModel.set('events', events);
+			_dayModel.set('dayCode', dayCode);
+			that.set('dayModalVisible', true);
+		},
 
 		// Try to put every value in here so stuff is more obvious.
 		defaults: {
@@ -64,47 +105,27 @@ define([
 
 			options = options || {};
 			_app = options.app;
-			_mediator = options.mediator;
 
 			_eventCollection = new EventCollection();
-			this.set('eventCollection', _eventCollection);
+			that.set('eventCollection', _eventCollection);
 	
 			_accountModel = new AccountModel();
-			_calendarModel = new CalendarModel({ app: options.app, appModel: this });
-			_dayModel = new DayModel({ app: options.app, appModel: this });
-			_eventModel = new EventModel({ app: options.app, appModel: this });
+			_calendarModel = new CalendarModel({ app: options.app, appModel: that });
+			_dayModel = new DayModel({ app: options.app, appModel: that });
+			_eventModel = new EventModel({ app: options.app, appModel: that });
 			
-			this.set('accountModel', _accountModel);
-			this.set('calendarModel', _calendarModel);
-			this.set('dayModel', _dayModel);
-			this.set('eventModel', _eventModel);
+			that.set('accountModel', _accountModel);
+			that.set('calendarModel', _calendarModel);
+			that.set('dayModel', _dayModel);
+			that.set('eventModel', _eventModel);
 
+			_accountView = new AccountView({ app: that, model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
+			_calendarView = new CalendarView({ app: that, model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
+			_eventView = new EventView({ app: that, model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
+			_dayView = new DayView({ app: that, model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
+			_appView = new AppView({ model: that, el: $('body') });
+			
 			_accountModel.fetch();
-		},
-
-		addEvent: function(eventName, eventDayCode) {
-			// Begin here creating event model.
-			var event = new EventModel({ app: _app, appModel: this, name: eventName, dayCode: eventDayCode });
-			_eventCollection.add(event);
-		},
-
-		setSelectedEvent: function(cid) {
-			var selectedEvent = _eventCollection.getByCid(cid);
-			// BEGIN HERE
-			// should event view sit inside day view?
-			// We have to do EventView.setModel(selectedEvent)
-			//	or something similar
-			_mediator.setSelectedEvent(selectedEvent);
-			// Let's use a mediator for cross component communication.
-
-		},
-
-		displayDay: function(dayCode) {
-			var events = _eventCollection.get(dayCode);
-			
-			_dayModel.set('events', events);
-			_dayModel.set('dayCode', dayCode);
-			this.set('dayModalVisible', true);
 		}
 
 	});
