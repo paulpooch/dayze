@@ -23,7 +23,6 @@ define([
 		template: _.template(EventTemplate),
 
 		render: function() {
-			console.log('EventView.render');
 			this.$el.html(that.template(that.model.toJSON()));
 		},
 

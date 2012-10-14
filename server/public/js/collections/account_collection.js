@@ -22,6 +22,6 @@ define([
 	});
 
 	// Notice we're instantiating here.
-	return new AccountCollection();
+	return AccountCollection;
 
 });

@@ -45,6 +45,7 @@ define([
 		_app,
 		_appView,
 
+		_accountCollection,
 		_eventCollection,
 		
 		_accountModel,
@@ -62,6 +63,7 @@ define([
 		// Try to put every value in here so stuff is more obvious.
 		defaults: {
 			dayModalVisible: false,
+			accountCollection: null,
 			eventCollection: null,
 			accountModel: null,
 			calendarModel: null,
@@ -108,6 +110,7 @@ define([
 
 			_eventCollection = new EventCollection();
 			that.set('eventCollection', _eventCollection);
+			_accountCollection = new AccountCollection();
 	
 			_accountModel = new AccountModel();
 			_calendarModel = new CalendarModel({ app: options.app, appModel: that });

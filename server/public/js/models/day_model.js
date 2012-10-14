@@ -16,13 +16,6 @@ define([
 		_eventCollection;
 
 	var DayModel = Backbone.Model.extend({
-		// ATTRIBUTES:
-		// appModel
-		// todaysEvents
-		//	a collection of EventModels pulled from the master EventCollection in AppModel
-		// dayCode
-		// displayDate
-		// currEventName
 
 		defaults: {
 			appModel: null,

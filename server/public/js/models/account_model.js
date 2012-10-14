@@ -12,8 +12,6 @@ define([
 	var that;
 
 	var AccountModel = Backbone.Model.extend({
-		// ATTRIBUTES:
-		// displayName
 
 		defaults: {
 			displayName: 'Anonymous'
