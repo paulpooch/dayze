@@ -1,6 +1,14 @@
 /*
-Use underscores to differentiate our styles from bootstrap stuff.
-Will also help with namespace collision.
+
+WE USE UNDERSCORES.
+BOOTSTRAP USES DASHES.
+HELPS DIFFERENTIATE.
+
+ARE YOU SURE YOU NEED CUSTOM CSS?  
+CHECK BOOTSTRAP DOCS FIRST TO SEE IF IT ALREADY EXISTS. 
+
+ONE TIME USE ITEMS CAN BE DONE INLINE.
+
 */
 
 html {
@@ -53,7 +61,7 @@ header {
 #account_view_holder {
   position: absolute;
   top: 0;
-  left: 75%;
+  left: 0;
   width: 100%;
   margin-top: -5px;
   text-align: right;
@@ -61,13 +69,14 @@ header {
 
 #user_dropdown {
     margin-top: 10px;
-    margin-right: 100px;
+    margin-right: 10px;
     text-align: left;
+    float: right;
 }
 
 #calendar {   
     margin: 30px auto;
-    padding: 10px 0px 0px 10px;
+    padding: 10px 0 0 10px;
     width: 80%;
     min-width: 960px;
 }
@@ -91,8 +100,8 @@ header {
     -moz-border-radius: 5px; 
     -webkit-border-radius: 5px; 
     border: 1px solid #000000;
-    -webkit-box-shadow:  3px 3px 5px 0px rgba(0, 0, 0, .3);
-    box-shadow:  3px 3px 5px 0px rgba(0, 0, 0, .3);
+    -webkit-box-shadow:  3px 3px 5px 0 rgba(0, 0, 0, .3);
+    box-shadow:  3px 3px 5px 0 rgba(0, 0, 0, .3);
 
     background: #fff;
     background: -moz-linear-gradient(rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0.1));
@@ -113,23 +122,26 @@ header {
         rgba(0,0,0,0.7) 1px  -1px;
 }
 
-.two_col_content_wrap {
-  float: left;
-  width: 100%;
+#day_view_holder {
+  width: 90%;         /* Width must be specified inline in index.dust */
+  margin-left: -45%;  /* Must be (width / 2) */
 }
 
-.two_col_content {
-  margin-left: 200px;
-}
+  #day_view_holder .modal-body {
+    background: -moz-linear-gradient(left, rgba(204,204,204,0) 180px, rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(180px,rgba(204,204,204,0)), color-stop(215px,rgba(204,204,204,0.25)), color-stop(216px,rgba(255,255,255,1.0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left,  rgba(204,204,204,0) 180px,rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left,  rgba(204,204,204,0) 180px,rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left,  rgba(204,204,204,0) 180px,rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* IE10+ */
+    background: linear-gradient(to right,  rgba(204,204,204,0) 180px,rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* W3C */
+  }
 
-.two_col_left {
-  float: left;
-  width: 200px;
-  margin-left: -100%;
-  background: #c8fc98;
-}
-
-
+  #day_view_holder .two_col_left legend {
+    line-height: 20px; 
+    border: none;
+    margin: 0px 0px 12px 5px;
+    padding-top: 70px;
+  }
 
 
 

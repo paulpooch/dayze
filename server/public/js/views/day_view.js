@@ -32,25 +32,38 @@ define([
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'click #addEventButton': 'onAddEventButtonClick',
-			'click .event_listing button': 'onEventClick'
+			'click .event_listing button': 'onEventClick',
+			'keydown #addEventText': 'onAddEventTextKeydown',
+			'click #saveButton': 'onSaveButtonClick'
 		},
 
 		onAddEventButtonClick: function() {
 			var eventText = that.$el.find('#addEventText').val();
 			var dayCode = that.model.get('dayCode');
-			//console.log(dayCode);
-			_appModel.addEvent(eventText, dayCode);
+			var eventCid = _appModel.addEvent(eventText, dayCode);
+
+			// Fake click new event.
+			that.$el.find('button[data-id=' + eventCid + ']').click();
 		},
 
 		onEventClick: function(e) {
 			var id = $(e.target).data('id');
 			_appModel.setSelectedEvent(id);
+			that.model.set('selectedEventId', id);
+		},
 
-			//that.model.setSelectedEvent(id);
-			//var eventText = that.$el.find('#addEventText').val();
-			//var dayCode = that.model.get('dayCode');
-			//console.log(dayCode);
-			//_appModel.addEvent(eventText, dayCode);
+		onAddEventTextKeydown: function(e) {
+			// Make sure 'enter' does what we expect.
+			var code = e.which;
+			if (code == 13) {
+				e.preventDefault();
+				that.onAddEventButtonClick();
+				return false;
+			}
+		},
+
+		onSaveButtonClick: function() {
+			_appModel.saveEvent();
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -61,6 +74,10 @@ define([
 		},
 
 		onTodaysEventsChange: function() {
+			that.update();
+		},
+
+		onSelectedEventIdChange: function() {
 			that.update();
 		},
 		// END MODEL EVENTS ///////////////////////////////////////////////////
@@ -77,6 +94,7 @@ define([
 			// BINDINGS
 			that.model.on('change:dayCode', that.update);
 			that.model.on('change:todaysEvents', that.onTodaysEventsChange);
+			that.model.on('change:selectedEventId', that.onSelectedEventIdChange);
 
 			that.update();
 		}

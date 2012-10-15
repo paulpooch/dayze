@@ -84,6 +84,7 @@ define([
 			// Begin here creating event model.
 			var event = new EventModel({ app: _app, appModel: that, name: eventName, dayCode: eventDayCode });
 			_eventCollection.add(event);
+			return event.cid;
 		},
 
 		setSelectedEvent: function(cid) {
@@ -97,6 +98,27 @@ define([
 			_dayModel.set('events', events);
 			_dayModel.set('dayCode', dayCode);
 			that.set('dayModalVisible', true);
+		},
+
+		saveEvent: function() {
+			var eventCid = _dayModel.get('selectedEventId');
+			var eventModel = _eventCollection.getByCid(eventCid);
+			console.log('saving', eventModel);
+			
+
+			// THIS DOES NOTHING?!
+			eventModel.save();
+
+			// eventModel.save({ name: 'someName'}, {
+			// 	wait: true,
+			// 	success: function(model, response) {
+			// 		console.log(1);
+			// 	},
+			// 	error: function(model, error) {
+			// 		console.log(0);
+			// 	}
+			// });
+
 		},
 
 		initialize: function(options) {

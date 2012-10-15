@@ -28,15 +28,15 @@ define([
 				var d = new Date();
 				return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).toLocaleDateString();
 			})(),
-			currEventName: ''
+			selectedEventId: null
 		},
 
 		checkEventCollectionForNewEvents: function() {
-			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'))
+			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'));
 			that.set('todaysEvents', evtColl);
 			if (evtColl.length > 1) {
-				that.trigger('change:todaysEvents'); 	// Need a manual trigger since it's always an array.
-													// Can't detect change.		
+				that.trigger('change:todaysEvents');	// Need a manual trigger since it's always an array.
+														// Can't detect change.
 			}
 		},
 

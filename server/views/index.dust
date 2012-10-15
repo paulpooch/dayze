@@ -23,16 +23,21 @@
         <h2 id="month_name">THIS IS MONTH NAME</h2>
     </div>
     <div id="account_view_holder">
+        <!-- AccountView -->
     </div>
+
 </header>
 <div id="content">
 
     <div id="calendar_view_holder">
-        <div id="calendar"></div>
+        <div id="calendar">
+            <!-- CalendarView -->
+        </div>
     </div> 
 
 
-	<div id="day_view_holder" class="modal hidden fade" tabindex="-1" role="dialog">
+	<div style="width: 90%;" id="day_view_holder" class="modal hidden fade" tabindex="-1" role="dialog">
+        <!-- DayView -->
 	</div>
 
 </div>

@@ -1,16 +1,16 @@
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-    <h3 id="myModalLabel"><%= displayDate %></h3>
+    <h3><%= displayDate %></h3>
 </div>
 <div class="modal-body">
-    <div class="two_col_content_wrap">
-        <div id="event_view_holder" class="two_col_content">
+    <div style="float: left; width: 100%;">
+        <div id="event_view_holder" style="margin-left: 220px; padding-left: 10px;">
             <!-- EVENT VIEW GOES HERE -->
         </div>
     </div>
-    <div class="two_col_left">
+    <div style="float: left; width: 200px; margin-left: -100%; padding: 0px 10px;">
         <form>
-            <legend>Add Event</legend>
+            <legend>Today's Events</legend>
             <div class="input-append">
                 <input class="span2" id="addEventText" size="16" type="text" placeholder="Event Name"><button id="addEventButton" class="btn" type="button">Add</button>
             </div>
@@ -19,8 +19,12 @@
             <div class="btn-group btn-group-vertical">
                 <% _.each(todaysEvents, function(item, key, list) { 
                     var eventName = item.get('name');
+                    var color = '';
+                    if (item.cid == selectedEventId) {
+                        color = 'btn-success';
+                    }
                 %>
-                <button type="button" class="btn" data-id="<%= item.cid %>"><i class="icon-edit"></i> <%= eventName %></button>
+                <button type="button" class="btn <%= color %>" data-id="<%= item.cid %>"><i class="icon-edit"></i> <%= eventName %></button>
                 <% }); %>
             </div>
         </div>
@@ -28,5 +32,5 @@
 </div>
 <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hideen="true">Close</button>
-    <button class="btn btn-primary">Save changes</button>
+    <button id="saveButton" class="btn btn-primary">Save changes</button>
 </div>
