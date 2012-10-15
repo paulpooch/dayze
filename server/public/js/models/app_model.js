@@ -8,7 +8,6 @@ define([
 
 	'views/app_view',
 
-	'collections/account_collection',
 	'collections/event_collection',
 
 	'models/account_model',
@@ -27,7 +26,6 @@ define([
 
 	AppView,
 
-	AccountCollection,
 	EventCollection,
 
 	AccountModel,
@@ -45,7 +43,6 @@ define([
 		_app,
 		_appView,
 
-		_accountCollection,
 		_eventCollection,
 		
 		_accountModel,
@@ -107,17 +104,17 @@ define([
 			
 
 			// THIS DOES NOTHING?!
-			eventModel.save();
+			//eventModel.save();
 
-			// eventModel.save({ name: 'someName'}, {
-			// 	wait: true,
-			// 	success: function(model, response) {
-			// 		console.log(1);
-			// 	},
-			// 	error: function(model, error) {
-			// 		console.log(0);
-			// 	}
-			// });
+			eventModel.save({ name: 'someName'}, {
+				wait: true,
+				success: function(model, response) {
+					console.log(1);
+				},
+				error: function(model, error) {
+					console.log(0);
+				}
+			});
 
 		},
 
@@ -132,7 +129,6 @@ define([
 
 			_eventCollection = new EventCollection();
 			that.set('eventCollection', _eventCollection);
-			_accountCollection = new AccountCollection();
 	
 			_accountModel = new AccountModel();
 			_calendarModel = new CalendarModel({ app: options.app, appModel: that });
@@ -150,7 +146,7 @@ define([
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 			
-			_accountModel.fetch();
+			//_accountModel.fetch();
 		}
 
 	});

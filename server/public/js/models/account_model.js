@@ -13,6 +13,8 @@ define([
 
 	var AccountModel = Backbone.Model.extend({
 
+		url: 'rest/account',
+
 		defaults: {
 			displayName: 'Anonymous'
 		},

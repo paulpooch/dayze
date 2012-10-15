@@ -16,7 +16,7 @@ define([
 
 	'router',
 	
-	'models/app_model',
+	'models/app_model'
 ], function(
 	jQuery,
 	Modernizr,
@@ -37,7 +37,7 @@ define([
 
 		var _initialize = function() {
 			// customize sync function
-			Backbone.sync = _sync;
+			//Backbone.sync = _sync;
 			var that = this;
 			$(function() { _domReady.call(that); });
 		};
@@ -48,6 +48,8 @@ define([
 		};
 
 		var _sync = function(method, model, options) {
+
+			console.log(method);
 
 			var methodMap = {
 				'create': 'POST',

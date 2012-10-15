@@ -18,7 +18,7 @@ define([
 
 	var EventModel = Backbone.Model.extend({
 
-		url: '/event',
+		url: 'rest/event',
 
 		defaults: {
 			mode: MODE_NONE,
