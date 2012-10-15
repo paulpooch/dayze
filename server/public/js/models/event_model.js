@@ -37,6 +37,15 @@ define([
 			if (errors.length) return errors;
 		},
 
+		// Without this, somehow .save() fails.
+		// Related to underscore's clone method I think.
+		// Line 235 of backbone.js
+		toJSON: function() {
+			return {
+				name: this.get('name')
+			};
+		},
+		
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.

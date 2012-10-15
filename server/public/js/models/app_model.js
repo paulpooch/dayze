@@ -101,11 +101,6 @@ define([
 			var eventCid = _dayModel.get('selectedEventId');
 			var eventModel = _eventCollection.getByCid(eventCid);
 			console.log('saving', eventModel);
-			
-
-			// THIS DOES NOTHING?!
-				eventModel.save();
-
 			eventModel.save({ name: 'someName'}, {
 				wait: true,
 				success: function(model, response) {
@@ -148,20 +143,6 @@ define([
 			
 			// Don't hammer dynamo please.
 			//_accountModel.fetch();
-			
-			//_eventModel.fetch();
-
-			//_eventCollection.create(_eventModel);
-			/*
-			_eventModel.save({ name: 'test' }, {
-	            success: function(model, resp) {
-	                console.log('success');
-	            },
-	            error: function() {
-	                console.log('error');
-	            }
-        	});
-			*/
 
 		}
 
