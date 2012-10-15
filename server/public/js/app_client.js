@@ -47,6 +47,7 @@ define([
 			_appModel = new AppModel({ app: this });
 		};
 
+		/*
 		var _sync = function(method, model, options) {
 
 			console.log(method);
@@ -59,6 +60,7 @@ define([
 			};
 
 		};
+		*/
 
 		// Expose public methods.
 		return {

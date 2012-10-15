@@ -57,15 +57,15 @@ requirejs([
 			var that = this;																// used inside anonymous functions
 
 			// configure express
-			this.app = express();
-			this.app.engine('dust', consolidate.dust);
-			this.app.configure(function() {
-			    that.app.set('view engine', 'dust');
-			    that.app.set('views', __dirname + '/views');
-			    that.app.use(express.static(__dirname + '/public'));
-			    that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
-				that.app.use(express.cookieParser(Config.COOKIE_SECRET_HASH));
-				that.app.use(express.session({ 
+			that.app = express();
+			that.app.engine('dust', consolidate.dust);
+			that.app.configure(function() {
+			that.app.set('view engine', 'dust');
+			that.app.set('views', __dirname + '/views');
+			that.app.use(express.static(__dirname + '/public'));
+			that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
+			that.app.use(express.cookieParser(Config.COOKIE_SECRET_HASH));
+			that.app.use(express.session({ 
 					secret: Config.COOKIE_SECRET_HASH,
 					store: new express.session.MemoryStore({
 						reapInterval: 60000 * 10 
@@ -75,30 +75,68 @@ requirejs([
 			 });
 
 			// handle requests to roots
-			this.app.get('/', function(req, res) {
+			that.app.get('/', function(req, res) {
 				var data = {};
 				res.render('index', data);	
 			});
 
-			var accountRestApi = new AccountRestApi(this.app);
+			var accountRestApi = new AccountRestApi(that.app);
+			var eventRestApi = new EventRestApi(that.app);
 
 			// route catch-all: must appear at the end of all app.get() calls
-			this.app.get('*', function(req, res) {
+			that.app.get('*', function(req, res) {
 				res.render('index');	
 			});
 
 			// begin listening
-			this.app.listen(this.get('port'));
-			Utils.log('Listening on port ' + this.get('port'));
+			that.app.listen(that.get('port'));
+			Utils.log('Listening on port ' + that.get('port'));
 		}
 
 	});
 
-	var AccountRestApi = function(app) {
+	// Careful of the format stuff.
+	// We're not using that.
 
-		var path = 'account';
+	var EventRestApi = function(app) {
+
+		var path = Config.REST_PREFIX + 'event';
+
 		// List
 		app.get('/' + path, function(req, res) {
+			var fake = { name: 'fake event', dayCode: '2012-10-20' };
+			res.send(fake);
+		});
+
+		// Create 
+		app.post('/' + path, function(req, res) {
+			console.log('event post');
+		});
+
+		// Read
+		app.get('/' + path + '/:id', function(req, res) {
+		
+		});
+
+		// Update
+		app.put('/' + path + '/:id', function(req, res) {
+		
+		});
+
+		// Delete
+		app.del('/' + path + '/:id', function(req, res) {
+		
+		});
+
+	};
+
+	var AccountRestApi = function(app) {
+
+		var path = Config.REST_PREFIX + 'account';
+		// List
+		app.get('/' + path, function(req, res) {
+
+			console.log('GET account');
 
 			var proceedWithUser = function(user) {
 				Utils.log('Pulled user', user);
@@ -143,38 +181,6 @@ requirejs([
 
 		});
 
-		console.log('account rest');
-
-	};
-
-	var UsersRestApi = function(app) {
-
-		var path = 'users';
-		// List
-		app.get('/' + path + '.:format', function(req, res) {
-
-		});
-
-		// Create 
-		app.post('/' + path + '.:format?', function(req, res) {
-		
-		});
-
-		// Read
-		app.get('/' + path + '/:id.:format?', function(req, res) {
-		
-		});
-
-		// Update
-		app.put('/' + path + '/:id.:format?', function(req, res) {
-		
-		});
-
-		// Delete
-		app.del('/' + path + '/:id.:format?', function(req, res) {
-		
-		});
-	
 	};
 
 	new App();

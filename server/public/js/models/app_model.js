@@ -104,7 +104,7 @@ define([
 			
 
 			// THIS DOES NOTHING?!
-			//eventModel.save();
+				eventModel.save();
 
 			eventModel.save({ name: 'someName'}, {
 				wait: true,
@@ -146,7 +146,23 @@ define([
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 			
+			// Don't hammer dynamo please.
 			//_accountModel.fetch();
+			
+			//_eventModel.fetch();
+
+			//_eventCollection.create(_eventModel);
+			/*
+			_eventModel.save({ name: 'test' }, {
+	            success: function(model, resp) {
+	                console.log('success');
+	            },
+	            error: function() {
+	                console.log('error');
+	            }
+        	});
+			*/
+
 		}
 
 	});

@@ -30,14 +30,21 @@ define([
 			endTime: ''
 		},
 
+		validate: function() {
+			// Only return errors.
+			var errors = [];
+
+			if (errors.length) return errors;
+		},
+
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 			that = this;
 			
-			this.set('name', options.name || '');
-			this.set('dayCode', options.dayCode || '');
+			that.set('name', options.name || '');
+			that.set('dayCode', options.dayCode || '');
 
 		}
 

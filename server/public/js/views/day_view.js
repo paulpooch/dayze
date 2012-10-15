@@ -42,7 +42,7 @@ define([
 			var dayCode = that.model.get('dayCode');
 			var eventCid = _appModel.addEvent(eventText, dayCode);
 
-			// Fake click new event.
+			// Trigger onEventClick.
 			that.$el.find('button[data-id=' + eventCid + ']').click();
 		},
 

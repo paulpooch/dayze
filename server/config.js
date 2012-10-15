@@ -7,6 +7,8 @@ define(function() {
 
 	var Config = {};
 
+	Config.REST_PREFIX = 'rest/'
+
 	Config.COOKIE_SECRET_HASH = '7G4Q0jRLP2DtCKIL28CGmSzsA2d8nu8u';
 	Config.COOKIE_MAX_AGE = 60480000000;
 
