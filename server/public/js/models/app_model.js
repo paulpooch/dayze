@@ -101,6 +101,7 @@ define([
 			var eventCid = _dayModel.get('selectedEventId');
 			var eventModel = _eventCollection.getByCid(eventCid);
 			console.log('saving', eventModel);
+			
 			eventModel.save({ name: 'someName'}, {
 				wait: true,
 				success: function(model, response) {
@@ -142,7 +143,7 @@ define([
 			_appView = new AppView({ model: that, el: $('body') });
 			
 			// Don't hammer dynamo please.
-			//_accountModel.fetch();
+			_accountModel.fetch();
 
 		}
 

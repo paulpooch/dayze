@@ -42,7 +42,12 @@ define([
 		// Line 235 of backbone.js
 		toJSON: function() {
 			return {
-				name: this.get('name')
+				name: this.get('name'),
+				dayCode: this.get('dayCode'),
+				description: this.get('description'),
+				location: this.get('location'),
+				beginTime: this.get('beginTime'),
+				endTime: this.get('endTime')
 			};
 		},
 		

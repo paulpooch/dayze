@@ -23,6 +23,63 @@ define([
 	var ddb = DynamoDB.ddb(Config.DYNAMODB_CREDENTIALS);
 
 	///////////////////////////////////////////////////////////////////////////
+	// Events
+	///////////////////////////////////////////////////////////////////////////
+	Storage.Events = (function() {
+
+		var Events = {};
+
+		Events.createEvent = function(userId, post) {
+			
+			var eventId = Uuid.v4();
+
+			var event = {
+				eventId: eventId,
+				name: post.name,
+				dayCode: post.dayCode,
+				description: post.description,
+				location: post.location,
+				beginTime: post.beginTime,
+				endTIme: post.endTIme
+			};
+
+			// 1. Get any events matching userId + time in TABLE_EVENTS_BY_USERID_AND_TIME
+			// 2. treat as array.
+			// 3. push new eventId to array, or create new array for it.
+			// 4. Add event to TABLE_EVENTS
+			// 5. Add eventId array to TABLE_EVENTS_BY_USERID_AND_TIME
+
+
+			// var step1 = Q.ncall(
+			// 	ddb.query,
+			// 	this,
+			// 	Config.TABLE_EVENTS_BY_USERID_AND_TIME,
+
+
+			// 	)
+
+			// var step5 = Q.ncall(
+			// 	ddb.putItem,
+			// 	this,
+			// 	Config.TABLE_EVENTS,
+			// 	event,
+			// 	{}
+			// );
+
+			// var step2 = return Q.ncall(
+			// 		ddb.getItem,
+			// 		this,
+			// 		Config.TABLE_USERS_BY_COOKIE,
+			// 		cookieId,
+			// 		null,
+			// 		{}
+			// 	);
+
+		};
+
+	});
+
+	///////////////////////////////////////////////////////////////////////////
 	// Users
 	///////////////////////////////////////////////////////////////////////////
 	Storage.Users = (function() {
@@ -191,6 +248,7 @@ define([
 		};
 
 
+		// This really needs memcache.
 		Users.getUserWithCookieId = function(cookieId) {
 			var deferred = Q.defer();
 

@@ -36,7 +36,8 @@ define(function() {
 	// Tables
 	Config.TABLE_USERS = 'DAYZE_USERS';
 	Config.TABLE_USERS_BY_COOKIE = 'DAYZE_USERS_BY_COOKIE';
-
+	Config.TABLE_EVENTS = 'DAYZE_EVENTS';
+	Config.TABLE_EVENTS_BY_USERID_AND_TIME = 'TABLE_EVENTS_BY_USERID_AND_TIME';
 	return Config;
 
 });

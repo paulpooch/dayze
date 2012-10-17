@@ -28,7 +28,17 @@ define([
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			
+			'change input': 'syncForm',
+			'change textarea': 'syncForm'
+		},
+
+		syncForm: function(e) {
+			console.log(1);
+			var target = $(e.currentTarget);
+      		var data = {};
+      		console.log(target, data);
+      		data[target.attr('id')] = target.val();
+      		this.model.set(data);
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -46,6 +56,7 @@ define([
 
 		setElAndRender: function(el) {
 			that.$el = el;
+			that.delegateEvents(); // Must occur whenever we change $el or 'events' won't work.
 			that.update();
 		},
 

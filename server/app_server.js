@@ -23,22 +23,24 @@ requirejs.config({
 });
 
 requirejs([
-		'express', 
-		'consolidate', 
-		'underscore', 
-		'backbone', 
-		'config',
-		'storage',
-		'utils'
-	], function(
-		express, 
-		consolidate,
-		_,
-		Backbone,
-		Config,
-		Storage,
-		Utils
-	) {	// list all dependencies for this scope
+	'express', 
+	'consolidate', 
+	'underscore', 
+	'backbone', 
+	'config',
+	'storage',
+	'utils',
+	'q'
+], function(
+	express, 
+	consolidate,
+	_,
+	Backbone,
+	Config,
+	Storage,
+	Utils,
+	Q
+) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
 // http://nodetuts.com/tutorials/13-authentication-in-express-sessions-and-route-middleware.html
@@ -98,6 +100,23 @@ requirejs([
 	// Careful of the format stuff.
 	// We're not using that.
 
+	var verifyUser = function(cookieId) {
+		var deferred = 	Q.defer();
+		
+		Storage.Users.getUserWithCookieId(cookieId)
+		.then(function(user) {
+			console.log('verifyUser pulled user', user);
+			deferred.resolve(user);
+		})
+		.fail(function(err) {
+			// Make sure if no user comes back, this does fail.
+			deferred.reject(new Error(err));
+		})
+		.end();
+
+		return deferred.promise;
+	};
+
 	var EventRestApi = function(app) {
 
 		var path = Config.REST_PREFIX + 'event';
@@ -110,7 +129,26 @@ requirejs([
 
 		// Create 
 		app.post('/' + path, function(req, res) {
-			console.log('event post');
+			
+			console.log(req.signedCookies);
+			verifyUser(req.signedCookies.cookieId)
+			.then(function(user) {
+
+				// TODO: Filter request.
+				//var post = filter(req.body);
+				var post = req.body;
+				
+				//Storage.Events.createEvent(user.userId, post)
+				//.then(function(result) {
+				//	res.send(result);
+				//});
+			
+			})
+			.fail(function(err) {
+				Utils.log('create event with invalid user account');
+			})
+			.end();
+
 		});
 
 		// Read

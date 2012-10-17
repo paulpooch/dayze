@@ -23,6 +23,11 @@ require.config({
 			deps: [
 				'jquery'
 			]
+		},
+		'plugins': {
+			deps: [
+				'jquery'
+			]
 		}
 	},
 	paths: {

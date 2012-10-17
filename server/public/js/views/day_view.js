@@ -86,7 +86,7 @@ define([
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
-			
+
 			// VARS
 			that = this;
 			_appModel = options.appModel;
