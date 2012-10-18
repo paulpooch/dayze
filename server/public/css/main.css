@@ -74,6 +74,12 @@ header {
     float: right;
 }
 
+#user_modal {
+  text-align: left;
+  width: 380px;
+  margin: -200px 0 0 -190px;
+}
+
 #calendar {   
     margin: 30px auto;
     padding: 10px 0 0 10px;

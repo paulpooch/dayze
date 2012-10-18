@@ -15,6 +15,11 @@ define([
 	AccountTemplate
 ) {
 
+	var _userButton;
+	var _userModal;
+	var _userEmail;
+	var _userPassword;
+
 	var AccountView = Backbone.View.extend({
 
 		template: _.template(AccountTemplate),
@@ -25,7 +30,7 @@ define([
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			
+			'click #user_button': 'toggleModal'
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -33,11 +38,32 @@ define([
 
 		///////////////////////////////////////////////////////////////////////
 
+		toggleModal: function(event) {
+			_userModal.modal('toggle');
+		},
+
 	    initialize: function (options) {
 	    	var options = options || {};
 	        _.bindAll(this);
 	        this.model.on('change', this.render, this);
 	        this.render();
+
+	        // following elements don't exist unti render is called
+	        _userButton = this.$el.find('#user_button')
+	        _userModal = this.$el.find('#user_modal');
+	        _userEmail = this.$el.find('#user_email');
+	        _userPassword = this.$el.find('#user_password');
+
+			// bind user button pressed state to modal state
+	        _userModal.bind('show', function() {
+	        	_userButton.button('toggle');
+
+	        	/* TODO: no idea why i need to wrap this in a timeout */
+	        	setTimeout(function(){ _userEmail.focus(); }, 500);
+
+	        }).bind('hide', function() {
+	        	_userButton.button('toggle');
+	        })
 	    }
 
 	});

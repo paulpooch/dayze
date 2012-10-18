@@ -1,6 +1,6 @@
 <div id="user_dropdown">
     <div class="btn-group">
-        <a class="btn btn-primary" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
+        <a id="user_button" class="btn btn-primary" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
         <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
         <ul class="dropdown-menu">
             <li><a href="#!settings"><i class="icon-cog"></i> Account Settings</a></li>
@@ -11,4 +11,20 @@
             <li><a href="#"><i class="i"></i> Make admin</a></li>
         </ul>
     </div>
+</div>
+<div id="user_modal" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>User Information</h3>
+    </div>
+    <div class="modal-body" style="padding: 15px">
+        <label>Sign in</label>
+        <input id="user_email" type="text" class="input-small" placeholder="Email">
+        <input id="user_password" type="text" class="input-small" placeholder="Password">
+        <button type="submit" class="btn btn-primary" style="position: relative; top: -4px;">Submit</button>
+        <label class="checkbox">
+            <input type="checkbox" checked>keep me signed in
+        </label>
+    </div>
+
 </div>
