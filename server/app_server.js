@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // APP SERVER
 ///////////////////////////////////////////////////////////////////////////////
-
-'use strict';
-
+//
 // PACKAGE DOCUMENTATION //////////////////////////////////////////////////////
 // dynamodb = https://github.com/teleportd/node-dynamodb
 // node-uuid = https://github.com/broofa/node-uuid
@@ -13,6 +11,8 @@
 //		http://erickrdch.com/2012/06/how-to-wait-for-2-asynchronous-responses-on-nodejs-commonjs-promises.html
 //	 	http://howtonode.org/promises
 ///////////////////////////////////////////////////////////////////////////////
+
+'use strict';
 
 var requirejs = require('requirejs');
 var HTML_DEV_MODE = true; // Don't hit dynamo when playing with html/css/js

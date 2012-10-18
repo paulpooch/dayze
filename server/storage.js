@@ -7,20 +7,98 @@
 ////////////////////////////////////////////////////////////////////////////////
 define([
 	'dynamodb',
+	'node-uuid',
+	'q',
+	'memcached',
+
 	'config',
 	'utils',
-	'node-uuid',
-	'q'
+	'logg'
 ], function(
 	DynamoDB,
+	Uuid,
+	Q,
+	Memcached,
+
 	Config,
 	Utils,
-	Uuid,
-	Q
+	Logg
 ) {
 
 	var Storage = {};
 	var ddb = DynamoDB.ddb(Config.DYNAMODB_CREDENTIALS);
+	var Memcached = new Memcached(Config.CACHE_URL);
+
+	///////////////////////////////////////////////////////////////////////////
+	// Cache
+	///////////////////////////////////////////////////////////////////////////
+	Storage.Cache = (function() {
+
+		var Cache = {};
+
+		Memcached.on('issue', function(issue) {
+			Logg.e('Issue occured on server ' + issue.server + ', ' + issue.retries  + 
+			' attempts left untill failure');
+		});
+		
+		Memcached.on('failure', function(issue) {
+			Logg.e(issue.server + ' failed!');
+		});
+		
+		Memcached.on('reconnecting', function(issue) {
+			Logg.e('reconnecting to server: ' + issue.server + ' failed!');
+		});
+
+		Cache.get = function(key, callback) {
+			if (Config.IS_LOCAL_DEV) {
+				callback(new Error());
+			} else {
+				Memcached.get(key, function(err, result) {
+					if (err) {
+						Logg.e(err);
+						callback(new Error('Cache.get could not get ' + key));	
+					} else {
+						callback(null, result);
+					}
+				});
+			}
+		};
+
+		Cache.set = function(key, value, lifetime, callback) {
+			if (Config.IS_LOCAL_DEV) {
+				callback(new Error());
+			} else {
+				Memcached.set(key, value, lifetime, function(err, result) {
+					if (err) {
+						Logg.e(err);
+						callback(new Error('Cache.set could not set ' + key));
+					} else {
+						// This will be true if successful.
+						callback(null, result);
+					}
+				});
+			}
+		};
+		
+		Cache.delete = function(key, callback) {
+			if (Config.IS_LOCAL_DEV) {
+				callback(new Error());
+			} else {
+				Memcached.del(key, function(err, result) {
+					if (err) {
+						Logg.e(err);
+						callback(new Error('Cache.delete could not delete ' + key));
+					} else {
+						callback(null, result);
+					}
+				});
+			}
+		};
+
+		return Cache;
+
+	})();
+
 
 	///////////////////////////////////////////////////////////////////////////
 	// Events
@@ -247,14 +325,30 @@ define([
 			return deferred.promise;
 		};
 
-
-		// This really needs memcache.
 		Users.getUserWithCookieId = function(cookieId) {
 			var deferred = Q.defer();
 
 			// ddb.getItem(Config.TABLE_USERS_BY_COOKIE, cookieId, null, {}, function(err, res, cap) {
 			// 	console.log(err, res, cap);
 			// });
+
+			var checkCache = function(cookieId) {
+				return Q.ncall(
+					Storage.Cache.get,
+					this,
+					Config.PRE_USER_WITH_COOKIE + cookieId
+				);
+			};
+
+			var setCache = function(cookieId, user) {
+				return Q.ncall(
+					Storage.Cache.set,
+					this,
+					Config.PRE_USER_WITH_COOKIE + cookieId,
+					user,
+					Config.TIMEOUT_USER_WITH_COOKIE
+				);
+			}
 
 			var getUserIdWithCookieId = function(cookieId) {
 				return Q.ncall(
@@ -278,13 +372,27 @@ define([
 				);
 			};
 
-			getUserIdWithCookieId(cookieId)
-			.then(getUserWithUserId)
-			.then(function(res) {
-				deferred.resolve(res);
+			checkCache(cookieId)
+			.then(function(user) {
+				deferred.resolve(user);
 			})
 			.fail(function(err) {
-				deferred.reject(new Error(err));
+				getUserIdWithCookieId(cookieId)
+				.then(getUserWithUserId)
+				.then(function(user) {
+					setCache(cookieId, user)
+					.then(function(setResult) {
+						deferred.resolve(user);
+					})
+					.fail(function(err) {
+						deferred.resolve(user);
+					})
+					.end();
+				})
+				.fail(function(err) {
+					deferred.reject(new Error(err));
+				})
+				.end();
 			})
 			.end();
 
