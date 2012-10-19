@@ -30,7 +30,8 @@ define([
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			'click #user_button': 'toggleModal'
+			'click #user_button': 'toggleModal',
+			'click #google_button': 'googleSignIn'
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -64,7 +65,31 @@ define([
 	        }).bind('hide', function() {
 	        	_userButton.button('toggle');
 	        })
-	    }
+	    },
+
+	    googleSignIn: function() {
+			// https://developers.google.com/accounts/docs/OAuth2Login
+
+			var endpoint = 'https://accounts.google.com/o/oauth2/auth';
+			var params = {
+				client_id: '495360231026.apps.googleusercontent.com',
+				response_type: 'token',
+				redirect_uri: 'https://localhost:8000/oauth2callback',
+				scope: 'https://www.googleapis.com/auth/userinfo.profile',
+				state: ''
+			};
+
+			window.location = endpoint + '?' + $.param(params);
+	/*
+			$.ajax({
+	  			url: endpoint + '?' + $.param(params),
+				success: function(data) {
+				    console.log(data);
+				}
+			});
+	*/
+
+		}
 
 	});
 
