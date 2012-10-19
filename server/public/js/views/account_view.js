@@ -43,6 +43,28 @@ define([
 			_userModal.modal('toggle');
 		},
 
+		oauth2Callback: function() {
+			var that = this;
+
+			this.toggleModal();
+
+			// parse response hash
+			var params = {};
+			var queryString = location.hash.substring(1);
+    		var regex = /([^&=]+)=([^&]*)/g, m;
+			while (m = regex.exec(queryString)) {
+			  params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+			}
+
+			$.ajax({
+	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + params.access_token,
+				success: function(data) {
+				    that.model.set('displayName', data.name);
+				}
+			});
+
+		},
+
 	    initialize: function (options) {
 	    	var options = options || {};
 	        _.bindAll(this);
@@ -74,21 +96,12 @@ define([
 			var params = {
 				client_id: '495360231026.apps.googleusercontent.com',
 				response_type: 'token',
-				redirect_uri: 'https://localhost:8000/oauth2callback',
+				redirect_uri: 'http://localhost:8000/oauth2callback',
 				scope: 'https://www.googleapis.com/auth/userinfo.profile',
 				state: ''
 			};
 
 			window.location = endpoint + '?' + $.param(params);
-	/*
-			$.ajax({
-	  			url: endpoint + '?' + $.param(params),
-				success: function(data) {
-				    console.log(data);
-				}
-			});
-	*/
-
 		}
 
 	});

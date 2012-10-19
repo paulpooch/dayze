@@ -30,10 +30,10 @@ define([
 	AppModel
 ) {
 
-	var App = function() {
+	var _router, 
+		_appModel;
 
-		var _router, 
-			_appModel;
+	var App = function() {
 
 		var _initialize = function() {
 			// customize sync function
@@ -43,8 +43,8 @@ define([
 		};
 
 		var _domReady = function() {
-			_router = new Router();
 			_appModel = new AppModel({ app: this });
+			_router = new Router({ app: this });
 		};
 
 		/*
@@ -64,9 +64,14 @@ define([
 
 		// Expose public methods.
 		return {
-			initialize: _initialize
+			initialize: _initialize,
+			oauth2Callback: _oauth2Callback
 		};
 	};
+
+	var _oauth2Callback = function() {
+		_appModel.oauth2Callback();
+	}
 
 	return App;
 

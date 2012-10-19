@@ -68,6 +68,10 @@ define([
 			eventModel: null
 		},
 
+		oauth2Callback: function() {
+			_accountView.oauth2Callback();
+		},
+
 		renderEventView: function(dayViewEl) {
 			var eventViewEl = dayViewEl.find('#event_view_holder');
 			_eventView.setElAndRender(eventViewEl);

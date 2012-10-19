@@ -1,10 +1,13 @@
 define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 
+	var _app;
+
 	var Router = Backbone.Router.extend({
 
 		initialize: function(options) {
 			var options = options || {};
 			var pushState = options.pushState || 'true';
+			_app = options.app;
 			Backbone.history.start({ pushState: pushState });
 			this.registerListeners();
 		},
@@ -15,7 +18,8 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			"download/*path":     "download",
 			"folder/:name":       "openFolder",
 			"folder/:name-:mode": "openFolder",
-			settings: 				  "settings", 
+			oauth2callback: 		'oauth2Callback', 
+			settings: 				'settings', 
 		},
 
 		registerListeners: function() {
@@ -39,6 +43,10 @@ define(['jquery', 'underscore', 'backbone'], function(jQuery, _, Backbone) {
 			    }
 			});
 
+		},
+
+		oauth2Callback: function() {
+			_app.oauth2Callback();
 		},
 
 		settings: function() {
