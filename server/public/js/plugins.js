@@ -14,7 +14,7 @@ if (!(window.console && console.log)) {
 // Place any jQuery/helper plugins in here.
 $(function() {
 
-	$('input.time_input').live('keyup', function() {
+	$('#day_view_holder').on('keyup', 'input.time_input', function() {
 		
 		var valid = false;
 		var val = $(this).val().toLowerCase();
@@ -47,6 +47,9 @@ $(function() {
 				msg.text('Please enter a valid time with am/pm.');
 			}
 		}
+
+		// Otherwise change event doesn't fire.
+		$(this).trigger('change');
 
 	});
 

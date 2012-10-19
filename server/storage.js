@@ -107,9 +107,11 @@ define([
 
 		var Events = {};
 
-		Events.createEvent = function(userId, post) {
+		Events.createEvent = function(user, post) {
 			
 			var eventId = Uuid.v4();
+			var eventTime = Utils.makeISOWithDayAndTime(dayCode, post.beginTime);
+			console.log(eventTime);
 
 			var event = {
 				eventId: eventId,
@@ -120,6 +122,15 @@ define([
 				beginTime: post.beginTime,
 				endTIme: post.endTIme
 			};
+
+			// var checkForConflictingEvents = function(post) {
+			// 	var hash = user.userId;
+			// 	var range = dayCode beginTime;
+
+
+			// }
+
+
 
 			// 1. Get any events matching userId + time in TABLE_EVENTS_BY_USERID_AND_TIME
 			// 2. treat as array.

@@ -137,11 +137,16 @@ requirejs([
 				// TODO: Filter request.
 				//var post = filter(req.body);
 				var post = req.body;
-				
-				//Storage.Events.createEvent(user.userId, post)
-				//.then(function(result) {
-				//	res.send(result);
-				//});
+				console.log(post);
+
+				Storage.Events.createEvent(user, post)
+				.then(function(result) {
+					res.send(result);
+				})
+				.fail(function(err) {
+					
+				})
+				.end();
 			
 			})
 			.fail(function(err) {

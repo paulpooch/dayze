@@ -33,6 +33,29 @@ define(['q'], function(Q) {
 		return password;
 	};
 
+	Utils.makeISOWithDayAndTime = function(dayCode, time) {
+		var dParts = dayCode.split('-');
+		var tParts = time.split(' ');
+		var amPm = time[1];
+		tParts = tParts.split(':');
+
+		var year = (dParts.length > 0) ? dParts[0] : null;
+		var month = (dParts.length > 1) ? Number(dParts[1]) - 1 : null;
+		var day = (dParts.length > 2) ? dParts[2] : null;
+
+		var hour = (tParts.length > 0) ? tParts[0] : null;
+		var minute = (tParts.length > 0) ? tParts[1] : 0;
+		if (amPm == 'pm') {
+			hour += 12;
+		}
+
+		if (year && month && day && hour) {
+			return new Date(year, month, day, hour, minute).toISOString();
+		} else {
+			throw new Error('Utils.makeISOWithDayAndTime cannot parse dayCode=' + dayCode + ' time=' + time);
+		}
+	};
+
   	return Utils;
 
 });

@@ -11,17 +11,13 @@ define([
 	Backbone
 ) {
 
-	var that,
-		MODE_NONE = 0,
-		MODE_EDIT = 1,
-		MODE_VIEW = 2;
+	var that;
 
 	var EventModel = Backbone.Model.extend({
 
 		url: 'rest/event',
 
 		defaults: {
-			mode: MODE_NONE,
 			name: 'No Events',
 			dayCode: '',
 			description: '',
