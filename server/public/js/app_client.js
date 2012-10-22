@@ -1,11 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// APP CLIENT
-///////////////////////////////////////////////////////////////////////////////
-
-// DEVELOPMENT RULES
-// 1. ALWAYS USE 'that'.  NEVER 'this'.
-// 2. EXPLICITY DECLARE ALL ATTRIBUTES IN MODEL defaults.
-
 define([
 	'jquery',
 	'modernizr',
@@ -14,8 +6,6 @@ define([
 	'plugins',
 	'bootstrap',
 
-	'router',
-	
 	'models/app_model'
 ], function(
 	jQuery,
@@ -25,53 +15,63 @@ define([
 	plugins,
 	Bootstrap,
 
-	Router,
-
 	AppModel
 ) {
 
-	var _router, 
-		_appModel;
+	var _appModel;
 
-	var App = function() {
+	var App = Backbone.Router.extend({
 
-		var _initialize = function() {
-			// customize sync function
-			//Backbone.sync = _sync;
+		initialize: function() {
 			var that = this;
-			$(function() { _domReady.call(that); });
-		};
-
-		var _domReady = function() {
+			var options = options || {};
+			var pushState = options.pushState || 'true';
 			_appModel = new AppModel({ app: this });
-			_router = new Router({ app: this });
-		};
+			Backbone.history.start({ pushState: pushState });
+			$(function() { that.domReady.call(that); });
+		},
 
-		/*
-		var _sync = function(method, model, options) {
+		domReady: function() {
+			this.registerListeners.call(this);
+		},
 
-			console.log(method);
+		routes: {
+			oauth2callback: 		'oauth2Callback', 
+			settings: 				'settings', 
+		},
 
-			var methodMap = {
-				'create': 'POST',
-				'update': 'PUT',
-				'delete': 'DELETE',
-				'read':   'GET'
-			};
+		registerListeners: function() {
+			var that = this;
 
-		};
-		*/
+			$(document).on('click', 'a:not([data-bypass])', function (event) {
 
-		// Expose public methods.
-		return {
-			initialize: _initialize,
-			oauth2Callback: _oauth2Callback
-		};
-	};
+				// intercept all 'a' clicks
+				// if 'href' contains 'http://', let event leak
+				// if 'href' contains '#!', use pushstate
+				// if 'href' contains '#', do nothing
 
-	var _oauth2Callback = function() {
-		_appModel.oauth2Callback();
-	}
+			    var href = $(this).attr('href');
+			    var protocol = this.protocol + '//';
+
+			    if (href.slice(protocol.length) !== protocol) {
+					event.preventDefault();
+					if (href.length > 2 && href.slice(0, 2) === '#!') {
+						that.navigate(href.slice(2), true);
+			    	}
+			    }
+			});
+
+		},
+
+		oauth2Callback: function() {
+			_appModel.oauth2Callback();
+		},
+
+		settings: function() {
+			alert('settings!');
+		}
+
+	});
 
 	return App;
 
