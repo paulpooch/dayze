@@ -135,6 +135,16 @@ define([
 				);
 			};
 
+			var saveEvent = function(event) {
+				return Q.ncall(
+					ddb.putItem,
+					this,
+					Config.TABLE_EVENTS,
+					event,
+					{}
+				);
+			};
+
 			var eventId = Uuid.v4();
 			var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
 
@@ -169,18 +179,26 @@ define([
 
 				saveEventsByUserIdAndTime(eventsEntry)
 				.then(function(result) {
+					console.log('event keys saved');
 					console.log(result);
-					deferred.resolve(true);
+					
+					saveEvent(event)
+					.then(function(result) {
+						console.log('event saved');
+						console.log(result);
+						deferred.resolve(true);
+					})
+					.end();
+
 				})
-				// Let fail fall through.
 				.end();
 
 			})	
 			.fail(function(err) {
 				console.log(err);
 				deferred.reject(err);
-			}).
-			end();
+			})
+			.end();
 
 			return deferred.promise;
 
