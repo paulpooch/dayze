@@ -108,28 +108,81 @@ define([
 		var Events = {};
 
 		Events.createEvent = function(user, post) {
-			
+			var deferred = Q.defer();
+
+			var checkForConflictingEvents = function(event) {
+				var hash = user.userId;
+			 	var range = eventTime;
+
+			 	return Q.ncall(
+			 		ddb.getItem,
+			 		this,
+			 		Config.TABLE_EVENTS_BY_USERID_AND_TIME,
+			 		hash,
+			 		range,
+			 		{}
+			 	);
+
+			};
+
+			var saveEventsByUserIdAndTime = function(eventsEntry) {
+				return Q.ncall(
+					ddb.putItem,
+					this,
+					Config.TABLE_EVENTS_BY_USERID_AND_TIME,
+					eventsEntry,
+					{}
+				);
+			};
+
 			var eventId = Uuid.v4();
-			var eventTime = Utils.makeISOWithDayAndTime(dayCode, post.beginTime);
-			console.log(eventTime);
+			var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
 
 			var event = {
 				eventId: eventId,
+				eventTime: eventTime,
 				name: post.name,
 				dayCode: post.dayCode,
 				description: post.description,
 				location: post.location,
 				beginTime: post.beginTime,
-				endTIme: post.endTIme
+				endTime: post.endTime
 			};
 
-			// var checkForConflictingEvents = function(post) {
-			// 	var hash = user.userId;
-			// 	var range = dayCode beginTime;
+			checkForConflictingEvents(event)
+			.then(function(eventsByUserIdAndTime) {
+				
+				console.log(eventsByUserIdAndTime);
+				var existingEvents = eventsByUserIdAndTime.events;
+				console.log(existingEvents);
+				var eventArr = [];
+				if (existingEvents) {
+					eventArr.push(existingEvents);
+				}
+				eventArr.push(event.eventId);
 
+				var eventsEntry = {
+					userId: user.userId,
+					eventTime: eventTime,
+					events: eventArr
+				};
 
-			// }
+				saveEventsByUserIdAndTime(eventsEntry)
+				.then(function(result) {
+					console.log(result);
+					deferred.resolve(true);
+				})
+				// Let fail fall through.
+				.end();
 
+			})	
+			.fail(function(err) {
+				console.log(err);
+				deferred.reject(err);
+			}).
+			end();
+
+			return deferred.promise;
 
 
 			// 1. Get any events matching userId + time in TABLE_EVENTS_BY_USERID_AND_TIME
@@ -166,7 +219,9 @@ define([
 
 		};
 
-	});
+		return Events;
+
+	})();
 
 	///////////////////////////////////////////////////////////////////////////
 	// Users
@@ -382,7 +437,7 @@ define([
 					{}
 				);
 			};
-
+			
 			checkCache(cookieId)
 			.then(function(user) {
 				deferred.resolve(user);
@@ -391,6 +446,7 @@ define([
 				getUserIdWithCookieId(cookieId)
 				.then(getUserWithUserId)
 				.then(function(user) {
+					user = user[0];
 					setCache(cookieId, user)
 					.then(function(setResult) {
 						deferred.resolve(user);

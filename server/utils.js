@@ -36,8 +36,8 @@ define(['q'], function(Q) {
 	Utils.makeISOWithDayAndTime = function(dayCode, time) {
 		var dParts = dayCode.split('-');
 		var tParts = time.split(' ');
-		var amPm = time[1];
-		tParts = tParts.split(':');
+		var amPm = tParts[1];
+		tParts = tParts[0].split(':');
 
 		var year = (dParts.length > 0) ? dParts[0] : null;
 		var month = (dParts.length > 1) ? Number(dParts[1]) - 1 : null;

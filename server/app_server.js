@@ -12,6 +12,16 @@
 //	 	http://howtonode.org/promises
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// MASTER TODO:
+//
+// Unified exception handling scheme.
+// Maybe let all errors fall through to a single handler per REST request?
+// Also direct all errors to pretty logging solution.
+//
+///////////////////////////////////////////////////////////////////////////////
+
 'use strict';
 
 var requirejs = require('requirejs');
@@ -101,15 +111,19 @@ requirejs([
 	// We're not using that.
 
 	var verifyUser = function(cookieId) {
+		console.log(3);
 		var deferred = 	Q.defer();
 		
 		Storage.Users.getUserWithCookieId(cookieId)
 		.then(function(user) {
 			console.log('verifyUser pulled user', user);
+			console.log(15);
 			deferred.resolve(user);
 		})
 		.fail(function(err) {
 			// Make sure if no user comes back, this does fail.
+			console.log(20);
+			console.log('verifyUser failed', err);
 			deferred.reject(new Error(err));
 		})
 		.end();
@@ -130,26 +144,37 @@ requirejs([
 		// Create 
 		app.post('/' + path, function(req, res) {
 			
+			// TODO
+			// Validate & Filter req
+
+			console.log(1);
 			console.log(req.signedCookies);
+			console.log(2);
 			verifyUser(req.signedCookies.cookieId)
 			.then(function(user) {
+				console.log(user);
 
+				console.log(21);
 				// TODO: Filter request.
 				//var post = filter(req.body);
 				var post = req.body;
 				console.log(post);
+				console.log(22);
 
 				Storage.Events.createEvent(user, post)
 				.then(function(result) {
+					console.log(16);
 					res.send(result);
 				})
 				.fail(function(err) {
-					
+					console.log(17);
 				})
 				.end();
 			
 			})
 			.fail(function(err) {
+				console.log(18);
+				console.log(err);
 				Utils.log('create event with invalid user account');
 			})
 			.end();
