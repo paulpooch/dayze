@@ -41,6 +41,12 @@ define([
 			tableName: 'DAYZE_EVENTS',
 			cachePrefix: '02_',
 			cacheTimeout: 3600
+		},
+
+		USERS: {
+			tableName: 'DAYZE_USERS',
+			cachePrefix: '03_',
+			cacheTimeout: 3600
 		}
 	
 	};
@@ -291,6 +297,9 @@ define([
 		// Users.resetTable ///////////////////////////////////////////////////
 		Users.resetTables = function() {
 
+			// This is dumb.  Don't do this.  Just a dev utility function.
+			Config.TABLE_USERS = 'DAYZE_USERS';
+
 			var createUsersTable = function() {
 				return Q.ncall(
 					ddb.createTable,
@@ -394,21 +403,19 @@ define([
 					createTime: Utils.getNowIso()
 				};
 
-
-				ddb.putItem(Config.TABLE_USERS, user, {}, function(err, res, cap) {
-					if (err) {
-						console.log(err);
-						def1.reject(new Error(err));
-					} else {
-						console.log('putUser successful.', res, cap);
-						var result = {
-							cookieId: cookieId,
-							user: user
-						};
-						console.log(result.cookieId, result.user);
-						def1.resolve(result);
-					}
-				});
+				Storage.put(Storage.Tables.USERS, user)
+				.then(function(result) {
+					var result = {
+						cookieId: cookieId,
+						user: user
+					};
+					def1.resolve(result);
+				})
+				.fail(function(err) {
+					console.log('Error in createTempUser.', err);
+					def1.reject(err);
+				})
+				.end();
 
 				return def1.promise;
 			};
@@ -474,14 +481,7 @@ define([
 			};
 
 			var getUserWithUserId = function(res) {
-				return Q.ncall(
-					ddb.getItem,
-					this,
-					Config.TABLE_USERS,
-					res[0].userId,
-					null,
-					{}
-				);
+				return Storage.get(Storage.Tables.USERS, res[0].userId);
 			};
 			
 			Storage.Cache.get(Config.PRE_USER_WITH_COOKIE + cookieId)
