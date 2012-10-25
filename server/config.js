@@ -10,6 +10,8 @@ define(function() {
 	// Dev flag.
 	Config.IS_LOCAL_DEV = true;
 	
+	Config.DEFAULT_USER_NAME = 'Anonymous';
+
 	// Tables.
 	Config.TABLE_USERS = 'DAYZE_USERS';
 	Config.TABLE_USERS_BY_COOKIE = 'DAYZE_USERS_BY_COOKIE';

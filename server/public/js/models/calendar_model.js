@@ -13,18 +13,25 @@ define([
 
 	var that,
 		_app,
-		_appModel;
+		_appModel,
+		_eventCollection;
 
 	var CalendarModel = Backbone.Model.extend({
 
 		defaults: {
-			monthNames: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+			monthNames: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+			monthCode: ''
 		},
 
-		onDayClick: function(dayCode) {
-			//console.log('CalendarModel.onDayClick');
-			_appModel.displayDay(dayCode);
+		// EVENTS /////////////////////////////////////////////////////////////
+		onMonthCodeChange: function() {
+			_appModel.pullEventsForMonth(that.get('monthCode'));	
 		},
+
+		onEventCollectionChange: function() {
+			console.log('CalendarModel.onEventCollectionChange');
+		},
+		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
 			// This is really important.
@@ -35,7 +42,11 @@ define([
 			that = this;
 			_app = options.app;
 			_appModel = options.appModel;
-			
+			_eventCollection = _appModel.get('eventCollection');
+
+			// BINDINGS
+			that.bind('change:monthCode', that.onMonthCodeChange);
+			_eventCollection.bind('change', that.onEventCollectionChange);
 		}
 
 	});

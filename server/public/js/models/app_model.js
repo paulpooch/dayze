@@ -118,6 +118,13 @@ define([
 
 		},
 
+		// TODO: This should be intelligent.
+		// Not repull a million times.
+		pullEventsForMonth: function(monthCode) {
+			console.log('pullEventsForMonth', monthCode);
+			_eventCollection.fetch({ data: $.param({ monthCode: monthCode }) });
+		},
+
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.

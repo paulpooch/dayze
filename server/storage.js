@@ -49,49 +49,47 @@ define([
 			Logg.e('reconnecting to server: ' + issue.server + ' failed!');
 		});
 
-		Cache.get = function(key, callback) {
+		Cache.get = function(key) {
 			if (Config.IS_LOCAL_DEV) {
-				callback(new Error());
+				var deferred = Q.defer();
+				deferred.reject(new Error(key + ' was not in cache.'));
+				return deferred.promise;
 			} else {
-				Memcached.get(key, function(err, result) {
-					if (err) {
-						Logg.e(err);
-						callback(new Error('Cache.get could not get ' + key));	
-					} else {
-						callback(null, result);
-					}
-				});
+				return Q.ncall(
+					Memcached.get,
+					this,
+					key
+				);
 			}
 		};
 
-		Cache.set = function(key, value, lifetime, callback) {
+		Cache.set = function(key, value, lifetime) {
 			if (Config.IS_LOCAL_DEV) {
-				callback(new Error());
+				var deferred = Q.defer();
+				deferred.reject(new Error(key + ' could not be saved to cache.'));
+				return deferred.promise;
 			} else {
-				Memcached.set(key, value, lifetime, function(err, result) {
-					if (err) {
-						Logg.e(err);
-						callback(new Error('Cache.set could not set ' + key));
-					} else {
-						// This will be true if successful.
-						callback(null, result);
-					}
-				});
+				return Q.ncall(
+					Memcached.set,
+					this,
+					key,
+					value,
+					lifetime
+				);
 			}
 		};
-		
+
 		Cache.delete = function(key, callback) {
 			if (Config.IS_LOCAL_DEV) {
-				callback(new Error());
+				var deferred = Q.defer();
+				deferred.reject(new Error(key + ' could not be deleted from cache.'));
+				return deferred.promise;
 			} else {
-				Memcached.del(key, function(err, result) {
-					if (err) {
-						Logg.e(err);
-						callback(new Error('Cache.delete could not delete ' + key));
-					} else {
-						callback(null, result);
-					}
-				});
+				return Q.ncall(
+					Memcached.del,
+					this,
+					key
+				);
 			}
 		};
 
@@ -202,39 +200,59 @@ define([
 
 			return deferred.promise;
 
+		};
 
-			// 1. Get any events matching userId + time in TABLE_EVENTS_BY_USERID_AND_TIME
-			// 2. treat as array.
-			// 3. push new eventId to array, or create new array for it.
-			// 4. Add event to TABLE_EVENTS
-			// 5. Add eventId array to TABLE_EVENTS_BY_USERID_AND_TIME
+		// BEGIN HERE... HOW DO WE QUERY CORRECTLY?
+		Events.getEventsForMonth = function(user, monthCode) {
+			console.log(3);
+			var deferred = Q.defer();
 
+			var pullEventIds = function(userId, monthCode) {
+				
+				console.log(6);
+				var options = {
+					RangeKeyCondition: {
+						ComparisonOperator: 'BETWEEN',
+						AttributeValueList: [
+							'1994-11-05T13:15:30Z',
+							'2100-11-05T13:15:30Z'
+						]
+					}
+				};
 
-			// var step1 = Q.ncall(
-			// 	ddb.query,
-			// 	this,
-			// 	Config.TABLE_EVENTS_BY_USERID_AND_TIME,
+				return Q.ncall(
+					ddb.query,
+					this,
+					Config.TABLE_EVENTS_BY_USERID_AND_TIME,
+					userId,
+					options
+				);
 
+			};
 
-			// 	)
+			Storage.Cache.get(Config.PRE_MONTH_EVENTS_FOR_USER + user.userId + monthCode)
+			.then(function(events) {
+				console.log(4);
+				deferred.resolve(events);
+			})
+			.fail(function(err) {
+				console.log(5);
+				pullEventIds(user.userId, monthCode)
+				.then(function(events) {
+					console.log(7);
+					console.log(events);
+					deferred.resolve(events);
+				})
+				.fail(function(err) {
+					console.log(err);
+					deferred.reject(err);
+				})
+				.end();
 
-			// var step5 = Q.ncall(
-			// 	ddb.putItem,
-			// 	this,
-			// 	Config.TABLE_EVENTS,
-			// 	event,
-			// 	{}
-			// );
+			})
+			.end();
 
-			// var step2 = return Q.ncall(
-			// 		ddb.getItem,
-			// 		this,
-			// 		Config.TABLE_USERS_BY_COOKIE,
-			// 		cookieId,
-			// 		null,
-			// 		{}
-			// 	);
-
+			return deferred.promise;
 		};
 
 		return Events;
@@ -412,18 +430,6 @@ define([
 		Users.getUserWithCookieId = function(cookieId) {
 			var deferred = Q.defer();
 
-			// ddb.getItem(Config.TABLE_USERS_BY_COOKIE, cookieId, null, {}, function(err, res, cap) {
-			// 	console.log(err, res, cap);
-			// });
-
-			var checkCache = function(cookieId) {
-				return Q.ncall(
-					Storage.Cache.get,
-					this,
-					Config.PRE_USER_WITH_COOKIE + cookieId
-				);
-			};
-
 			var setCache = function(cookieId, user) {
 				return Q.ncall(
 					Storage.Cache.set,
@@ -456,7 +462,7 @@ define([
 				);
 			};
 			
-			checkCache(cookieId)
+			Storage.Cache.get(Config.PRE_USER_WITH_COOKIE + cookieId)
 			.then(function(user) {
 				deferred.resolve(user);
 			})
@@ -483,23 +489,6 @@ define([
 
 			return deferred.promise;
 		};
-
-		/* SCAN EXAMPLE			
-		var options = {
-			filter: {
-				cookieId: {
-					eq: cookieId
-				}
-			}
-		};
-		ddb.scan(Config.TABLE_USERS_BY_COOKIE, options, function(err, res) {
-			if (err) {
-				deferred.reject(new Error(err));
-			} else {
-				deferred.resolve(res);
-			}
-		});
-		*/
 
 		return Users;
 

@@ -20,6 +20,10 @@
 // Maybe let all errors fall through to a single handler per REST request?
 // Also direct all errors to pretty logging solution.
 //
+// Make pullEvents intelligent.  Caching.  Not repull.  Etc.
+//
+// Install memcached to windows.
+// http://www.codeforest.net/how-to-install-memcached-on-windows-machine
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -66,7 +70,7 @@ requirejs([
 
 		initialize: function() {
 
-			var that = this;																// used inside anonymous functions
+			var that = this; // used inside anonymous functions
 
 			// configure express
 			that.app = express();
@@ -75,7 +79,7 @@ requirejs([
 			that.app.set('view engine', 'dust');
 			that.app.set('views', __dirname + '/views');
 			that.app.use(express.static(__dirname + '/public'));
-			that.app.use(express.bodyParser()); 										// now have access to dom via req.body.title, etc...
+			that.app.use(express.bodyParser()); // now have access to dom via req.body.title, etc...
 			that.app.use(express.cookieParser(Config.COOKIE_SECRET_HASH));
 			that.app.use(express.session({ 
 					secret: Config.COOKIE_SECRET_HASH,
@@ -110,24 +114,24 @@ requirejs([
 	// Careful of the format stuff.
 	// We're not using that.
 
-	var verifyUser = function(cookieId) {
-		console.log(3);
+	var frontDoor = function(req) {
+
+		// TODO
+		// Validate & Filter req
+
 		var deferred = 	Q.defer();
-		
+		var cookieId = req.signedCookies.cookieId;		
 		Storage.Users.getUserWithCookieId(cookieId)
 		.then(function(user) {
 			console.log('verifyUser pulled user', user);
-			console.log(15);
 			deferred.resolve(user);
 		})
 		.fail(function(err) {
 			// Make sure if no user comes back, this does fail.
-			console.log(20);
 			console.log('verifyUser failed', err);
 			deferred.reject(new Error(err));
 		})
 		.end();
-
 		return deferred.promise;
 	};
 
@@ -137,37 +141,42 @@ requirejs([
 
 		// List
 		app.get('/' + path, function(req, res) {
-			var fake = { name: 'fake event', dayCode: '2012-10-20' };
-			res.send(fake);
+
+			frontDoor(req)
+			.then(function(user) {
+				var monthCode = req.query['monthCode'];
+				if (monthCode) {
+					Storage.Events.getEventsForMonth(user, monthCode)
+					.then(function(events) {
+						console.log(events);
+						res.send(events);
+					})
+					.end();					
+				}
+
+			})
+			.fail(function(err) {
+				console.log('Error in Event REST LIS.', err);
+			})
+			.end();			
+			
 		});
 
 		// Create 
 		app.post('/' + path, function(req, res) {
-			
-			// TODO
-			// Validate & Filter req
 
-			console.log(1);
-			console.log(req.signedCookies);
-			console.log(2);
-			verifyUser(req.signedCookies.cookieId)
+			frontDoor(req)
 			.then(function(user) {
 				console.log(user);
 
-				console.log(21);
 				// TODO: Filter request.
 				//var post = filter(req.body);
 				var post = req.body;
 				console.log(post);
-				console.log(22);
 
 				Storage.Events.createEvent(user, post)
 				.then(function(result) {
-					console.log(16);
 					res.send(result);
-				})
-				.fail(function(err) {
-					console.log(17);
 				})
 				.end();
 			
@@ -175,7 +184,7 @@ requirejs([
 			.fail(function(err) {
 				console.log(18);
 				console.log(err);
-				Utils.log('create event with invalid user account');
+				Utils.log('Error in Event REST CREATE.', err);
 			})
 			.end();
 
@@ -207,12 +216,16 @@ requirejs([
 			console.log('GET account');
 
 			var proceedWithUser = function(user) {
-				Utils.log('Pulled user', user);
+				
+				if (!user.displayName) {
+					user.displayName = Config.DEFAULT_USER_NAME;
+				}
 
 				var sanitizedUser = { 
 					displayName: user.displayName,
 					isRegistered: user.isRegistered
 				};
+				Utils.log('Pulled user', user, sanitizedUser);
 				res.send(sanitizedUser);
 			};
 

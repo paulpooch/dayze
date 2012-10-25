@@ -15,7 +15,9 @@ define([
 	WeekTemplate
 ) {
 
-	var _heightOfOneWeek,
+	var that,
+		_appModel,
+		_heightOfOneWeek,
 		_prevY,
 		_weekElements,
 		_template,
@@ -39,14 +41,16 @@ define([
 			//weekDate.setSeconds(0);
 			//weekDate.setMilliseconds(0);
 
-			this.renderWeek(weekDate);
+			that.renderWeek(weekDate);
 			for (var i = 0; i < initialWeekCount; i++) {
 			    weekDate.setDate(weekDate.getDate() + 7);
-			    this.renderWeek(weekDate);
+			    that.renderWeek(weekDate);
 			}
 
 			var firstVisibleWeek = _weekElements[0].timestamp;
-			var currentMonth = this.model.get('monthNames')[firstVisibleWeek.getMonth()];
+			var currentMonth = that.model.get('monthNames')[firstVisibleWeek.getMonth()];
+			var monthCode = firstVisibleWeek.getFullYear() + '-' + (firstVisibleWeek.getMonth() + 1);
+			that.model.set('monthCode', monthCode);
 			_$monthName.text(currentMonth);
 		},
 
@@ -57,7 +61,7 @@ define([
 
 		onDayClick: function(e) {
 			var dayCode = $(e.target).data('day-code');
-			this.model.onDayClick(dayCode);
+			_appModel.displayDay(dayCode);
 		},
 		///////////////////////////////////////////////////////////////////////
 		
@@ -69,15 +73,15 @@ define([
 			var scrollTop = _$window.scrollTop();
 			if (!_heightOfOneWeek) {
 				_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
-				//console.log(_heightOfOneWeek);
 			}
 			if (Math.abs(scrollTop - _prevY) > _heightOfOneWeek / 2) {
 				var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);
 				var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
-				var currentMonth = this.model.get('monthNames')[firstVisibleWeek.getMonth()];
+				var currentMonth = that.model.get('monthNames')[firstVisibleWeek.getMonth()];
+				var monthCode = firstVisibleWeek.getFullYear() + '-' + (firstVisibleWeek.getMonth() + 1);
+				that.model.set('monthCode', monthCode);
 				_prevY = _$window.scrollTop();
 				_$monthName.text(currentMonth);
-				//console.log('update ' + currentMonth);
 			}
 		},
 
@@ -123,19 +127,21 @@ define([
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
+			that = this;
 
 			//console.log('calendar view init');
 			var options = options || {};
+			_appModel = options.appModel;
 
 			//this.model.bind('change', render);
 			_$window = $(window);
-			_$calendar = this.$el.find('#calendar');
+			_$calendar = that.$el.find('#calendar');
 			_$monthName = $('#month_name');
 			_prevY = _$window.scrollTop();
 			_weekElements = [];
 
 			// can't be registered within View.events
-			_$window.scroll(this.onScroll);
+			_$window.scroll(that.onScroll);
 		}	
 
 	});
