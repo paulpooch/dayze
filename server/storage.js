@@ -29,6 +29,22 @@ define([
 	var ddb = DynamoDB.ddb(Config.DYNAMODB_CREDENTIALS);
 	var Memcached = new Memcached(Config.CACHE_URL);
 
+	Storage.Tables = {
+	
+		EVENTS_BY_USERID_AND_TIME: {
+			tableName: 'DAYZE_EVENTS_BY_USERID_AND_TIME',
+			cachePrefix: '01_',
+			cacheTimeout: 3600
+		},
+
+		EVENTS: {
+			tableName: 'DAYZE_EVENTS',
+			cachePrefix: '02_',
+			cacheTimeout: 3600
+		}
+	
+	};
+
 	///////////////////////////////////////////////////////////////////////////
 	// Cache
 	///////////////////////////////////////////////////////////////////////////
@@ -97,6 +113,56 @@ define([
 
 	})();
 
+	///////////////////////////////////////////////////////////////////////////
+	// PRIMARY FUNCTIONS
+	///////////////////////////////////////////////////////////////////////////
+	
+	// TODO: Wrap all these in memcache
+
+	Storage.get = function(tableInfo, hashKey, rangeKey) {
+		rangeKey = rangeKey || null;
+		console.log('Storage.get');
+		console.log('tableInfo = ', tableInfo);
+		console.log('hashKey = ', hashKey);
+		console.log('rangeKey = ', rangeKey);
+		console.log(typeof hashKey);
+		console.log(typeof rangeKey);
+		return Q.ncall(
+			ddb.getItem,
+			this,
+			tableInfo.tableName,
+			hashKey,
+			rangeKey,
+			{}
+		);
+	};
+		
+	Storage.put = function(tableInfo, item) {
+		console.log('Storage.put');
+		console.log('tableInfo = ', tableInfo);
+		console.log('item = ', item);
+		return Q.ncall(
+			ddb.putItem,
+			this,
+			tableInfo.tableName,
+			item,
+			{}
+		);
+	};
+
+	Storage.query = function(tableInfo, hashKey, options) {
+		console.log('Storage.query');
+		console.log('tableInfo = ', tableInfo);
+		console.log('hashKey = ', hashKey);
+		console.log('options = ', options);
+		return Q.ncall(
+			ddb.query,
+			this,
+			tableInfo.tableName,
+			hashKey,
+			options
+		);
+	};
 
 	///////////////////////////////////////////////////////////////////////////
 	// Events
@@ -107,41 +173,6 @@ define([
 
 		Events.createEvent = function(user, post) {
 			var deferred = Q.defer();
-
-			var checkForConflictingEvents = function(event) {
-				var hash = user.userId;
-			 	var range = eventTime;
-
-			 	return Q.ncall(
-			 		ddb.getItem,
-			 		this,
-			 		Config.TABLE_EVENTS_BY_USERID_AND_TIME,
-			 		hash,
-			 		range,
-			 		{}
-			 	);
-
-			};
-
-			var saveEventsByUserIdAndTime = function(eventsEntry) {
-				return Q.ncall(
-					ddb.putItem,
-					this,
-					Config.TABLE_EVENTS_BY_USERID_AND_TIME,
-					eventsEntry,
-					{}
-				);
-			};
-
-			var saveEvent = function(event) {
-				return Q.ncall(
-					ddb.putItem,
-					this,
-					Config.TABLE_EVENTS,
-					event,
-					{}
-				);
-			};
 
 			var eventId = Uuid.v4();
 			var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
@@ -157,9 +188,12 @@ define([
 				endTime: post.endTime
 			};
 
-			checkForConflictingEvents(event)
+			console.log(11);
+			Storage.get(Storage.Tables.EVENTS_BY_USERID_AND_TIME, user.userId, eventTime)
 			.then(function(eventsByUserIdAndTime) {
-				
+				console.log(22);
+
+
 				console.log(eventsByUserIdAndTime);
 				var existingEvents = eventsByUserIdAndTime.events;
 				console.log(existingEvents);
@@ -175,12 +209,12 @@ define([
 					events: eventArr
 				};
 
-				saveEventsByUserIdAndTime(eventsEntry)
+				Storage.put(Storage.Tables.EVENTS_BY_USERID_AND_TIME, eventsEntry)
 				.then(function(result) {
 					console.log('event keys saved');
 					console.log(result);
-					
-					saveEvent(event)
+
+					Storage.put(Storage.Tables.EVENTS, event)
 					.then(function(result) {
 						console.log('event saved');
 						console.log(result);
@@ -207,9 +241,14 @@ define([
 			console.log(3);
 			var deferred = Q.defer();
 
-			var pullEventIds = function(userId, monthCode) {
-				
-				console.log(6);
+			Storage.Cache.get(Config.PRE_MONTH_EVENTS_FOR_USER + user.userId + monthCode)
+			.then(function(events) {
+				console.log(4);
+				deferred.resolve(events);
+			})
+			.fail(function(err) {
+				console.log(5);
+
 				var options = {
 					RangeKeyCondition: {
 						ComparisonOperator: 'BETWEEN',
@@ -220,24 +259,7 @@ define([
 					}
 				};
 
-				return Q.ncall(
-					ddb.query,
-					this,
-					Config.TABLE_EVENTS_BY_USERID_AND_TIME,
-					userId,
-					options
-				);
-
-			};
-
-			Storage.Cache.get(Config.PRE_MONTH_EVENTS_FOR_USER + user.userId + monthCode)
-			.then(function(events) {
-				console.log(4);
-				deferred.resolve(events);
-			})
-			.fail(function(err) {
-				console.log(5);
-				pullEventIds(user.userId, monthCode)
+				Storage.query(Storage.Tables.EVENTS_BY_USERID_AND_TIME, user.userId, options)
 				.then(function(events) {
 					console.log(7);
 					console.log(events);
