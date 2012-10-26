@@ -118,10 +118,12 @@ define([
 
 		Cache.get(cacheKey)
 		.then(function(cacheResult) {
+			Log.l('CACHE HIT');
 			Log.l(cacheResult);
 			deferred.resolve(cacheResult);
 		})
 		.fail(function(err) {
+			Log.l('CACHE MISS');
 			Q.ncall(
 				ddb.getItem,
 				that,
