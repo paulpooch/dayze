@@ -6,6 +6,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 define([
+	'underscore',
+
 	'dynamodb',
 	'node-uuid',
 	'q',
@@ -15,6 +17,8 @@ define([
 	'utils',
 	'logg'
 ], function(
+	_,
+
 	DynamoDB,
 	Uuid,
 	Q,
@@ -22,154 +26,257 @@ define([
 
 	Config,
 	Utils,
-	Logg
+	Log
 ) {
 
 	var Storage = {};
 	var ddb = DynamoDB.ddb(Config.DYNAMODB_CREDENTIALS);
 	var Memcached = new Memcached(Config.CACHE_URL);
 
-	Storage.Tables = {
-	
-		EVENTS_BY_USERID_AND_TIME: {
-			tableName: 'DAYZE_EVENTS_BY_USERID_AND_TIME',
-			cachePrefix: '01_',
-			cacheTimeout: 3600
-		},
-
-		EVENTS: {
-			tableName: 'DAYZE_EVENTS',
-			cachePrefix: '02_',
-			cacheTimeout: 3600
-		},
-
-		USERS: {
-			tableName: 'DAYZE_USERS',
-			cachePrefix: '03_',
-			cacheTimeout: 3600
-		}
-	
-	};
-
 	///////////////////////////////////////////////////////////////////////////
 	// Cache
 	///////////////////////////////////////////////////////////////////////////
-	Storage.Cache = (function() {
+	var Cache = {};
 
-		var Cache = {};
-
-		Memcached.on('issue', function(issue) {
-			Logg.e('Issue occured on server ' + issue.server + ', ' + issue.retries  + 
-			' attempts left untill failure');
-		});
-		
-		Memcached.on('failure', function(issue) {
-			Logg.e(issue.server + ' failed!');
-		});
-		
-		Memcached.on('reconnecting', function(issue) {
-			Logg.e('reconnecting to server: ' + issue.server + ' failed!');
-		});
-
-		Cache.get = function(key) {
-			if (Config.IS_LOCAL_DEV) {
-				var deferred = Q.defer();
-				deferred.reject(new Error(key + ' was not in cache.'));
-				return deferred.promise;
-			} else {
-				return Q.ncall(
-					Memcached.get,
-					this,
-					key
-				);
-			}
-		};
-
-		Cache.set = function(key, value, lifetime) {
-			if (Config.IS_LOCAL_DEV) {
-				var deferred = Q.defer();
-				deferred.reject(new Error(key + ' could not be saved to cache.'));
-				return deferred.promise;
-			} else {
-				return Q.ncall(
-					Memcached.set,
-					this,
-					key,
-					value,
-					lifetime
-				);
-			}
-		};
-
-		Cache.delete = function(key, callback) {
-			if (Config.IS_LOCAL_DEV) {
-				var deferred = Q.defer();
-				deferred.reject(new Error(key + ' could not be deleted from cache.'));
-				return deferred.promise;
-			} else {
-				return Q.ncall(
-					Memcached.del,
-					this,
-					key
-				);
-			}
-		};
-
-		return Cache;
-
-	})();
-
-	///////////////////////////////////////////////////////////////////////////
-	// PRIMARY FUNCTIONS
-	///////////////////////////////////////////////////////////////////////////
+	Memcached.on('issue', function(issue) {
+		Log.e('Issue occured on server ' + issue.server + ', ' + issue.retries  + 
+		' attempts left untill failure');
+	});
 	
-	// TODO: Wrap all these in memcache
+	Memcached.on('failure', function(issue) {
+		Log.e(issue.server + ' failed!');
+	});
+	
+	Memcached.on('reconnecting', function(issue) {
+		Log.e('reconnecting to server: ' + issue.server + ' failed!');
+	});
 
-	Storage.get = function(tableInfo, hashKey, rangeKey) {
-		rangeKey = rangeKey || null;
-		console.log('Storage.get');
-		console.log('tableInfo = ', tableInfo);
-		console.log('hashKey = ', hashKey);
-		console.log('rangeKey = ', rangeKey);
-		console.log(typeof hashKey);
-		console.log(typeof rangeKey);
-		return Q.ncall(
-			ddb.getItem,
-			this,
-			tableInfo.tableName,
-			hashKey,
-			rangeKey,
-			{}
-		);
+	Cache.get = function(key) {
+		if (Config.IS_LOCAL_DEV) {
+			var deferred = Q.defer();
+			deferred.reject(new Error(key + ' was not in cache.'));
+			return deferred.promise;
+		} else {
+			return Q.ncall(
+				Memcached.get,
+				this,
+				key
+			);
+		}
 	};
+
+	Cache.set = function(key, value, lifetime) {
+		if (Config.IS_LOCAL_DEV) {
+			var deferred = Q.defer();
+			// Not setting is ok.
+			deferred.resolve(true);
+			//deferred.reject(new Error(key + ' could not be saved to cache.'));
+			return deferred.promise;
+		} else {
+			return Q.ncall(
+				Memcached.set,
+				this,
+				key,
+				value,
+				lifetime
+			);
+		}
+	};
+
+	Cache.delete = function(key, callback) {
+		if (Config.IS_LOCAL_DEV) {
+			var deferred = Q.defer();
+			// Is this really an error?
+			// I guess caller shouldn't freak out when this fails, 
+			// but we shouldn't fake success.
+			deferred.reject(new Error(key + ' could not be deleted from cache.'));
+			return deferred.promise;
+		} else {
+			return Q.ncall(
+				Memcached.del,
+				this,
+				key
+			);
+		}
+	};
+
+	/////////////////////////////////////////////////////////////////////////////
+	// PRIMARY FUNCTIONS
+	/////////////////////////////////////////////////////////////////////////////
+
+	var _get = function(hashKey, rangeKey) {
+		var that = this;
+		rangeKey = rangeKey || null;
+		Log.l('Storage.get');
+		Log.l('table = ', that.tableName);
+		Log.l('hashKey = ', hashKey);
+		Log.l('rangeKey = ', rangeKey);
 		
-	Storage.put = function(tableInfo, item) {
-		console.log('Storage.put');
-		console.log('tableInfo = ', tableInfo);
-		console.log('item = ', item);
-		return Q.ncall(
+		var deferred = Q.defer();
+		var cacheKey = (rangeKey) ? hashKey + rangeKey : hashKey;
+		cacheKey = that.cachePrefix + cacheKey;
+
+		Cache.get(cacheKey)
+		.then(function(cacheResult) {
+			Log.l(cacheResult);
+			deferred.resolve(cacheResult);
+		})
+		.fail(function(err) {
+			Q.ncall(
+				ddb.getItem,
+				that,
+				that.tableName,
+				hashKey,
+				rangeKey,
+				{}
+			)
+			.then(function(dbResult) {
+				// Is this correct?
+				dbResult = dbResult[0];
+				Cache.set(cacheKey, dbResult, that.cacheTimeout)
+				.then(function(cacheResult) {
+					Log.l(dbResult);
+					deferred.resolve(dbResult);
+				})
+				.end();
+			})
+			.end();
+		})
+		.end();
+
+		return deferred.promise;
+	};
+
+	var _put = function(item) {
+		var that = this;
+		Log.l('Storage.put');
+		Log.l('table = ', that.tableName);
+		Log.l('item = ', item);
+			
+		var deferred = Q.defer();
+		if (!cacheKey) {
+			cacheKey = item[that.cacheKey];	
+		}
+		
+		Q.ncall(
 			ddb.putItem,
-			this,
-			tableInfo.tableName,
+			that,
+			that.tableName,
 			item,
 			{}
-		);
+		)
+		.then(function(dbResult) {
+			Cache.set(that.cacheKey(item),	item,	that.cacheTimeout)
+			.then(function(cacheResult) {
+				Log.l(true);
+				deferred.resolve(true);
+			})
+			.end();	
+		})
+		.end();
+
+		return deferred.promise;
 	};
 
-	Storage.query = function(tableInfo, hashKey, options) {
-		console.log('Storage.query');
-		console.log('tableInfo = ', tableInfo);
-		console.log('hashKey = ', hashKey);
-		console.log('options = ', options);
-		return Q.ncall(
-			ddb.query,
-			this,
-			tableInfo.tableName,
-			hashKey,
-			options
-		);
+	var _query = function(hashKey, cacheKey, options) {
+		var that = this;
+		Log.l('Storage.query');
+		Log.l('table = ', that.tableName);
+		Log.l('hashKey = ', hashKey);
+		Log.l('cacheKey = ', cacheKey);
+		Log.l('options = ', options);
+
+		var deferred = Q.defer();
+	
+		Cache.get(cacheKey)
+		.then(function(cacheResult) {
+			Log.l(cacheResult);
+			deferred.resolve(cacheResult);
+		})
+		.fail(function(err) {
+			Q.ncall(
+				ddb.query,
+				that,
+				that.tableName,
+				hashKey,
+				options
+			)
+			.then(function(dbResult) {
+				// Is this correct?
+				dbResult = dbResult[0];
+				Cache.set(cacheKey, dbResult, that.cacheTimeout)
+				.then(function(cacheResult) {
+					Log.l(dbResult);
+					deferred.resolve(dbResult);
+				})
+				.end();
+			})
+			.end();
+		})
+		.end();
+
+		return deferred.promise;
 	};
 
+
+	///////////////////////////////////////////////////////////////////////////
+	// TABLES
+	//
+	// cacheKey used to cache items on Storage.put.
+	// Storage.get and others will require cacheKey to be specified.
+	// Be careful this matches how it is set with put!
+	///////////////////////////////////////////////////////////////////////////
+	
+	EVENTS_BY_USERID_AND_TIME = {
+		tableName: 'DAYZE_EVENTS_BY_USERID_AND_TIME',
+		cachePrefix: '01_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.userId + item.eventTime;
+		},
+		put: _put,
+		get: _get,
+		query: function(userId, monthCode, options) {
+			var hashKey = userId;
+			var cacheKey = this.cachePrefix + userId + monthCode;
+			// Make sure this object is the context.
+			return _query.call(this, hashKey, cacheKey, options);
+		}
+	};
+
+	EVENTS = {
+		tableName: 'DAYZE_EVENTS',
+		cachePrefix: '02_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.eventId;
+		},			
+		put: _put,
+		get: _get
+	};
+
+	USERS = {
+		tableName: 'DAYZE_USERS',
+		cachePrefix: '03_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix +  item.userId;
+		},
+		put: _put,
+		get: _get
+	};
+
+	USERS_BY_COOKIE = {
+		tableName: 'DAYZE_USERS_BY_COOKIE',
+		cachePrefix: '04_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.cookieId;
+		},
+		put: _put,
+		get: _get
+	};
+		
 	///////////////////////////////////////////////////////////////////////////
 	// Events
 	///////////////////////////////////////////////////////////////////////////
@@ -194,15 +301,9 @@ define([
 				endTime: post.endTime
 			};
 
-			console.log(11);
-			Storage.get(Storage.Tables.EVENTS_BY_USERID_AND_TIME, user.userId, eventTime)
+			EVENTS_BY_USERID_AND_TIME.get(user.userId, eventTime)
 			.then(function(eventsByUserIdAndTime) {
-				console.log(22);
-
-
-				console.log(eventsByUserIdAndTime);
 				var existingEvents = eventsByUserIdAndTime.events;
-				console.log(existingEvents);
 				var eventArr = [];
 				if (existingEvents) {
 					eventArr.push(existingEvents);
@@ -215,15 +316,10 @@ define([
 					events: eventArr
 				};
 
-				Storage.put(Storage.Tables.EVENTS_BY_USERID_AND_TIME, eventsEntry)
+				EVENTS_BY_USERID_AND_TIME.put(eventsEntry)
 				.then(function(result) {
-					console.log('event keys saved');
-					console.log(result);
-
-					Storage.put(Storage.Tables.EVENTS, event)
+					EVENTS.put(event)
 					.then(function(result) {
-						console.log('event saved');
-						console.log(result);
 						deferred.resolve(true);
 					})
 					.end();
@@ -233,7 +329,6 @@ define([
 
 			})	
 			.fail(function(err) {
-				console.log(err);
 				deferred.reject(err);
 			})
 			.end();
@@ -244,39 +339,21 @@ define([
 
 		// BEGIN HERE... HOW DO WE QUERY CORRECTLY?
 		Events.getEventsForMonth = function(user, monthCode) {
-			console.log(3);
 			var deferred = Q.defer();
 
-			Storage.Cache.get(Config.PRE_MONTH_EVENTS_FOR_USER + user.userId + monthCode)
+			var options = {
+				RangeKeyCondition: {
+					ComparisonOperator: 'BETWEEN',
+					AttributeValueList: [
+						'1994-11-05T13:15:30Z',
+						'2100-11-05T13:15:30Z'
+					]
+				}
+			};
+
+			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
 			.then(function(events) {
-				console.log(4);
 				deferred.resolve(events);
-			})
-			.fail(function(err) {
-				console.log(5);
-
-				var options = {
-					RangeKeyCondition: {
-						ComparisonOperator: 'BETWEEN',
-						AttributeValueList: [
-							'1994-11-05T13:15:30Z',
-							'2100-11-05T13:15:30Z'
-						]
-					}
-				};
-
-				Storage.query(Storage.Tables.EVENTS_BY_USERID_AND_TIME, user.userId, options)
-				.then(function(events) {
-					console.log(7);
-					console.log(events);
-					deferred.resolve(events);
-				})
-				.fail(function(err) {
-					console.log(err);
-					deferred.reject(err);
-				})
-				.end();
-
 			})
 			.end();
 
@@ -299,6 +376,7 @@ define([
 
 			// This is dumb.  Don't do this.  Just a dev utility function.
 			Config.TABLE_USERS = 'DAYZE_USERS';
+			Config.TABLE_USERS_BY_COOKIE = 'DAYZE_USERS_BY_COOKIE';
 
 			var createUsersTable = function() {
 				return Q.ncall(
@@ -349,33 +427,33 @@ define([
 			
 			removeUsersTable()
 			.then(function(res) {
-				console.log('Users table removed.');
-				console.log(res);
+				Log.l('Users table removed.');
+				Log.l(res);
 			})
 			.delay(60000)
 
 			.then(createUsersTable)
 			.then(function(res) {
-				console.log('Users table created.');
-				console.log(res);
+				Log.l('Users table created.');
+				Log.l(res);
 			})
 			.delay(10000)
 			
 			.then(removeUsersByCookieTable)
 			.then(function(res) {
-				console.log('UsersByCookie table removed.');
-				console.log(res);
+				Log.l('UsersByCookie table removed.');
+				Log.l(res);
 			})
 			.delay(60000)
 			
 			.then(createUsersByCookieTable)
 			.then(function(res) {
-				console.log('UsersByCookie table created.');
-				console.log(res);
+				Log.l('UsersByCookie table created.');
+				Log.l(res);
 			})
 
 			.fail(function(err) {
-				console.log('Error.', err);
+				Log.e('Error.', err, err.stack);
 			})
 			.end();
 
@@ -403,7 +481,7 @@ define([
 					createTime: Utils.getNowIso()
 				};
 
-				Storage.put(Storage.Tables.USERS, user)
+				USERS.put(user)
 				.then(function(result) {
 					var result = {
 						cookieId: cookieId,
@@ -412,7 +490,6 @@ define([
 					def1.resolve(result);
 				})
 				.fail(function(err) {
-					console.log('Error in createTempUser.', err);
 					def1.reject(err);
 				})
 				.end();
@@ -428,16 +505,14 @@ define([
 					userId: putUserResult.user.userId
 				};
 
-				ddb.putItem(Config.TABLE_USERS_BY_COOKIE, cookie, {}, function(err, res, cap) {
-					if (err) {
-						console.log(err);
-						def2.reject(new Error(err));
-					} else {
-						console.log('putCookie successful.', res, cap);
-						console.log(cookie.cookieId, cookie.user);
-						def2.resolve(putUserResult);
-					}
-				});
+				USERS_BY_COOKIE.put(cookie)
+				.then(function(result) {
+					def2.resolve(putUserResult);
+				})
+				.fail(function(err) {
+					def2.reject(err);
+				})
+				.end();
 
 				return def2.promise;
 
@@ -449,7 +524,7 @@ define([
 				deferred.resolve(putUserResult);
 			})
 			.fail(function(err) {
-				deferred.reject(new Error(err));
+				deferred.reject(err);
 			})
 			.end();
 			
@@ -459,51 +534,11 @@ define([
 		Users.getUserWithCookieId = function(cookieId) {
 			var deferred = Q.defer();
 
-			var setCache = function(cookieId, user) {
-				return Q.ncall(
-					Storage.Cache.set,
-					this,
-					Config.PRE_USER_WITH_COOKIE + cookieId,
-					user,
-					Config.TIMEOUT_USER_WITH_COOKIE
-				);
-			}
-
-			var getUserIdWithCookieId = function(cookieId) {
-				return Q.ncall(
-					ddb.getItem,
-					this,
-					Config.TABLE_USERS_BY_COOKIE,
-					cookieId,
-					null,
-					{}
-				);
-			};
-
-			var getUserWithUserId = function(res) {
-				return Storage.get(Storage.Tables.USERS, res[0].userId);
-			};
-			
-			Storage.Cache.get(Config.PRE_USER_WITH_COOKIE + cookieId)
+			USERS_BY_COOKIE.get(cookieId)
 			.then(function(user) {
-				deferred.resolve(user);
-			})
-			.fail(function(err) {
-				getUserIdWithCookieId(cookieId)
-				.then(getUserWithUserId)
+				USERS.get(user.userId)
 				.then(function(user) {
-					user = user[0];
-					setCache(cookieId, user)
-					.then(function(setResult) {
-						deferred.resolve(user);
-					})
-					.fail(function(err) {
-						deferred.resolve(user);
-					})
-					.end();
-				})
-				.fail(function(err) {
-					deferred.reject(new Error(err));
+					deferred.resolve(user);
 				})
 				.end();
 			})

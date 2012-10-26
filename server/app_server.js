@@ -44,7 +44,8 @@ requirejs([
 	'config',
 	'storage',
 	'utils',
-	'q'
+	'q',
+	'logg'
 ], function(
 	express, 
 	consolidate,
@@ -53,7 +54,8 @@ requirejs([
 	Config,
 	Storage,
 	Utils,
-	Q
+	Q,
+	Log
 ) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -92,6 +94,8 @@ requirejs([
 
 			// handle requests to roots
 			that.app.get('/', function(req, res) {
+				Log.l('INDEX ////////////////////');
+
 				var data = {};
 				res.render('index', data);	
 			});
@@ -106,7 +110,7 @@ requirejs([
 
 			// begin listening
 			that.app.listen(that.get('port'));
-			Utils.log('Listening on port ' + that.get('port'));
+			Log.l('Listening on port ' + that.get('port'));
 		}
 
 	});
@@ -120,27 +124,48 @@ requirejs([
 		// Validate & Filter req
 
 		var deferred = 	Q.defer();
-		var cookieId = req.signedCookies.cookieId;		
-		Storage.Users.getUserWithCookieId(cookieId)
-		.then(function(user) {
-			console.log('verifyUser pulled user', user);
-			deferred.resolve(user);
-		})
-		.fail(function(err) {
-			// Make sure if no user comes back, this does fail.
-			console.log('verifyUser failed', err);
-			deferred.reject(new Error(err));
-		})
-		.end();
+		
+		if (req.signedCookies.cookieId) {
+			var cookieId = req.signedCookies.cookieId;	
+			Storage.Users.getUserWithCookieId(cookieId)
+			.then(function(user) {
+				Log.l('verifyUser pulled user', user);
+				deferred.resolve(user);
+			})
+			.fail(function(err) {
+				// Make sure if no user comes back, this does fail.
+				Log.e('verifyUser failed', err, err.stack);
+				deferred.reject(new Error(err));
+			})
+			.end();
+		} else {
+			deferred.reject(new Error('User has no cookieId'));
+		}
+
 		return deferred.promise;
 	};
 
+
+
+
+
+
+
+
+
+
+	///////////////////////////////////////////////////////////////////////////////
+	// EVENT REST
+	///////////////////////////////////////////////////////////////////////////////
 	var EventRestApi = function(app) {
 
 		var path = Config.REST_PREFIX + 'event';
 
 		// List
 		app.get('/' + path, function(req, res) {
+			Log.l();
+			Log.l('EVENT LIST ////////////////////');
+			Log.l();
 
 			frontDoor(req)
 			.then(function(user) {
@@ -148,7 +173,7 @@ requirejs([
 				if (monthCode) {
 					Storage.Events.getEventsForMonth(user, monthCode)
 					.then(function(events) {
-						console.log(events);
+						Log.l(events);
 						res.send(events);
 					})
 					.end();					
@@ -156,7 +181,7 @@ requirejs([
 
 			})
 			.fail(function(err) {
-				console.log('Error in Event REST LIS.', err);
+				Log.e('Error in EVENT LIST.', err, err.stack);
 			})
 			.end();			
 			
@@ -164,15 +189,16 @@ requirejs([
 
 		// Create 
 		app.post('/' + path, function(req, res) {
+			Log.l();
+			Log.l('EVENT CREATE ////////////////////');
+			Log.l();
 
 			frontDoor(req)
 			.then(function(user) {
-				console.log(user);
-
 				// TODO: Filter request.
 				//var post = filter(req.body);
 				var post = req.body;
-				console.log(post);
+				Log.l(post);
 
 				Storage.Events.createEvent(user, post)
 				.then(function(result) {
@@ -182,9 +208,7 @@ requirejs([
 			
 			})
 			.fail(function(err) {
-				console.log(18);
-				console.log(err);
-				Utils.log('Error in Event REST CREATE.', err);
+				Log.e('Error in EVENT CREATE', err, err.stack);
 			})
 			.end();
 
@@ -192,40 +216,56 @@ requirejs([
 
 		// Read
 		app.get('/' + path + '/:id', function(req, res) {
-		
+			Log.l();
+			Log.l('EVENT READ ////////////////////');
+			Log.l();
 		});
 
 		// Update
 		app.put('/' + path + '/:id', function(req, res) {
-		
+			Log.l();
+			Log.l('EVENT UPDATE ////////////////////');
+			Log.l();
 		});
 
 		// Delete
 		app.del('/' + path + '/:id', function(req, res) {
-		
+			Log.l();
+			Log.l('EVENT DELETE ////////////////////');
+			Log.l();
 		});
 
 	};
 
+
+
+
+
+
+
+
+
+
+	///////////////////////////////////////////////////////////////////////////////
+	// ACCOUNT REST
+	///////////////////////////////////////////////////////////////////////////////
 	var AccountRestApi = function(app) {
 
 		var path = Config.REST_PREFIX + 'account';
 		// List
 		app.get('/' + path, function(req, res) {
-
-			console.log('GET account');
+			Log.l();
+			Log.l('ACCOUNT LIST ////////////////////');
+			Log.l();
 
 			var proceedWithUser = function(user) {
-				
 				if (!user.displayName) {
 					user.displayName = Config.DEFAULT_USER_NAME;
 				}
-
 				var sanitizedUser = { 
 					displayName: user.displayName,
 					isRegistered: user.isRegistered
 				};
-				Utils.log('Pulled user', user, sanitizedUser);
 				res.send(sanitizedUser);
 			};
 
@@ -239,24 +279,22 @@ requirejs([
 					proceedWithUser(user);
 				})
 				.fail(function(err) {
-					Utils.log('createTempUser failed.', err);
+					Log.e('createTempUser failed.', err, err.stack);
 				})
 				.end();
 			}
 
-			if (req.signedCookies.cookieId) {				
-				Utils.log('User has cookie.', req.signedCookies.cookieId);
+			if (req.signedCookies.cookieId) {
 				Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
 				.then(proceedWithUser)
 				.fail(function(err) {
-					Utils.log('getUserWithCookieId failed.', err);
+					Log.e('getUserWithCookieId failed.', err, err.stack);
 					// Couldn't find cookieId in db.
 					createAnonymousUser();
 				})
 				.end();
 			} else {
 				// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
-				Utils.log('User does not have cookie.');
 				createAnonymousUser();
 			}
 

@@ -7,8 +7,6 @@ define(['q'], function(Q) {
 
 	var Utils = {};
 
-	Utils.log = console.log;
-
   	Utils.getNowIso = function() {
   		return (new Date().toISOString());
   	};

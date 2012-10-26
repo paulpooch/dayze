@@ -15,7 +15,7 @@ define([
 	Config
 ) {
 
-	var Logg = {};
+	var Log = {};
 
 	var now = new Date();
 	var writeFlags = { flags: 'a' };
@@ -34,31 +34,66 @@ define([
 		}
 	}, Config.INTERVAL_LOG_RENAME);
 
-	Logg.l = function(what) {
-		console.log(JSON.stringify(what));
-		logFile.debug(JSON.stringify(what));
+	Log.l = function() {
+		var text = [];
+		var len = arguments.length;
+		for (var i = 0; i < len; i++) {
+			if (typeof arguments[i] == 'string') {
+				text.push(arguments[i]);
+			} else {
+				text.push(Util.inspect(arguments[i]));
+			}
+		}
+		var out = text.join(' ');
+		console.log(out);
+		logFile.log(out);
 	};
 
-	Logg.exception = function(what) {
-		console.log(JSON.stringify(what));
-		errorLog.debug(JSON.stringify(what));
+	Log.e = function() {
+		var text = [];
+		var len = arguments.length;
+		for (var i = 0; i < len; i++) {
+			if (typeof arguments[i] == 'string') {
+				text.push(arguments[i]);
+			} else {
+				text.push(Util.inspect(arguments[i]));
+			}
+		}
+		var out = text.join(' ');
+		console.error(out);
+		errorLog.error(out);
 	};
 
-	Logg.e = function(what) {
-		console.log(JSON.stringify(what));
-		errorLog.debug(JSON.stringify(what));
+	Log.i = function() {
+		var text = [];
+		var len = arguments.length;
+		for (var i = 0; i < len; i++) {
+			if (typeof arguments[i] == 'string') {
+				text.push(arguments[i]);
+			} else {
+				text.push(Util.inspect(arguments[i]));
+			}
+		}
+		var out = text.join(' ');
+		console.info(out);
+		errorLog.info(out);
 	};
 
-	Logg.i = function(what) {
-		console.log(JSON.stringify(what));
-		logFile.debug(JSON.stringify(what));
-	};
-	
-	Logg.w = function(what) {
-		console.log(JSON.stringify(what));
-		logFile.debug(JSON.stringify(what));
+	Log.w = function() {
+		var text = [];
+		var len = arguments.length;
+		for (var i = 0; i < len; i++) {
+			if (typeof arguments[i] == 'string') {
+				text.push(arguments[i]);
+			} else {
+				text.push(Util.inspect(arguments[i]));
+			}
+		}
+		var out = text.join(' ');
+		console.warn(out);
+		errorLog.warn(out);
 	};
 
-	return Logg;
+	return Log;
 
 });
