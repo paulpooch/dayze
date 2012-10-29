@@ -79,7 +79,7 @@ define([
 				dayEl
 				.addClass('has_event')
 				.find('.event_holder')
-				.append('<span class="label label-info">' + event.get('name') + '</span>');
+				.append('<div class="label label-info">' + event.get('name') + '</div>');
 			});
 		},
 		///////////////////////////////////////////////////////////////////////
