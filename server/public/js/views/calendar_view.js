@@ -68,10 +68,17 @@ define([
 		
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		onEventCollectionReset: function() {
+			var alreadyResetDays = {};
 			_eventCollection.each(function(event) {
 				var dayCode = event.get('eventTime').split('T')[0];
-				console.log(dayCode);
-				$('.day[data-day-code=' + dayCode + ']')
+				var dayEl = $('.day[data-day-code=' + dayCode + ']');
+				if (!alreadyResetDays[dayCode]) {
+					alreadyResetDays[dayCode] = 1;
+					dayEl.find('.event_holder').empty();
+				}
+				dayEl
+				.addClass('has_event')
+				.find('.event_holder')
 				.append('<span class="label label-info">' + event.get('name') + '</span>');
 			});
 		},
