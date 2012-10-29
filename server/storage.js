@@ -446,11 +446,15 @@ define([
 				}
 			};
 
+			var eventIds = [];
 			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
-			.then(function(events) {
-				if (events.length) {
-					Log.l('EVENTS!', events);
-					eventIds = events[0].events;
+			.then(function(eventsByTime) {
+				if (eventsByTime.length) {
+					Log.l('EVENTS!', eventsByTime);
+					eventsByTime.forEach(function(eventsAtTime) {
+						// Less than optimal.
+						eventIds = eventIds.concat(eventsAtTime.events);
+					});
 					Log.l(eventIds);
 					if (eventIds.length) {
 						EVENTS.batchGet(eventIds)

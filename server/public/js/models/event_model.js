@@ -47,6 +47,13 @@ define([
 			};
 		},
 		
+		// EVENTS /////////////////////////////////////////////////////////////
+		onChange: function() {
+			console.log('model change');
+		},
+
+		///////////////////////////////////////////////////////////////////////
+
 		initialize: function(options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
@@ -55,7 +62,10 @@ define([
 			
 			that.set('name', options.name || '');
 			that.set('dayCode', options.dayCode || '');
+			
 
+			// BINDINGS
+			that.bind('change', that.onChange);			
 		}
 
 	});

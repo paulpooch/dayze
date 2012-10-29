@@ -175,13 +175,11 @@ requirejs([
 				if (monthCode) {
 					Storage.Events.getEventsForMonth(user, monthCode)
 					.then(function(events) {
-						
-						Log.l(events);
+						Log.l('got events for month', events);
 						res.send(events);
 					})
 					.end();					
 				}
-
 			})
 			.fail(function(err) {
 				Log.e('Error in EVENT LIST.', err, err.stack);

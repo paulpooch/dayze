@@ -17,6 +17,7 @@ define([
 
 	var that,
 		_appModel,
+		_eventCollection,
 		_heightOfOneWeek,
 		_prevY,
 		_weekElements,
@@ -66,7 +67,14 @@ define([
 		///////////////////////////////////////////////////////////////////////
 		
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-
+		onEventCollectionReset: function() {
+			_eventCollection.each(function(event) {
+				var dayCode = event.get('eventTime').split('T')[0];
+				console.log(dayCode);
+				$('.day[data-day-code=' + dayCode + ']')
+				.append('<span class="label label-info">' + event.get('name') + '</span>');
+			});
+		},
 		///////////////////////////////////////////////////////////////////////
 		
 		onScroll: function() {
@@ -132,6 +140,7 @@ define([
 			//console.log('calendar view init');
 			var options = options || {};
 			_appModel = options.appModel;
+			_eventCollection = _appModel.get('eventCollection');
 
 			//this.model.bind('change', render);
 			_$window = $(window);
@@ -142,6 +151,11 @@ define([
 
 			// can't be registered within View.events
 			_$window.scroll(that.onScroll);
+
+
+			// BINDINGS
+			_eventCollection.on('reset', that.onEventCollectionReset);
+
 		}	
 
 	});

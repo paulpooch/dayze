@@ -26,16 +26,33 @@ define([
 			return _eventsByDay[dayCode] || [];
 		},
 
+		// EVENTS /////////////////////////////////////////////////////////////
 		onAdd: function(event) {
 			var dayCode = event.get('dayCode');
 			var existingEvents = _eventsByDay[dayCode] || [];
 			existingEvents.push(event);
 			_eventsByDay[dayCode] = existingEvents;
+
+			console.log(event);
+		},
+
+		onChange: function() {
+			console.log('EventCollection.onChange');
+		},
+
+		onReset: function() {
+			console.log('EventCollection.onReset');
 		},
 
 		initialize: function() {
+			_.bindAll(this);
+			that = this;
+
+			// BINDINGS
 			_eventsByDay = {};
-			this.on('add', this.onAdd);
+			that.on('add', that.onAdd);
+			that.on('change', that.onChange);
+			that.on('reset', that.onReset);
 		}
 
 	});
