@@ -149,6 +149,87 @@ define([
 		return deferred.promise;
 	};
 
+	var _batchGet = function(keys) {
+		var that = this;
+		Log.l('Storage.batchGet');
+		Log.l('table = ', that.tableName);
+		Log.l('keys = ', keys);
+		
+		var deferred = Q.defer();
+		var keysRequiringDbHit = [];
+		var results = [];
+		
+		var checkCache = function(key) {
+			var defer2 = Q.defer();
+
+			var cacheKey = that.cachePrefix + key;
+			Cache.get(cacheKey)
+			.then(function(cacheResult) {
+				Log.l('CACHE HIT');
+				Log.l(cacheResult);
+				results.push(cacheResult);
+				defer2.resolve();
+			})
+			.fail(function(err) {
+				Log.l('CACHE MISS');
+				keysRequiringDbHit.push(key);
+				defer2.resolve();
+			})
+			.end();
+
+			return defer2.promise;
+		};
+
+		var putCache = function(item) {
+			var defer3 = Q.defer();
+			Cache.set(that.cacheKey(item), item, that.cacheTimeout)
+			.then(function(cacheResult) {
+				defer3.resolve(true);
+			})
+			.end();	
+			return defer3.promise;
+		};
+
+		// http://erickrdch.com/2012/06/how-to-wait-for-2-asynchronous-responses-on-nodejs-commonjs-promises.html
+		var queue = [];
+		keys.forEach(function(key) {
+			queue.push(checkCache(key));
+		});
+		Q.all(queue)
+		.then(function(fulfilled) {
+
+			var batchReq = {};
+			batchReq[that.tableName] =  { keys: keysRequiringDbHit };
+			Log.l('batchReq', batchReq);
+
+			Q.ncall(
+				ddb.batchGetItem,
+				that,
+				batchReq
+			)
+			.then(function(dbResult) {
+				Log.l('BATCH RESULT');
+				Log.l(dbResult);
+
+				var result = dbResult[0].items;
+				var queue = [];
+				result.forEach(function(item) {
+					queue.push(putCache(item));
+				});
+				Q.all(queue)
+				.then(function(fulfilled) {
+					Log.l('Done caching all items from batch get.');
+					deferred.resolve(result);
+				})
+				.end();
+			})
+			.end();
+		})
+		.end();
+
+		return deferred.promise;
+	};
+
 	var _put = function(item) {
 		var that = this;
 		Log.l('Storage.put');
@@ -156,10 +237,8 @@ define([
 		Log.l('item = ', item);
 			
 		var deferred = Q.defer();
-		if (!cacheKey) {
-			cacheKey = item[that.cacheKey];	
-		}
-		
+		cacheKey = item[that.cacheKey];	
+				
 		Q.ncall(
 			ddb.putItem,
 			that,
@@ -168,7 +247,7 @@ define([
 			{}
 		)
 		.then(function(dbResult) {
-			Cache.set(that.cacheKey(item),	item,	that.cacheTimeout)
+			Cache.set(that.cacheKey(item), item, that.cacheTimeout)
 			.then(function(cacheResult) {
 				Log.l(true);
 				deferred.resolve(true);
@@ -189,10 +268,11 @@ define([
 		Log.l('options = ', options);
 
 		var deferred = Q.defer();
-	
+
 		Cache.get(cacheKey)
 		.then(function(cacheResult) {
 			Log.l(cacheResult);
+			cacheResult = cacheResult.items;
 			deferred.resolve(cacheResult);
 		})
 		.fail(function(err) {
@@ -206,6 +286,11 @@ define([
 			.then(function(dbResult) {
 				// Is this correct?
 				dbResult = dbResult[0];
+				if (dbResult.count && dbResult.items && dbResult.count > 0) {
+					dbResult = dbResult.items;
+				} else {
+					dbResult = [];
+				}
 				Cache.set(cacheKey, dbResult, that.cacheTimeout)
 				.then(function(cacheResult) {
 					Log.l(dbResult);
@@ -254,7 +339,8 @@ define([
 			return this.cachePrefix + item.eventId;
 		},			
 		put: _put,
-		get: _get
+		get: _get,
+		batchGet: _batchGet
 	};
 
 	USERS = {
@@ -291,6 +377,7 @@ define([
 
 			var eventId = Uuid.v4();
 			var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
+			Log.l('eventTime = ', eventTime);
 
 			var event = {
 				eventId: eventId,
@@ -305,10 +392,13 @@ define([
 
 			EVENTS_BY_USERID_AND_TIME.get(user.userId, eventTime)
 			.then(function(eventsByUserIdAndTime) {
-				var existingEvents = eventsByUserIdAndTime.events;
+
 				var eventArr = [];
-				if (existingEvents) {
-					eventArr.push(existingEvents);
+				if (eventsByUserIdAndTime) {
+					var existingEvents = eventsByUserIdAndTime.events;
+					if (existingEvents) {
+						eventArr.push(existingEvents);
+					}
 				}
 				eventArr.push(event.eventId);
 
@@ -343,19 +433,38 @@ define([
 		Events.getEventsForMonth = function(user, monthCode) {
 			var deferred = Q.defer();
 
+			var eventTimeRange = Utils.makeMonthRange(monthCode);
+			Log.l(eventTimeRange);
+
 			var options = {
 				RangeKeyCondition: {
 					ComparisonOperator: 'BETWEEN',
 					AttributeValueList: [
-						'1994-11-05T13:15:30Z',
-						'2100-11-05T13:15:30Z'
+						eventTimeRange.begin,
+						eventTimeRange.end
 					]
 				}
 			};
 
 			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
 			.then(function(events) {
-				deferred.resolve(events);
+				if (events.length) {
+					Log.l('EVENTS!', events);
+					eventIds = events[0].events;
+					Log.l(eventIds);
+					if (eventIds.length) {
+						EVENTS.batchGet(eventIds)
+						.then(function(events) {
+							Log.l(events);
+							deferred.resolve(events);
+						})
+						.end();
+					} else {
+						deferred.resolve([]);
+					}	
+				} else {
+					deferred.resolve([]);
+				}
 			})
 			.end();
 

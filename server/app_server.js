@@ -167,12 +167,15 @@ requirejs([
 			Log.l('EVENT LIST ////////////////////');
 			Log.l();
 
+			Log.l('cookies =', req.signedCookies);
+
 			frontDoor(req)
 			.then(function(user) {
 				var monthCode = req.query['monthCode'];
 				if (monthCode) {
 					Storage.Events.getEventsForMonth(user, monthCode)
 					.then(function(events) {
+						
 						Log.l(events);
 						res.send(events);
 					})

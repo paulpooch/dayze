@@ -106,7 +106,7 @@ define([
 			var eventModel = _eventCollection.getByCid(eventCid);
 			console.log('saving', eventModel);
 			
-			eventModel.save({ name: 'someName'}, {
+			eventModel.save({}, {
 				wait: true,
 				success: function(model, response) {
 					console.log(1);
