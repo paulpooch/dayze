@@ -37,11 +37,11 @@ define([
 		},
 
 		onChange: function() {
-			console.log('EventCollection.onChange');
+
 		},
 
 		onReset: function() {
-			console.log('EventCollection.onReset');
+
 		},
 
 		initialize: function() {

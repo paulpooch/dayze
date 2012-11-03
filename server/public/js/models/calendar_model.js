@@ -29,7 +29,7 @@ define([
 		},
 
 		onEventCollectionChange: function() {
-			console.log('CalendarModel.onEventCollectionChange');
+			
 		},
 		///////////////////////////////////////////////////////////////////////
 

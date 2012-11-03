@@ -19,27 +19,47 @@
 <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
 <![endif]-->
 <header>
-    <div id="month_controls">
-        <h2 id="month_name">THIS IS MONTH NAME</h2>
-    </div>
-    <div id="account_view_holder">
-        <!-- AccountView -->
-    </div>
+    <div id="header_center_wrap">
+        <div id="header_center">
+            
+                <div class="month_button">
+                    <span id="month_name" class="month_heading"></span>
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
+                    <ul id="month_dropdown" class="dropdown-menu" >
+                        <li data-month-num="1"><a href="#">January</a></li>
+                        <li data-month-num="2"><a href="#">February</a></li>
+                        <li data-month-num="3"><a href="#">March</a></li>
+                        <li data-month-num="4"><a href="#">April</a></li>
+                        <li data-month-num="5"><a href="#">May</a></li>
+                        <li data-month-num="6"><a href="#">June</a></li>
+                        <li data-month-num="7"><a href="#">July</a></li>
+                        <li data-month-num="8"><a href="#">August</a></li>
+                        <li data-month-num="9"><a href="#">September</a></li>
+                        <li data-month-num="10"><a href="#">October</a></li>
+                        <li data-month-num="11"><a href="#">November</a></li>
+                        <li data-month-num="12"><a href="#">December</a></li>
+                    </ul>
+                </div><!--
+                <div id="year_name" class="month_heading"></div>-->
 
+        </div>
+    </div>
+    <div id="header_left">this is header left</div>
+    <div id="header_right">
+        <div id="account_view_holder">
+            <!-- AccountView -->
+        </div>
+    </div>
 </header>
 <div id="content">
-
     <div id="calendar_view_holder">
         <div id="calendar">
             <!-- CalendarView -->
         </div>
     </div> 
-
-
 	<div style="width: 90%;" id="day_view_holder" class="modal hidden fade" tabindex="-1" role="dialog">
         <!-- DayView -->
 	</div>
-
 </div>
 </body>
 </html>

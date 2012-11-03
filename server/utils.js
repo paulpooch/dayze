@@ -32,8 +32,6 @@ define(['q'], function(Q) {
 	};
 
 	Utils.makeISOWithDayAndTime = function(dayCode, time) {
-		console.log('makeISOWithDayAndTime');
-		console.log(dayCode, time);
 		var dParts = dayCode.split('-');
 		var tParts = time.split(' ');
 		var amPm = tParts[1];
@@ -48,8 +46,6 @@ define(['q'], function(Q) {
 		if (amPm == 'pm') {
 			hour += 12;
 		}
-
-		console.log(year, month, day, hour, minute);
 
 		if (year && month && day && hour) {
 			return new Date(year, month, day, hour, minute).toISOString();

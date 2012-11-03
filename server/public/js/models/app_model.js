@@ -59,6 +59,9 @@ define([
 
 		// Try to put every value in here so stuff is more obvious.
 		defaults: {
+			SUPPRESS_SERVER_CALLS: true,
+			WEEK_SCROLL_BUFFER: 50,
+			PAST_WEEKS_TO_SHOW: 20,
 			dayModalVisible: false,
 			accountCollection: null,
 			eventCollection: null,
@@ -104,15 +107,14 @@ define([
 		saveEvent: function() {
 			var eventCid = _dayModel.get('selectedEventId');
 			var eventModel = _eventCollection.getByCid(eventCid);
-			console.log('saving', eventModel);
 			
 			eventModel.save({}, {
 				wait: true,
 				success: function(model, response) {
-					console.log(1);
+
 				},
 				error: function(model, error) {
-					console.log(0);
+
 				}
 			});
 
@@ -121,8 +123,9 @@ define([
 		// TODO: This should be intelligent.
 		// Not repull a million times.
 		pullEventsForMonth: function(monthCode) {
-			console.log('pullEventsForMonth', monthCode);
-			_eventCollection.fetch({ data: $.param({ monthCode: monthCode }) });
+			if (!that.get('SUPPRESS_SERVER_CALLS')) {
+				_eventCollection.fetch({ data: $.param({ monthCode: monthCode }) });
+			}
 		},
 
 		initialize: function(options) {
@@ -153,8 +156,10 @@ define([
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 			
-			// Don't hammer dynamo please.
-			_accountModel.fetch();
+			if (!that.get('SUPPRESS_SERVER_CALLS')) {
+				_accountModel.fetch();
+			}
+
 
 		}
 

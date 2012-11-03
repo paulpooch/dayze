@@ -12,6 +12,7 @@ ONE TIME USE ITEMS CAN BE DONE INLINE.
 */
 
 html {
+  width:100%;
   background: url('../img/bg.jpg') no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -20,6 +21,7 @@ html {
 }
 
 body {
+  width:100%;
   background: transparent;
 }
 
@@ -40,31 +42,55 @@ header {
   border-bottom: 1px solid #000;
 }
 
+#header_left {
+  float: left;
+  width: 200px;
+  margin-left: -100%;
+}
+
+#header_center_wrap {
+  float: left;
+  width: 100%;
+  height: 100%;
+}
+
+#header_center {
+  height: 100%;
+  margin: 0 200px 0 200px;
+  min-width: 560px; /* 960 (#calender min-width) - header_left - header_right */
+  text-align: center;
+}
+
+#header_right {
+  float: left;
+  width: 200px;
+  margin-left: -200px;
+  margin-top: -5px;
+}
+
 #content {
   margin-top: 40px;
 }
 
-#month_controls {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    text-align: center;
+.month_button {
+  float: left;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #999;
 }
 
-#month_name {
-  color: #666;
-  margin-top: -1px;
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, 1);
-}
+  .month_button .dropdown-menu {
+    text-align: left;
+  }
 
-#account_view_holder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  margin-top: -5px;
-  text-align: right;
+.month_heading {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  line-height: 40px;
+  text-shadow: 2px 2px 1px rgba(0, 0, 0, 1), 
+    2px -2px 1px rgba(0, 0, 0, 1),
+    -2px 2px 1px rgba(0, 0, 0, 1),
+    -2px -2px 1px rgba(0, 0, 0, 1);
 }
 
 #user_dropdown {

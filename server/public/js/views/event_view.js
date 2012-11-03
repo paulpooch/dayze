@@ -33,10 +33,8 @@ define([
 		},
 
 		syncForm: function(e) {
-			console.log(1);
 			var target = $(e.currentTarget);
       		var data = {};
-      		console.log(target, data);
       		data[target.attr('id')] = target.val();
       		this.model.set(data);
 		},

@@ -23,8 +23,6 @@ define([
 		template: _.template(DayTemplate),
 
 		render: function() {
-			//console.log('render day');
-			//console.log(that.model.toJSON());
 			this.$el.html(that.template(that.model.toJSON()));
 			_appModel.renderEventView(this.$el);
 		},
