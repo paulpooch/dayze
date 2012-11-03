@@ -19,14 +19,12 @@ define([
 		_appModel,
 		_eventCollection,
 		_heightOfOneWeek,
-		_prevY,
 		_weekElements,
 		_template,
-		_yFirstWeek,
-		_yLastWeek,
 		_heightOfHeader = 50,
 		
 		_$window,
+		_$document,
 		_$calendar,
 		_$monthName,
 		_$yearName,
@@ -71,13 +69,6 @@ define([
 				that.renderWeek(startDate, direction, alsoRemove);
 				startDate.setDate(startDate.getDate() + diff);
 			}
-			that.setYLimits();
-		},
-
-		setYLimits: function() {
-			var weeks = _$calendar.find('.week');
-			_yFirstWeek = $(weeks).eq(0).offset().top;
-			_yLastWeek = $(weeks).eq(weeks.length - 1).offset().top;
 		},
 
 		scrollToDay: function(dayDate) {
@@ -100,6 +91,7 @@ define([
 		},
 
 		infiniteScroll: function(direction) {
+			$(document).mouseup();
 			var alsoRemove = true;
 			if (direction) {
 				// Forwards.
@@ -169,26 +161,14 @@ define([
 			if (!_heightOfOneWeek) {
 				_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
 			}
-			if (Math.abs(scrollTop - _prevY) > _heightOfOneWeek / 2) {
-				_scrollDisabled = true;
-				_prevY = _$window.scrollTop();
-				var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);
-				
-				// We cheat and consider the second displayed week for Month display.
-				// Things make more sense this way.  Hence the ++ below.
-				if (hiddenWeekCount != _weekElements.length - 1) {
-					hiddenWeekCount++;
-				}
-				
-				if (scrollTop >= _yLastWeek - 500) {
-					that.infiniteScroll(1);	
-				} else if (scrollTop <= _yFirstWeek + 500) {
-					that.infiniteScroll(0);	
-				} else {
-					var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
-					console.log('Neither.', 'hiddenweekcount', hiddenWeekCount, 'firstVisibleWeek', firstVisibleWeek);
-					that.setActiveMonth(firstVisibleWeek.getMonth() + 1, firstVisibleWeek.getFullYear());
-				}
+			var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);				
+			if (scrollTop >= _$document.height() - _$window.height() - 200) {
+  				that.infiniteScroll(1);	
+			} else if (scrollTop <= 200) {
+				that.infiniteScroll(0);	
+			} else {
+				var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
+				that.setActiveMonth(firstVisibleWeek.getMonth() + 1, firstVisibleWeek.getFullYear());
 			}
 		},
 
@@ -255,6 +235,7 @@ define([
 
 			//this.model.bind('change', render);
 			_$window = $(window);
+			_$document = $(document);
 			_$calendar = that.$el.find('#calendar');
 			_$monthName = $('#month_name');
 			_$yearName = $('#year_name');
