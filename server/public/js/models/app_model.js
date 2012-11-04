@@ -160,7 +160,6 @@ define([
 				_accountModel.fetch();
 			}
 
-
 		}
 
 	});

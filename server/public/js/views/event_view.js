@@ -5,18 +5,71 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
+	'gmaps',
 
 	'text!templates/event_template.html',
 ], function(
 	jQuery,
 	_,
 	Backbone,
+	GMaps,
 
 	EventTemplate
 ) {
 
 	var that,
 		_appModel;
+
+	/* Try a standalone one to isolate variables 
+	var Map = (function() {
+
+		var Map = {},
+			gmap,
+			isGmapsLoaded = false;
+
+		var onGmapsLoaded = function() {
+			console.log(3);
+			isGmapsLoaded = true;
+			console.log(4);
+			Map.init();
+		};
+
+		Map.init = function() {
+			if (!isGmapsLoaded) {
+				// Load the map scripts
+				google.load('maps', '3', { other_params: 'sensor=true' });
+				console.log(1);
+				google.setOnLoadCallback(onGmapsLoaded);
+				console.log(2);
+			} else {
+				var options = {
+					zoom: 0,
+					center: new google.maps.LatLng(0, 0),
+					mapTypeId: google.maps.MapTypeId.ROADMAP
+				};
+				gmap = new google.maps.Map(document.getElementById('event_map'), options);
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(currPosCallback);
+				} else {
+					alert('The browser does not support geolocation');
+				}
+			}
+		};
+
+		var currPosCallback = function(pos) {
+			var userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+			var marker = new google.maps.Marker({
+				position: userLatLng,
+				map: gmap
+			});
+			gmap.setCenter(userLatLng);
+			gmap.setZoom(15);
+		};
+
+		return Map;
+
+	})();
+	*/
 
 	var EventView = Backbone.View.extend({
 
@@ -29,7 +82,9 @@ define([
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'change input': 'syncForm',
-			'change textarea': 'syncForm'
+			'change textarea': 'syncForm',
+			'change #location': 'mapLocation',
+			'click #location_button': 'mapLocation'
 		},
 
 		syncForm: function(e) {
@@ -37,6 +92,12 @@ define([
       		var data = {};
       		data[target.attr('id')] = target.val();
       		this.model.set(data);
+		},
+
+		mapLocation: function() {
+			console.log(google);
+			//var loc = $('#location').val();
+			//Map.init();
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -59,11 +120,7 @@ define([
 		},
 
 		initialize: function(options) {
-			// This is really important.
-			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
-			
-			// VARS
 			that = this;
 			_appModel = options.appModel;
 			

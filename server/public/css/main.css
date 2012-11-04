@@ -11,6 +11,8 @@ ONE TIME USE ITEMS CAN BE DONE INLINE.
 
 */
 
+/* GENERAL ------------------------------------------------------------------*/
+
 html {
   width:100%;
   background: url('../img/bg.jpg') no-repeat center center fixed; 
@@ -24,6 +26,12 @@ body {
   width:100%;
   background: transparent;
 }
+
+#content {
+  margin-top: 40px;
+}
+
+/* HEADER -------------------------------------------------------------------*/
 
 header {
   position: fixed;
@@ -68,10 +76,6 @@ header {
   margin-top: -5px;
 }
 
-#content {
-  margin-top: 40px;
-}
-
 #month_button_wrap {
   float: left;
   border-left: 1px solid #999;
@@ -86,11 +90,11 @@ header {
   border-right: 1px solid #999;
 }
 
-.month_button:hover {
-  background: -moz-linear-gradient(#ddd, #bbb);
-  background: -webkit-linear-gradient(#ddd, #bbb);
-  background: -o-linear-gradient(#ddd, #bbb);
-}
+  .month_button:hover {
+    background: -moz-linear-gradient(#ddd, #bbb);
+    background: -webkit-linear-gradient(#ddd, #bbb);
+    background: -o-linear-gradient(#ddd, #bbb);
+  }
 
   .month_button .dropdown-menu {
     text-align: left;
@@ -130,11 +134,15 @@ header {
     float: right;
 }
 
+/* USER MODAL ---------------------------------------------------------------*/
+
 #user_modal {
   text-align: left;
   width: 380px;
   margin: -200px 0 0 -190px;
 }
+
+/* CALENDAR -----------------------------------------------------------------*/
 
 #calendar {   
     margin: 30px auto;
@@ -198,6 +206,8 @@ header {
         rgba(0,0,0,0.7) 1px  -1px;
 }
 
+/* DAY MODAL ----------------------------------------------------------------*/
+
 #day_view_holder {
   width: 90%;         /* Width must be specified inline in index.dust */
   margin-left: -45%;  /* Must be (width / 2) */
@@ -219,14 +229,10 @@ header {
     padding-top: 70px;
   }
 
-
-
-
-
-
-
-
-
+#event_map {
+  width: 100%;
+  height: 400px;
+}
 
 /*///////////////////////////////////////////////////////////////////////////*/
 /* BOOTSTRAP OVERRIDES */

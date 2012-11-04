@@ -37,6 +37,8 @@ require.config({
 		text: 'vendor/require/text',
 		modernizr: 'vendor/modernizr/modernizr',
 		bootstrap: 'vendor/bootstrap/bootstrap',
+		google: 'vendor/google/google',
+		gmaps: 'vendor/google/gmaps',
 		plugins: 'plugins'
 	}
 });

@@ -280,8 +280,6 @@ define([
 				$(dropdowns[i]).css({ left: left + 'px' });
 			}
 
-
-
 		}	
 
 	});
