@@ -54,3 +54,10 @@ $(function() {
 	});
 
 });
+
+
+google.load('maps', '3');
+function mapInit() {
+	
+}
+google.setOnLoadCallback(mapInit);

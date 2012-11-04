@@ -28,7 +28,8 @@ define([
 		_$calendar,
 		_$monthName,
 		_$yearName,
-		_$monthDropdown;
+		_$monthDropdown,
+		_$yearDropdown;
 	
 
 	var CalendarView = Backbone.View.extend({
@@ -78,10 +79,23 @@ define([
 			that.setActiveMonth(dayDate.getMonth() + 1, dayDate.getFullYear());
 		},
 
+		displayYear: function(yearNum) {
+			_$yearName.text(yearNum);
+			var y = Number(yearNum);
+			var html = [];
+			for (var i = y - 3; i < y + 5; i++) {
+				if (i == y) {
+					html.push('<li data-year-num="' + i + '" class="disabled"><a href="#">' + i + '</a></li>');
+				}
+				html.push('<li data-year-num="' + i + '"><a href="#">' + i + '</a></li>');
+			}
+			_$yearDropdown.html(html.join(''));
+		},
+
 		setActiveMonth: function(monthNum, yearNum) {
 			var currentMonthText = that.model.get('monthNames')[monthNum - 1];
 			_$monthName.text(currentMonthText);
-			_$yearName.text(yearNum);
+			that.displayYear(yearNum);
 
 			var monthCode = yearNum + '-' + monthNum;
 			that.model.set('monthCode', monthCode);
@@ -125,6 +139,13 @@ define([
 		onMonthDropdownSelect: function(e) {
 			var monthNum = $(e.target).parent().data('month-num');
 			var yearNum = that.model.get('monthCode').split('-')[0];
+			var targetDate = new Date(yearNum, monthNum - 1, 1);
+			that.jumpToDate(targetDate);
+		},
+
+		onYearDropdownSelect: function(e) {
+			var monthNum = that.model.get('monthCode').split('-')[1];
+			var yearNum = $(e.target).parent().data('year-num');
 			var targetDate = new Date(yearNum, monthNum - 1, 1);
 			that.jumpToDate(targetDate);
 		},
@@ -240,12 +261,14 @@ define([
 			_$monthName = $('#month_name');
 			_$yearName = $('#year_name');
 			_$monthDropdown = $('#month_dropdown');
+			_$yearDropdown = $('#year_dropdown');
 			_prevY = _$window.scrollTop();
 
 			// BINDINGS
 			// Most of these reach into header bar (global els), not limited to $el.
 			_$window.scroll(that.onScroll);
 			_$monthDropdown.on('click', 'li', that.onMonthDropdownSelect);
+			_$yearDropdown.on('click', 'li', that.onYearDropdownSelect);
 			_$monthName.parents('.month_button').on('click', that.onMonthNameClick);
 			_$yearName.parents('.month_button').on('click', that.onYearNameClick);
 			_eventCollection.on('reset', that.onEventCollectionReset);
@@ -256,6 +279,8 @@ define([
 				var left = dropdowns[i].parentNode.offsetLeft;
 				$(dropdowns[i]).css({ left: left + 'px' });
 			}
+
+
 
 		}	
 

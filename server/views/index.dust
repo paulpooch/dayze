@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/bootstrap.css">
 <link rel="stylesheet" href="css/font-awesome.css">
 <link rel="stylesheet" href="css/main.css">
+<script src="http://www.google.com/jsapi"></script>
 <script data-main="js/main" src="js/vendor/require/require.js"></script>
 </head>
 <body>
@@ -21,9 +22,10 @@
 <header>
     <div id="header_center_wrap">
         <div id="header_center">
-            
+                
+            <div id="month_button_wrap">
                 <div class="month_button">
-                    <span id="month_name" class="month_heading"></span>
+                    <span id="month_name" class="month_heading"></span>&nbsp;&nbsp;
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
                     <ul id="month_dropdown" class="dropdown-menu" >
                         <li data-month-num="1"><a href="#">January</a></li>
@@ -39,12 +41,18 @@
                         <li data-month-num="11"><a href="#">November</a></li>
                         <li data-month-num="12"><a href="#">December</a></li>
                     </ul>
-                </div><!--
-                <div id="year_name" class="month_heading"></div>-->
+                </div>
+                <div class="month_button">
+                    <span id="year_name" class="month_heading"></span>&nbsp;&nbsp;
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
+                    <ul id="year_dropdown" class="dropdown-menu" >
+                    </ul>
+                </div>
+            </div>
 
         </div>
     </div>
-    <div id="header_left">this is header left</div>
+    <div id="header_left"></div>
     <div id="header_right">
         <div id="account_view_holder">
             <!-- AccountView -->
