@@ -1,10 +1,16 @@
-define(['http://www.google.com/jsapi?key=api_key_here&callback=define'], {
-	load: function(name, req, load, config) {
-		var request = name.split('/');
-		google.load(request[0], request[1], { 
-			callback: load, 
-			language: 'en', 
-			other_params: ((typeof request[2] === 'string')?request[2]:'') 
-		}); 
-	} 
-}); 
+define(
+	[ "async!http://maps.google.com/maps/api/js?key=AIzaSyDIc1qNTUvLvybuC4-dGGq6zWT0FMaJpYA&sensor=true!callback" ],
+	function() {
+		return {
+			addMapToCanvas: function( mapCanvas ) {
+				var myOptions = {
+					center: new google.maps.LatLng( -34.397, 150.644 ),
+					zoom: 8,
+					mapTypeId: google.maps.MapTypeId.ROADMAP
+				};
+
+				var map = new google.maps.Map( mapCanvas, myOptions );			
+			}		
+		}
+	}
+);

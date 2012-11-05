@@ -5,14 +5,14 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'gmaps',
+	'google',
 
 	'text!templates/event_template.html',
 ], function(
 	jQuery,
 	_,
 	Backbone,
-	GMaps,
+	Google,
 
 	EventTemplate
 ) {
@@ -95,7 +95,11 @@ define([
 		},
 
 		mapLocation: function() {
-			console.log(google);
+
+			var mapCanvas = $('#event_map').get(0);
+			Google.addMapToCanvas(mapCanvas);
+
+			//console.log(google);
 			//var loc = $('#location').val();
 			//Map.init();
 		},
