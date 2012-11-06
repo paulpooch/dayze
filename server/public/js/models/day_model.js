@@ -28,7 +28,8 @@ define([
 				var d = new Date();
 				return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).toLocaleDateString();
 			})(),
-			selectedEventId: null
+			selectedEventId: null,
+			isActiveView: false
 		},
 
 		checkEventCollectionForNewEvents: function() {

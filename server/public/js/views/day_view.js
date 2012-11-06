@@ -78,6 +78,15 @@ define([
 		onSelectedEventIdChange: function() {
 			that.update();
 		},
+
+		onIsActiveViewChange: function() {
+			if (that.model.get('isActiveView')) {
+				_$headerEls.show();
+				_$headerEls.find('#day_display_date').text(that.model.get('displayDate'));
+			} else {
+				_$headerEls.hide();
+			}
+		},
 		// END MODEL EVENTS ///////////////////////////////////////////////////
 
 		initialize: function(options) {
@@ -88,11 +97,13 @@ define([
 			// VARS
 			that = this;
 			_appModel = options.appModel;
+			_$headerEls = $('.day_view_header');
 			
 			// BINDINGS
 			that.model.on('change:dayCode', that.update);
 			that.model.on('change:todaysEvents', that.onTodaysEventsChange);
 			that.model.on('change:selectedEventId', that.onSelectedEventIdChange);
+			that.model.on('change:isActiveView', that.onIsActiveViewChange);
 
 			that.update();
 		}

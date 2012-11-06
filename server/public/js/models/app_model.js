@@ -59,10 +59,13 @@ define([
 
 		// Try to put every value in here so stuff is more obvious.
 		defaults: {
+			// Turns off initial model fetches so you can do UI development without crushing server.
 			SUPPRESS_SERVER_CALLS: true,
+
 			WEEK_SCROLL_BUFFER: 50,
 			PAST_WEEKS_TO_SHOW: 20,
-			dayModalVisible: false,
+			
+			activeView: 'calendar',
 			accountCollection: null,
 			eventCollection: null,
 			accountModel: null,
@@ -104,7 +107,7 @@ define([
 			_dayModel.set('dayCode', dayCode);
 
 			// Trigger modal in app_view.
-			that.set('dayModalVisible', true); 
+			that.set('activeView', 'day'); 
 		},
 
 		saveEvent: function() {

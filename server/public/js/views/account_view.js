@@ -15,10 +15,11 @@ define([
 	AccountTemplate
 ) {
 
-	var _userButton;
-	var _userModal;
-	var _userEmail;
-	var _userPassword;
+	var that,
+		_userButton,
+		_userModal,
+		_userEmail,
+		_userPassword;
 
 	var AccountView = Backbone.View.extend({
 
@@ -66,6 +67,9 @@ define([
 		},
 
 	    initialize: function (options) {
+	    	_.bindAll(this);
+			that = this;
+
 	    	var options = options || {};
 	        _.bindAll(this);
 	        this.model.on('change', this.render, this);

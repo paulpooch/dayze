@@ -22,7 +22,11 @@
     <div id="header_center_wrap">
         <div id="header_center">
                 
-            <div id="month_button_wrap">
+            <div class="day_view_header" style="display: none;">
+                <h2 id="day_display_date" style="margin-top: 1px;"></h2>
+            </div>
+
+            <div class="calendar_view_header" style="display: none;">
                 <div class="month_button">
                     <span id="month_name" class="month_heading"></span>&nbsp;&nbsp;
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
@@ -51,7 +55,13 @@
 
         </div>
     </div>
-    <div id="header_left"></div>
+    <div id="header_left">
+
+        <div class="day_view_header" style="display: none;">
+            morestuff
+        </div>
+
+    </div>
     <div id="header_right">
         <div id="account_view_holder">
             <!-- AccountView -->
@@ -59,14 +69,14 @@
     </div>
 </header>
 <div id="content">
+    <div id="day_view_holder">
+        <!-- DayView -->
+    </div>
     <div id="calendar_view_holder">
         <div id="calendar">
             <!-- CalendarView -->
         </div>
     </div> 
-	<div style="width: 90%;" id="day_view_holder" class="modal hidden fade" tabindex="-1" role="dialog">
-        <!-- DayView -->
-	</div>
 </div>
 </body>
 </html>

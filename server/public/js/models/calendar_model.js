@@ -20,7 +20,8 @@ define([
 
 		defaults: {
 			monthNames: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
-			monthCode: ''
+			monthCode: '',
+			isActiveView: false
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////

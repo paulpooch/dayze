@@ -11,42 +11,53 @@ define([
 	Backbone
 ) {
 
-	var that;
+	var that,
+		_$dayViewHolder,
+		_$calendarViewHolder;
 
 	var AppView = Backbone.View.extend({
 
 		render: function() {
-			this.model.renderCalendarView();
+			that.model.renderCalendarView();
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			'hide #day_view_holder': 'onModalHide'
-		},
-
-		onModalHide: function() {
-			this.model.set('dayModalVisible', false);
 		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-		onDayModalVisibleChange: function() {
-			if (that.model.get('dayModalVisible')) {
-				$('#day_view_holder').modal('show');
+		onActiveViewChange: function() {
+			var currentView = that.model.get('activeView');
+			switch (currentView) {
+				case 'calendar':
+					_$dayViewHolder.hide();
+					_$calendarViewHolder.show();
+					that.model.get('dayModel').set('isActiveView', false);
+					that.model.get('calendarModel').set('isActiveView', true);
+					break;
+				case 'day':
+					_$calendarViewHolder.hide();
+					_$dayViewHolder.show();
+					that.model.get('calendarModel').set('isActiveView', false);
+					that.model.get('dayModel').set('isActiveView', true);
+					break;
 			}
 		},
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
-			// This is really important.
-			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 			that = this;
 			
-			options = options || {};		
-			this.model.on('change:dayModalVisible', that.onDayModalVisibleChange);
+			options = options || {};
+			_$calendarViewHolder = $('#calendar_view_holder');
+			_$dayViewHolder = $('#day_view_holder');
 
-			this.render();
+			// MODEL EVENTS
+			that.model.on('change:activeView', that.onActiveViewChange);
+			that.onActiveViewChange();
+			that.render();
 		}
 
 	});

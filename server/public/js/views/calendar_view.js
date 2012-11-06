@@ -22,6 +22,7 @@ define([
 		_weekElements,
 		_template,
 		_heightOfHeader = 50,
+		_isActiveView = false,
 		
 		_$window,
 		_$document,
@@ -29,22 +30,95 @@ define([
 		_$monthName,
 		_$yearName,
 		_$monthDropdown,
-		_$yearDropdown;
+		_$yearDropdown,
+		_$headerEls;
 	
 
 	var CalendarView = Backbone.View.extend({
 
 		render: function() {
 			that.jumpToDate(new Date());
-			/*
-			var weekDate = new Date();
-			var day = weekDate.getDay();
-			var diff = weekDate.getDate() - day;
-			weekDate.setDate(diff);
-			weekDate = new Date(weekDate.getFullYear(), weekDate.getMonth(), weekDate.getDate(), 0, 0, 0, 0);
-			that.jumpToDate(weekDate);
-			*/
 		},
+
+		// VIEW EVENTS ////////////////////////////////////////////////////////
+		events: {
+			'click .day': 'onDayClick'
+		},
+
+		onDayClick: function(e) {
+			var dayCode = $(e.target).data('day-code');
+			_appModel.displayDay(dayCode);
+		},
+
+		onMonthDropdownSelect: function(e) {
+			var monthNum = $(e.target).parent().data('month-num');
+			var yearNum = that.model.get('monthCode').split('-')[0];
+			var targetDate = new Date(yearNum, monthNum - 1, 1);
+			that.jumpToDate(targetDate);
+		},
+
+		onYearDropdownSelect: function(e) {
+			var monthNum = that.model.get('monthCode').split('-')[1];
+			var yearNum = $(e.target).parent().data('year-num');
+			var targetDate = new Date(yearNum, monthNum - 1, 1);
+			that.jumpToDate(targetDate);
+		},
+
+		onMonthNameClick: function() {
+			_$monthDropdown.toggle();
+		},
+
+		onYearNameClick: function() {
+			_$yearDropdown.toggle();
+		},
+
+		onScroll: function() {
+			if (_isActiveView) {
+				var scrollTop = _$window.scrollTop();
+				if (!_heightOfOneWeek) {
+					_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
+				}
+				var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);				
+				if (scrollTop >= _$document.height() - _$window.height() - 200) {
+	  				that.infiniteScroll(1);	
+				} else if (scrollTop <= 200) {
+					that.infiniteScroll(0);	
+				} else {
+					var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
+					that.setActiveMonth(firstVisibleWeek.getMonth() + 1, firstVisibleWeek.getFullYear());
+				}
+			}
+		},
+		///////////////////////////////////////////////////////////////////////
+
+		// MODEL EVENTS ///////////////////////////////////////////////////////
+		onEventCollectionReset: function() {
+			var alreadyResetDays = {};
+			_eventCollection.each(function(event) {
+				var dayCode = event.get('eventTime').split('T')[0];
+				var dayEl = $('.day[data-day-code=' + dayCode + ']');
+				if (!alreadyResetDays[dayCode]) {
+					alreadyResetDays[dayCode] = 1;
+					dayEl.find('.event_holder').empty();
+				}
+				dayEl
+				.addClass('has_event')
+				.find('.event_holder')
+				.append('<div class="label label-info">' + event.get('name') + '</div>');
+			});
+		},
+
+		onIsActiveViewChange: function() {
+			if (that.model.get('isActiveView')) {
+				_$headerEls.show();	
+				that.doUiTweaks();
+				_isActiveView = true;
+			} else {
+				_$headerEls.hide();
+				_isActiveView = false;
+			}
+		},
+		///////////////////////////////////////////////////////////////////////
 
 		jumpToDate: function(weekDate) {
 			_$calendar.empty();
@@ -79,6 +153,18 @@ define([
 			that.setActiveMonth(dayDate.getMonth() + 1, dayDate.getFullYear());
 		},
 
+		setActiveMonth: function(monthNum, yearNum) {
+			var currentMonthText = that.model.get('monthNames')[monthNum - 1];
+			_$monthName.text(currentMonthText);
+			that.displayYear(yearNum);
+
+			var monthCode = yearNum + '-' + monthNum;
+			that.model.set('monthCode', monthCode);
+
+			_$monthDropdown.find('li').removeClass('disabled');
+			_$monthDropdown.find('li[data-month-num=' + monthNum + ']').addClass('disabled');
+		},
+
 		displayYear: function(yearNum) {
 			_$yearName.text(yearNum);
 			var y = Number(yearNum);
@@ -90,18 +176,6 @@ define([
 				html.push('<li data-year-num="' + i + '"><a href="#">' + i + '</a></li>');
 			}
 			_$yearDropdown.html(html.join(''));
-		},
-
-		setActiveMonth: function(monthNum, yearNum) {
-			var currentMonthText = that.model.get('monthNames')[monthNum - 1];
-			_$monthName.text(currentMonthText);
-			that.displayYear(yearNum);
-
-			var monthCode = yearNum + '-' + monthNum;
-			that.model.set('monthCode', monthCode);
-
-			_$monthDropdown.find('li').removeClass('disabled');
-			_$monthDropdown.find('li[data-month-num=' + monthNum + ']').addClass('disabled');
 		},
 
 		infiniteScroll: function(direction) {
@@ -125,70 +199,12 @@ define([
 			}
 		},
 
-		// VIEW EVENTS ////////////////////////////////////////////////////////
-		events: {
-			'click .day': 'onDayClick'
-		},
-
-		onDayClick: function(e) {
-			var dayCode = $(e.target).data('day-code');
-			_appModel.displayDay(dayCode);
-		},
-
-		onMonthDropdownSelect: function(e) {
-			var monthNum = $(e.target).parent().data('month-num');
-			var yearNum = that.model.get('monthCode').split('-')[0];
-			var targetDate = new Date(yearNum, monthNum - 1, 1);
-			that.jumpToDate(targetDate);
-		},
-
-		onYearDropdownSelect: function(e) {
-			var monthNum = that.model.get('monthCode').split('-')[1];
-			var yearNum = $(e.target).parent().data('year-num');
-			var targetDate = new Date(yearNum, monthNum - 1, 1);
-			that.jumpToDate(targetDate);
-		},
-
-		onMonthNameClick: function() {
-			_$monthDropdown.toggle();
-		},
-
-		onYearNameClick: function() {
-			_$yearDropdown.toggle();
-		},
-		///////////////////////////////////////////////////////////////////////
-		
-		// MODEL EVENTS ///////////////////////////////////////////////////////
-		onEventCollectionReset: function() {
-			var alreadyResetDays = {};
-			_eventCollection.each(function(event) {
-				var dayCode = event.get('eventTime').split('T')[0];
-				var dayEl = $('.day[data-day-code=' + dayCode + ']');
-				if (!alreadyResetDays[dayCode]) {
-					alreadyResetDays[dayCode] = 1;
-					dayEl.find('.event_holder').empty();
-				}
-				dayEl
-				.addClass('has_event')
-				.find('.event_holder')
-				.append('<div class="label label-info">' + event.get('name') + '</div>');
-			});
-		},
-		///////////////////////////////////////////////////////////////////////
-		
-		onScroll: function() {
-			var scrollTop = _$window.scrollTop();
-			if (!_heightOfOneWeek) {
-				_heightOfOneWeek = _$calendar.find('.day_wrap:eq(0)').height();
-			}
-			var hiddenWeekCount = Math.ceil(scrollTop / _heightOfOneWeek);				
-			if (scrollTop >= _$document.height() - _$window.height() - 200) {
-  				that.infiniteScroll(1);	
-			} else if (scrollTop <= 200) {
-				that.infiniteScroll(0);	
-			} else {
-				var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
-				that.setActiveMonth(firstVisibleWeek.getMonth() + 1, firstVisibleWeek.getFullYear());
+		doUiTweaks: function() {
+			// Dropdown positioning bs.  Can we do this without js?
+			var dropdowns = $('.month_button .dropdown-menu');
+			for (var i = 0; i < dropdowns.length; i++) {
+				var left = dropdowns[i].parentNode.offsetLeft;
+				$(dropdowns[i]).css({ left: left + 'px' });
 			}
 		},
 
@@ -252,8 +268,6 @@ define([
 			var options = options || {};
 			_appModel = options.appModel;
 			_eventCollection = _appModel.get('eventCollection');
-
-			//this.model.bind('change', render);
 			_$window = $(window);
 			_$document = $(document);
 			_$calendar = that.$el.find('#calendar');
@@ -261,24 +275,19 @@ define([
 			_$yearName = $('#year_name');
 			_$monthDropdown = $('#month_dropdown');
 			_$yearDropdown = $('#year_dropdown');
+			_$headerEls = $('.calendar_view_header');
 			_prevY = _$window.scrollTop();
 
-			// BINDINGS
+			// VIEW EVENTS
 			// Most of these reach into header bar (global els), not limited to $el.
 			_$window.scroll(that.onScroll);
 			_$monthDropdown.on('click', 'li', that.onMonthDropdownSelect);
 			_$yearDropdown.on('click', 'li', that.onYearDropdownSelect);
 			_$monthName.parents('.month_button').on('click', that.onMonthNameClick);
 			_$yearName.parents('.month_button').on('click', that.onYearNameClick);
+			// MODEL EVENTS
 			_eventCollection.on('reset', that.onEventCollectionReset);
-
-			// Dropdown positioning bs.  Can we do this without js?
-			var dropdowns = $('.month_button .dropdown-menu');
-			for (var i = 0; i < dropdowns.length; i++) {
-				var left = dropdowns[i].parentNode.offsetLeft;
-				$(dropdowns[i]).css({ left: left + 'px' });
-			}
-
+			that.model.bind('change:isActiveView', that.onIsActiveViewChange);
 		}	
 
 	});
