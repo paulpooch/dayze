@@ -28,10 +28,16 @@ require.config({
 			deps: [
 				'jquery'
 			]
+		},
+		'jqueryui': {
+			deps: [
+				'jquery'
+			]
 		}
 	},
 	paths: {
 		jquery: 'vendor/jquery/jquery.min',
+		jqueryui: 'vendor/jquery/jquery-ui.min',
 		underscore: 'vendor/underscore/underscore',
 		backbone: 'vendor/backbone/backbone',
 		text: 'vendor/require/text',

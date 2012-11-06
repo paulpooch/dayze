@@ -71,6 +71,12 @@ define([
 			eventModel: null
 		},
 
+		// MODEL EVENTS ///////////////////////////////////////////////////////
+		onDayModalVisibleChange: function() {
+			var vis = that.get('dayModalVisible');
+			_calendarView.setInfiniteScroll(!vis);
+		},
+
 		oauth2Callback: function() {
 			_accountView.oauth2Callback();
 		},
@@ -159,6 +165,8 @@ define([
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch();
 			}
+
+			that.bind('change:dayModalVisible', that.onDayModalVisibleChange);
 
 		}
 

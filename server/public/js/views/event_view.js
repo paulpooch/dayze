@@ -18,72 +18,22 @@ define([
 ) {
 
 	var that,
-		_appModel;
-
-	/* Try a standalone one to isolate variables 
-	var Map = (function() {
-
-		var Map = {},
-			gmap,
-			isGmapsLoaded = false;
-
-		var onGmapsLoaded = function() {
-			console.log(3);
-			isGmapsLoaded = true;
-			console.log(4);
-			Map.init();
-		};
-
-		Map.init = function() {
-			if (!isGmapsLoaded) {
-				// Load the map scripts
-				google.load('maps', '3', { other_params: 'sensor=true' });
-				console.log(1);
-				google.setOnLoadCallback(onGmapsLoaded);
-				console.log(2);
-			} else {
-				var options = {
-					zoom: 0,
-					center: new google.maps.LatLng(0, 0),
-					mapTypeId: google.maps.MapTypeId.ROADMAP
-				};
-				gmap = new google.maps.Map(document.getElementById('event_map'), options);
-				if (navigator.geolocation) {
-					navigator.geolocation.getCurrentPosition(currPosCallback);
-				} else {
-					alert('The browser does not support geolocation');
-				}
-			}
-		};
-
-		var currPosCallback = function(pos) {
-			var userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-			var marker = new google.maps.Marker({
-				position: userLatLng,
-				map: gmap
-			});
-			gmap.setCenter(userLatLng);
-			gmap.setZoom(15);
-		};
-
-		return Map;
-
-	})();
-	*/
+		_appModel,
+		_delayedMapAction;
 
 	var EventView = Backbone.View.extend({
 
 		template: _.template(EventTemplate),
 
 		render: function() {
-			this.$el.html(that.template(that.model.toJSON()));
+			that.$el.html(that.template(that.model.toJSON()));
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
+			'keyup #location': 'mapLocation',
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
-			'change #location': 'mapLocation',
 			'click #location_button': 'mapLocation'
 		},
 
@@ -95,19 +45,19 @@ define([
 		},
 
 		mapLocation: function() {
-
-			var mapCanvas = $('#event_map').get(0);
-			Google.addMapToCanvas(mapCanvas);
-
-			//console.log(google);
-			//var loc = $('#location').val();
-			//Map.init();
+			console.log('WARNING - mapLocation is currently useless.')
+			if (_delayedMapAction) {
+				clearTimeout(_delayedMapAction);
+			}
+			_delayedMapAction = setTimeout(function() {
+				var loc = $('#location').val();
+				console.log(loc);
+			}, 2000);
 		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		update: function() {
-			
 			that.render();
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -115,6 +65,14 @@ define([
 		setModel: function(m) {
 			that.model = m;
 			that.update();
+			that.addMap();			
+		},
+
+		addMap: function() {
+			setTimeout(function() {
+				Google.Maps.addMapToCanvas($('#event_map').get(0));
+				Google.Maps.setupGeocodeAutocomplete($('#location').eq(0));
+			}, 1000);	
 		},
 
 		setElAndRender: function(el) {
@@ -126,8 +84,9 @@ define([
 		initialize: function(options) {
 			_.bindAll(this);
 			that = this;
+
 			_appModel = options.appModel;
-			
+
 			// BINDINGS
 			that.update();
 		}
