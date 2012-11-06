@@ -22,7 +22,6 @@ define([
 		_weekElements,
 		_template,
 		_heightOfHeader = 50,
-		_infiniteScrollOn = true,
 		
 		_$window,
 		_$document,
@@ -45,11 +44,6 @@ define([
 			weekDate = new Date(weekDate.getFullYear(), weekDate.getMonth(), weekDate.getDate(), 0, 0, 0, 0);
 			that.jumpToDate(weekDate);
 			*/
-		},
-
-		setInfiniteScroll: function(b) {
-			_infiniteScrollOn = b;
-			// Maybe do something so scrolling occurs inside modal here.
 		},
 
 		jumpToDate: function(weekDate) {

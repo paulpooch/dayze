@@ -65,7 +65,7 @@ define([
 		setModel: function(m) {
 			that.model = m;
 			that.update();
-			that.addMap();			
+			that.addMap();	
 		},
 
 		addMap: function() {

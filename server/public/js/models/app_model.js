@@ -72,11 +72,6 @@ define([
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-		onDayModalVisibleChange: function() {
-			var vis = that.get('dayModalVisible');
-			_calendarView.setInfiniteScroll(!vis);
-		},
-
 		oauth2Callback: function() {
 			_accountView.oauth2Callback();
 		},
@@ -107,7 +102,9 @@ define([
 			
 			_dayModel.set('events', events);
 			_dayModel.set('dayCode', dayCode);
-			that.set('dayModalVisible', true);
+
+			// Trigger modal in app_view.
+			that.set('dayModalVisible', true); 
 		},
 
 		saveEvent: function() {
@@ -165,8 +162,6 @@ define([
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch();
 			}
-
-			that.bind('change:dayModalVisible', that.onDayModalVisibleChange);
 
 		}
 

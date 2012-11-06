@@ -161,7 +161,8 @@ header {
     height: 200px;
 }
 
-.day {   
+.day {
+    cursor: pointer;
     margin: 0 10px 10px 0;
     height: 95%;
     width: 95%;
@@ -241,6 +242,10 @@ header {
 .modal-body {
   padding: 0;
   max-height: none;
+}
+
+img { 
+  max-width: none; /* Was messing up gmaps markers. */
 }
 
 /*///////////////////////////////////////////////////////////////////////////*/

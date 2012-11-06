@@ -25,7 +25,9 @@ define([
 			_geocoder = new google.maps.Geocoder();
 			_marker = new google.maps.Marker({
     			map: _map,
-    			draggable: true
+    			draggable: true,
+    			animation: google.maps.Animation.DROP,
+    			rotate: 0
     		});
 		};
 
