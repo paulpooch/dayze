@@ -26,8 +26,9 @@ define([
 		template: _.template(AccountTemplate),
 
 		render: function () {
-	    	this.$el.html(this.template(this.model.toJSON()));
-	    },
+			var data = that.model.toJSON();
+			that.$el.html(that.template(data));
+		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
@@ -71,7 +72,6 @@ define([
 			that = this;
 
 	    	var options = options || {};
-	        _.bindAll(this);
 	        this.model.on('change', this.render, this);
 	        this.render();
 

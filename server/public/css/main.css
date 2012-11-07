@@ -73,7 +73,6 @@ header {
   float: left;
   width: 200px;
   margin-left: -200px;
-  margin-top: -5px;
 }
 
 .calendar_view_header {
@@ -128,8 +127,8 @@ header {
 }
 
 #user_dropdown {
-    margin-top: 10px;
-    margin-right: 10px;
+    margin-top: 5px;
+    margin-right: 20px;
     text-align: left;
     float: right;
 }
@@ -209,7 +208,7 @@ header {
 
 /* DAY MODAL ----------------------------------------------------------------*/
 
-#day_view_holder {
+#page_holder {
   margin: 64px 20px 20px 20px;
   background: -moz-linear-gradient(left, rgba(255,255,255,.7) 180px, rgba(255,255,255,0.25) 215px, rgba(255,255,255,1.0) 216px); /* FF3.6+ */
   background: -webkit-gradient(linear, left top, right top, color-stop(180px,rgba(255,255,255,.7)), color-stop(215px,rgba(255,255,255,0.9)), color-stop(216px,rgba(255,255,255,1.0))); /* Chrome,Safari4+ */
@@ -236,6 +235,14 @@ header {
 
 img { 
   max-width: none; /* Was messing up gmaps markers. */
+}
+
+/* Bootstrap messing up Font Awesome. */
+li [class^="icon-"], li [class*=" icon-"] {
+  background-image: none;
+}
+a [class^="icon-"], a [class*=" icon-"] {
+  background-image: none;
 }
 
 /*///////////////////////////////////////////////////////////////////////////*/

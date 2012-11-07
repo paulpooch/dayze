@@ -14,7 +14,7 @@ if (!(window.console && console.log)) {
 // Place any jQuery/helper plugins in here.
 $(function() {
 
-	$('#day_view_holder').on('keyup', 'input.time_input', function() {
+	$('#page_holder').on('keyup', 'input.time_input', function() {
 		
 		var valid = false;
 		var val = $(this).val().toLowerCase();

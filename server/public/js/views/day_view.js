@@ -6,12 +6,14 @@ define([
 	'underscore',
 	'backbone',
 
+	'c',
 	'text!templates/day_template.html',
 ], function(
 	jQuery,
 	_,
 	Backbone,
 
+	C,
 	DayTemplate
 ) {
 
@@ -63,6 +65,10 @@ define([
 		onSaveButtonClick: function() {
 			_appModel.saveEvent();
 		},
+
+		onReturnToCalendarButtonClick: function() {
+			_appModel.displayCalendarView();
+		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -79,8 +85,8 @@ define([
 			that.update();
 		},
 
-		onIsActiveViewChange: function() {
-			if (that.model.get('isActiveView')) {
+		onActiveViewChange: function() {
+			if (_appModel.get('activeView') == C.ActiveViews.Day) {
 				_$headerEls.show();
 				_$headerEls.find('#day_display_date').text(that.model.get('displayDate'));
 			} else {
@@ -103,7 +109,8 @@ define([
 			that.model.on('change:dayCode', that.update);
 			that.model.on('change:todaysEvents', that.onTodaysEventsChange);
 			that.model.on('change:selectedEventId', that.onSelectedEventIdChange);
-			that.model.on('change:isActiveView', that.onIsActiveViewChange);
+			_appModel.on('change:activeView', that.onActiveViewChange);
+			_$headerEls.find('#return_to_cal_button').on('click', that.onReturnToCalendarButtonClick);
 
 			that.update();
 		}

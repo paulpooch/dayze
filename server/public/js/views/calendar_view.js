@@ -6,12 +6,14 @@ define([
 	'underscore',
 	'backbone',
 
+	'c',
 	'text!templates/week_template.html'
 ], function(
 	jQuery,
 	_,
 	Backbone,
 
+	C,
 	WeekTemplate
 ) {
 
@@ -47,7 +49,7 @@ define([
 
 		onDayClick: function(e) {
 			var dayCode = $(e.target).data('day-code');
-			_appModel.displayDay(dayCode);
+			_appModel.displayDayView(dayCode);
 		},
 
 		onMonthDropdownSelect: function(e) {
@@ -108,8 +110,8 @@ define([
 			});
 		},
 
-		onIsActiveViewChange: function() {
-			if (that.model.get('isActiveView')) {
+		onActiveViewChange: function() {
+			if (_appModel.get('activeView') == C.ActiveViews.Calendar) {
 				_$headerEls.show();	
 				that.doUiTweaks();
 				_isActiveView = true;
@@ -265,7 +267,6 @@ define([
 			_.bindAll(this);
 			that = this;
 
-			var options = options || {};
 			_appModel = options.appModel;
 			_eventCollection = _appModel.get('eventCollection');
 			_$window = $(window);
@@ -287,7 +288,7 @@ define([
 			_$yearName.parents('.month_button').on('click', that.onYearNameClick);
 			// MODEL EVENTS
 			_eventCollection.on('reset', that.onEventCollectionReset);
-			that.model.bind('change:isActiveView', that.onIsActiveViewChange);
+			_appModel.bind('change:activeView', that.onActiveViewChange);
 		}	
 
 	});

@@ -4,15 +4,17 @@
 define([
 	'jquery',
 	'underscore',
-	'backbone'
+	'backbone',
+	'c'
 ], function(
 	jQuery,
 	_,
-	Backbone
+	Backbone,
+	C
 ) {
 
 	var that,
-		_$dayViewHolder,
+		_$pageViewHolder,
 		_$calendarViewHolder;
 
 	var AppView = Backbone.View.extend({
@@ -30,17 +32,14 @@ define([
 		onActiveViewChange: function() {
 			var currentView = that.model.get('activeView');
 			switch (currentView) {
-				case 'calendar':
-					_$dayViewHolder.hide();
+				case C.ActiveViews.Calendar:
+					_$pageViewHolder.hide();
 					_$calendarViewHolder.show();
-					that.model.get('dayModel').set('isActiveView', false);
-					that.model.get('calendarModel').set('isActiveView', true);
 					break;
-				case 'day':
+				case C.ActiveViews.CreateAccount:
+				case C.ActiveViews.Day:
 					_$calendarViewHolder.hide();
-					_$dayViewHolder.show();
-					that.model.get('calendarModel').set('isActiveView', false);
-					that.model.get('dayModel').set('isActiveView', true);
+					_$pageViewHolder.show();
 					break;
 			}
 		},
@@ -52,7 +51,8 @@ define([
 			
 			options = options || {};
 			_$calendarViewHolder = $('#calendar_view_holder');
-			_$dayViewHolder = $('#day_view_holder');
+			// make this pageviewholder
+			_$pageViewHolder = $('#page_holder');
 
 			// MODEL EVENTS
 			that.model.on('change:activeView', that.onActiveViewChange);

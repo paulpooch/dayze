@@ -6,6 +6,7 @@ define([
 	'underscore',
 	'backbone',
 
+	'c',
 	'views/app_view',
 
 	'collections/event_collection',
@@ -18,12 +19,14 @@ define([
 	'views/account_view',
 	'views/calendar_view',
 	'views/day_view',
-	'views/event_view'
+	'views/event_view',
+	'views/create_account_view'
 ], function(
 	jQuery,
 	_,
 	Backbone,
 
+	C,
 	AppView,
 
 	EventCollection,
@@ -36,7 +39,8 @@ define([
 	AccountView,
 	CalendarView,
 	DayView,
-	EventView
+	EventView,
+	CreateAccountView
 ) {
 
 	var that,
@@ -65,7 +69,7 @@ define([
 			WEEK_SCROLL_BUFFER: 50,
 			PAST_WEEKS_TO_SHOW: 20,
 			
-			activeView: 'calendar',
+			activeView: '',
 			accountCollection: null,
 			eventCollection: null,
 			accountModel: null,
@@ -75,6 +79,29 @@ define([
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+
+		createAccount: function() {
+			var createAccountView = new CreateAccountView({ model: that.get('accountModel'), appModel: that, el: $('#page_holder') });
+			that.set('activeView', C.ActiveViews.CreateAccount); 
+		},
+
+		displayCalendarView: function() {
+			that.set('activeView', C.ActiveViews.Calendar); 
+		},	
+
+		// When a day is clicked in calendar.
+		displayDayView: function(dayCode) {
+			var events = _eventCollection.get(dayCode);
+			
+			_dayModel.set('events', events);
+			_dayModel.set('dayCode', dayCode);
+
+			// Trigger modal in app_view.
+			that.set('activeView', C.ActiveViews.Day); 
+		},
+
 		oauth2Callback: function() {
 			_accountView.oauth2Callback();
 		},
@@ -84,6 +111,7 @@ define([
 			_eventView.setElAndRender(eventViewEl);
 		},
 
+		// Called by AppView during initialization.
 		renderCalendarView: function() {
 			_calendarView.render();
 		},
@@ -98,16 +126,6 @@ define([
 		setSelectedEvent: function(cid) {
 			var selectedEventModel = _eventCollection.getByCid(cid);
 			_eventView.setModel(selectedEventModel);
-		},
-
-		displayDay: function(dayCode) {
-			var events = _eventCollection.get(dayCode);
-			
-			_dayModel.set('events', events);
-			_dayModel.set('dayCode', dayCode);
-
-			// Trigger modal in app_view.
-			that.set('activeView', 'day'); 
 		},
 
 		saveEvent: function() {
@@ -159,12 +177,14 @@ define([
 			_accountView = new AccountView({ model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
-			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#day_view_holder') });
+			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 			
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch();
 			}
+
+			that.set('activeView', C.ActiveViews.Calendar)
 
 		}
 

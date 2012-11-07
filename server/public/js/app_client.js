@@ -18,12 +18,14 @@ define([
 	AppModel
 ) {
 
-	var _appModel;
+	var that,
+		_appModel;
 
 	var App = Backbone.Router.extend({
 
 		initialize: function() {
-			var that = this;
+			that = this;
+			
 			var options = options || {};
 			var pushState = options.pushState || 'true';
 			_appModel = new AppModel({ app: this });
@@ -37,7 +39,8 @@ define([
 
 		routes: {
 			oauth2callback: 		'oauth2Callback', 
-			settings: 				'settings', 
+			settings: 				'settings',
+			create_account: 		'create_account'
 		},
 
 		registerListeners: function() {
@@ -69,6 +72,10 @@ define([
 
 		settings: function() {
 			alert('settings!');
+		},
+
+		create_account: function() {
+			_appModel.createAccount();
 		}
 
 	});
