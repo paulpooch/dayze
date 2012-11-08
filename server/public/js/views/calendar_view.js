@@ -49,7 +49,7 @@ define([
 
 		onDayClick: function(e) {
 			var dayCode = $(e.target).data('day-code');
-			_appModel.displayDayView(dayCode);
+			_appModel.navigateToDay(dayCode);
 		},
 
 		onMonthDropdownSelect: function(e) {

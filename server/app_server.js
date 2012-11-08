@@ -104,8 +104,9 @@ requirejs([
 			var eventRestApi = new EventRestApi(that.app);
 
 			// route catch-all: must appear at the end of all app.get() calls
-			that.app.get('*', function(req, res) {
-				res.render('index');	
+			that.app.get('/*', function(req, res) {
+				Log.l('catch-all');
+				res.render('index');
 			});
 
 			// begin listening

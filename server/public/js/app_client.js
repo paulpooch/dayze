@@ -32,6 +32,7 @@ define([
 
 		day: function(dayCode) {
 			log('ROUTE: day/', dayCode);
+			_appModel.displayDayView(dayCode);
 		},
 
 		calendar: function() {

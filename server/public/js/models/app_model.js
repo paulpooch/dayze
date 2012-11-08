@@ -92,6 +92,10 @@ define([
 		},
 
 		// When a day is clicked in calendar.
+		navigateToDay: function(dayCode) {
+			_router.navigate('day/' + dayCode, { trigger: true });
+		},
+
 		displayDayView: function(dayCode) {
 			var events = _eventCollection.get(dayCode);
 			
@@ -99,7 +103,7 @@ define([
 			_dayModel.set('dayCode', dayCode);
 
 			// Trigger modal in app_view.
-			that.set('activeView', C.ActiveViews.Day); 
+			that.set('activeView', C.ActiveViews.Day);
 		},
 
 		oauth2Callback: function(response) {
@@ -159,7 +163,7 @@ define([
 			that = this;
 
 			options = options || {};
-			_router = options.app;
+			_router = options.router;
 
 			_eventCollection = new EventCollection();
 			that.set('eventCollection', _eventCollection);

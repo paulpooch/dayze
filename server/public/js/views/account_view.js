@@ -47,7 +47,6 @@ define([
 
 		oauth2Callback: function(response) {
 			var that = this;
-			console.log(response);
 			$.ajax({
 	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + response.access_token,
 				success: function(data) {
@@ -96,7 +95,6 @@ define([
 
 	    googleSignIn: function() {
 			// https://developers.google.com/accounts/docs/OAuth2Login
-
 			var endpoint = 'https://accounts.google.com/o/oauth2/auth';
 			var params = {
 				client_id: '495360231026.apps.googleusercontent.com',
