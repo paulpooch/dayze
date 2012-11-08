@@ -65,10 +65,6 @@ define([
 		onSaveButtonClick: function() {
 			_appModel.saveEvent();
 		},
-
-		onReturnToCalendarButtonClick: function() {
-			_appModel.displayCalendarView();
-		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -110,7 +106,6 @@ define([
 			that.model.on('change:todaysEvents', that.onTodaysEventsChange);
 			that.model.on('change:selectedEventId', that.onSelectedEventIdChange);
 			_appModel.on('change:activeView', that.onActiveViewChange);
-			_$headerEls.find('#return_to_cal_button').on('click', that.onReturnToCalendarButtonClick);
 
 			that.update();
 		}

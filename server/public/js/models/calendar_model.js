@@ -12,7 +12,6 @@ define([
 ) {
 
 	var that,
-		_app,
 		_appModel,
 		_eventCollection;
 
@@ -40,7 +39,6 @@ define([
 			
 			// VARS
 			that = this;
-			_app = options.app;
 			_appModel = options.appModel;
 			_eventCollection = _appModel.get('eventCollection');
 

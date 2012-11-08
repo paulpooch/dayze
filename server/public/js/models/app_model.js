@@ -44,7 +44,7 @@ define([
 ) {
 
 	var that,
-		_app,
+		_router,
 		_appView,
 
 		_eventCollection,
@@ -82,14 +82,14 @@ define([
 
 		///////////////////////////////////////////////////////////////////////
 
-		createAccount: function() {
+		routeCreateAccount: function() {
 			var createAccountView = new CreateAccountView({ model: that.get('accountModel'), appModel: that, el: $('#page_holder') });
 			that.set('activeView', C.ActiveViews.CreateAccount); 
 		},
 
-		displayCalendarView: function() {
+		routeCalendar: function() {
 			that.set('activeView', C.ActiveViews.Calendar); 
-		},	
+		},
 
 		// When a day is clicked in calendar.
 		displayDayView: function(dayCode) {
@@ -159,15 +159,15 @@ define([
 			that = this;
 
 			options = options || {};
-			_app = options.app;
+			_router = options.app;
 
 			_eventCollection = new EventCollection();
 			that.set('eventCollection', _eventCollection);
 	
-			_accountModel = new AccountModel();
-			_calendarModel = new CalendarModel({ app: options.app, appModel: that });
-			_dayModel = new DayModel({ app: options.app, appModel: that });
-			_eventModel = new EventModel({ app: options.app, appModel: that });
+			_accountModel = new AccountModel({ appModel: that  });
+			_calendarModel = new CalendarModel({ appModel: that });
+			_dayModel = new DayModel({ appModel: that });
+			_eventModel = new EventModel({ appModel: that });
 			
 			that.set('accountModel', _accountModel);
 			that.set('calendarModel', _calendarModel);

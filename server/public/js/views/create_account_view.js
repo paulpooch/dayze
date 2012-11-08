@@ -33,10 +33,6 @@ define([
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 		},
-
-		onReturnToCalendarButtonClick: function() {
-			_appModel.displayCalendarView();
-		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -58,7 +54,6 @@ define([
 	    	
 	        // BINDINGS
 	      	_appModel.on('change:activeView', that.onActiveViewChange);
-			_$headerEls.find('#return_to_cal_button').on('click', that.onReturnToCalendarButtonClick);
 
 	      	this.render();
 	    },
