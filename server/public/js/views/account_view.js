@@ -47,6 +47,7 @@ define([
 
 		oauth2Callback: function(response) {
 			var that = this;
+			console.log(response);
 			$.ajax({
 	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + response.access_token,
 				success: function(data) {

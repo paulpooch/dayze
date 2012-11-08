@@ -102,8 +102,8 @@ define([
 			that.set('activeView', C.ActiveViews.Day); 
 		},
 
-		oauth2Callback: function() {
-			_accountView.oauth2Callback();
+		oauth2Callback: function(response) {
+			_accountView.oauth2Callback(response);
 		},
 
 		renderEventView: function(dayViewEl) {
@@ -118,7 +118,7 @@ define([
 
 		addEvent: function(eventName, eventDayCode) {
 			// Begin here creating event model.
-			var event = new EventModel({ app: _app, appModel: that, name: eventName, dayCode: eventDayCode });
+			var event = new EventModel({ app: this, appModel: that, name: eventName, dayCode: eventDayCode });
 			_eventCollection.add(event);
 			return event.cid;
 		},
