@@ -68,7 +68,25 @@ define([
     				event.stopPropagation();
 				}
 			});
-		}
+		},
+
+		oauth2Callback: function() {
+			// parse hash parameters
+			var response = {};
+			var queryString = location.hash.substring(1);
+    		var regex = /([^&=]+)=([^&]*)/g, m;
+			while (m = regex.exec(queryString)) {
+			  response[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+			}
+			// clear hash
+			location.hash = '';
+			window.history.replaceState(null, null, '/');
+
+
+			_appModel.oauth2Callback(response);
+
+
+		},
 
 
 		/*
@@ -78,7 +96,9 @@ define([
 			var options = options || {};
 			var pushState = options.pushState || 'true';
 			_appModel = new AppModel({ router: that });
+
 			Backbone.history.start({ pushState: pushState });
+
 			$(function() { that.domReady.call(that); });
 		},
 

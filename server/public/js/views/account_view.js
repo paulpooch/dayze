@@ -45,25 +45,25 @@ define([
 			_userModal.modal('toggle');
 		},
 
-		oauth2Callback: function() {
+		oauth2Callback: function(response) {
 			var that = this;
-
-			this.toggleModal();
-
-			// parse response hash
-			var params = {};
-			var queryString = location.hash.substring(1);
-    		var regex = /([^&=]+)=([^&]*)/g, m;
-			while (m = regex.exec(queryString)) {
-			  params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-			}
-
 			$.ajax({
-	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + params.access_token,
+	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + response.access_token,
 				success: function(data) {
+					console.log(data);
 				    that.model.set('displayName', data.name);
+				    dog();
 				}
 			});
+
+			function dog() {
+			$.ajax({
+	  			url:  'https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=' + response.access_token,
+				success: function(data) {
+					console.log(data);
+				}
+			});
+			};
 
 		},
 
@@ -75,7 +75,7 @@ define([
 	        this.model.on('change', this.render, this);
 	        this.render();
 
-	        // following elements don't exist unti render is called
+	        // following elements don't exist until render is called
 	        _userButton = this.$el.find('#user_button')
 	        _userModal = this.$el.find('#user_modal');
 	        _userEmail = this.$el.find('#user_email');
@@ -101,10 +101,21 @@ define([
 				client_id: '495360231026.apps.googleusercontent.com',
 				response_type: 'token',
 				redirect_uri: 'http://localhost:8000/oauth',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile',
+				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
 				state: ''
 			};
+			window.location = endpoint + '?' + $.param(params);
+		},
 
+		facebookSignIn: function() {
+			// http://developers.facebook.com/docs/reference/dialogs/oauth/
+		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
+			var params = {
+				client_id: '576982815664713',
+				redirect_uri: 'http://localhost:8000/oauth2callback',
+				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
+				state: ''
+			};
 			window.location = endpoint + '?' + $.param(params);
 		}
 
