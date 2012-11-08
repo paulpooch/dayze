@@ -100,7 +100,7 @@ define([
 			var params = {
 				client_id: '495360231026.apps.googleusercontent.com',
 				response_type: 'token',
-				redirect_uri: 'http://localhost:8000/oauth2callback',
+				redirect_uri: 'http://localhost:8000/oauth',
 				scope: 'https://www.googleapis.com/auth/userinfo.profile',
 				state: ''
 			};

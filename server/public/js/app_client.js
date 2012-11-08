@@ -24,9 +24,10 @@ define([
 	var App = Backbone.Router.extend({
 
 		routes: {
-			'day/:dayCode': 'day',
-			'calendar': 'calendar',
-			'create_account': 'createAccount'
+			'day/:dayCode':		'day',
+			'calendar':			'calendar',
+			'create_account':	'createAccount',
+			'oauth': 			'oauth', 
 		},
 
 		day: function(dayCode) {
