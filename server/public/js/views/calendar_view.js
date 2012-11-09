@@ -35,11 +35,10 @@ define([
 		_$yearDropdown,
 		_$headerEls;
 	
-
 	var CalendarView = Backbone.View.extend({
 
 		render: function() {
-			that.jumpToDate(new Date());
+			setTimeout(function() { that.jumpToDate(new Date()); }, 50 );
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -87,7 +86,9 @@ define([
 					that.infiniteScroll(0);	
 				} else {
 					var firstVisibleWeek = _weekElements[hiddenWeekCount].timestamp;
-					that.setActiveMonth(firstVisibleWeek.getMonth() + 1, firstVisibleWeek.getFullYear());
+					var firstVisibleMonth = new Date(firstVisibleWeek);
+					firstVisibleMonth.setDate(firstVisibleMonth.getDate() + 6);
+					that.setActiveMonth(firstVisibleMonth.getMonth() + 1, firstVisibleMonth.getFullYear());
 				}
 			}
 		},
@@ -151,6 +152,7 @@ define([
 		scrollToDay: function(dayDate) {
 			var dayCode = dayDate.toISOString().split('T')[0];
 			var offset = $('.day[data-day-code=' + dayCode + ']').offset().top - _heightOfHeader;
+			console.log(offset);
 			_$window.scrollTop(offset);
 			that.setActiveMonth(dayDate.getMonth() + 1, dayDate.getFullYear());
 		},

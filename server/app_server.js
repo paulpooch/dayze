@@ -100,14 +100,15 @@ requirejs([
 				res.render('index', data);	
 			});
 
+			// route catch-all: must appear at the end of all app.get() calls
+			that.app.get('*', function(req, res) {
+				Log.l('catch-all');
+				var data = {};
+				res.render('index', data);
+			});
+
 			var accountRestApi = new AccountRestApi(that.app);
 			var eventRestApi = new EventRestApi(that.app);
-
-			// route catch-all: must appear at the end of all app.get() calls
-			that.app.get('/*', function(req, res) {
-				Log.l('catch-all');
-				res.render('index');
-			});
 
 			// begin listening
 			that.app.listen(that.get('port'));
