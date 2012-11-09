@@ -16,7 +16,8 @@ define([
 		url: 'rest/account',
 
 		defaults: {
-			displayName: 'Anonymous'
+			displayName: 'Anonymous',
+			isFullyRegistered: 0
 		},
 
 		initialize: function(user) {

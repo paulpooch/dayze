@@ -32,7 +32,7 @@ define([
 
 		day: function(dayCode) {
 			log('ROUTE: day/', dayCode);
-			_appModel.displayDayView(dayCode);
+			_appModel.routeDay(dayCode);
 		},
 
 		calendar: function() {
@@ -43,6 +43,22 @@ define([
 		createAccount: function() {
 			log('ROUTE: create_account');
 			_appModel.routeCreateAccount();
+		},
+
+				oauth: function() {
+			// parse hash parameters
+			var response = {};
+			var queryString = location.hash.substring(1);
+    		var regex = /([^&=]+)=([^&]*)/g, m;
+			while (m = regex.exec(queryString)) {
+			  response[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+			}
+			// clear hash
+			location.hash = '';
+			window.history.replaceState(null, null, '/');
+
+			_appModel.oauth2Callback(response);
+
 		},
 
 		initialize: function(options) {
@@ -71,21 +87,7 @@ define([
 			});
 		},
 
-		oauth: function() {
-			// parse hash parameters
-			var response = {};
-			var queryString = location.hash.substring(1);
-    		var regex = /([^&=]+)=([^&]*)/g, m;
-			while (m = regex.exec(queryString)) {
-			  response[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-			}
-			// clear hash
-			location.hash = '';
-			window.history.replaceState(null, null, '/');
 
-			_appModel.oauth2Callback(response);
-
-		},
 
 
 		/*

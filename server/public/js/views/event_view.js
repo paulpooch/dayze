@@ -34,7 +34,8 @@ define([
 			'keyup #location': 'mapLocation',
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
-			'click #location_button': 'mapLocation'
+			'click #location_button': 'mapLocation',
+			'click #saveButton': 'onSaveButtonClick'
 		},
 
 		syncForm: function(e) {
@@ -54,13 +55,20 @@ define([
 				console.log(loc);
 			}, 2000);
 		},
+
+		onSaveButtonClick: function(event) {
+			_$loginModal = that.$el.find('#login_modal');
+			_appModel.saveEvent(_$loginModal);
+		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+
 		update: function() {
 			that.render();
 		},
-		///////////////////////////////////////////////////////////////////////
 
 		setModel: function(m) {
 			that.model = m;

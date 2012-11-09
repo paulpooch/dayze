@@ -17,7 +17,7 @@ define([
 		Maps.addMapToCanvas = function(mapCanvas) {
 			var myOptions = {
 				center: new google.maps.LatLng(40.7142, -74.0064),
-				zoom: 8,
+				zoom: 10,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
 

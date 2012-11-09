@@ -82,42 +82,19 @@ define([
 
 		///////////////////////////////////////////////////////////////////////
 
-		routeCreateAccount: function() {
-			var createAccountView = new CreateAccountView({ model: that.get('accountModel'), appModel: that, el: $('#page_holder') });
-			that.set('activeView', C.ActiveViews.CreateAccount); 
-		},
 
-		routeCalendar: function() {
-			that.set('activeView', C.ActiveViews.Calendar); 
-		},
 
-		// When a day is clicked in calendar.
-		navigateToDay: function(dayCode) {
-			_router.navigate('day/' + dayCode, { trigger: true });
-		},
 
-		displayDayView: function(dayCode) {
-			var events = _eventCollection.get(dayCode);
-			
-			_dayModel.set('events', events);
-			_dayModel.set('dayCode', dayCode);
 
-			// Trigger modal in app_view.
-			that.set('activeView', C.ActiveViews.Day);
-		},
 
-		oauth2Callback: function(response) {
-			_accountView.oauth2Callback(response);
-		},
 
+
+
+
+		// FROM DAY VIEW //////////////////////////////////////////////////////
 		renderEventView: function(dayViewEl) {
 			var eventViewEl = dayViewEl.find('#event_view_holder');
 			_eventView.setElAndRender(eventViewEl);
-		},
-
-		// Called by AppView during initialization.
-		renderCalendarView: function() {
-			_calendarView.render();
 		},
 
 		addEvent: function(eventName, eventDayCode) {
@@ -131,23 +108,126 @@ define([
 			var selectedEventModel = _eventCollection.getByCid(cid);
 			_eventView.setModel(selectedEventModel);
 		},
+		///////////////////////////////////////////////////////////////////////
 
-		saveEvent: function() {
-			var eventCid = _dayModel.get('selectedEventId');
-			var eventModel = _eventCollection.getByCid(eventCid);
-			
-			eventModel.save({}, {
-				wait: true,
-				success: function(model, response) {
 
-				},
-				error: function(model, error) {
 
-				}
-			});
 
+
+
+
+
+
+
+		// FROM CALENDAR VIEW /////////////////////////////////////////////////
+		// When a day is clicked in calendar.
+		navigateToDay: function(dayCode) {
+			_router.navigate('day/' + dayCode, { trigger: true });
+		},
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+		// FROM EVENT VIEW ////////////////////////////////////////////////////
+		saveEvent: function($loginModal) {
+			if (_accountModel.get('isFullyRegistered')) {
+				var eventCid = _dayModel.get('selectedEventId');
+				var eventModel = _eventCollection.getByCid(eventCid);
+				eventModel.save({}, {
+					wait: true,
+					success: function(model, response) {
+						console.log('event saved', model, response);
+					},
+					error: function(model, error) {
+
+					}
+				});
+			} else {
+				$loginModal.modal('show');
+			}
+		},
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+		// FROM ROUTER ////////////////////////////////////////////////////////
+		routeCreateAccount: function() {
+			var createAccountView = new CreateAccountView({ model: that.get('accountModel'), appModel: that, el: $('#page_holder') });
+			that.set('activeView', C.ActiveViews.CreateAccount); 
 		},
 
+		routeCalendar: function() {
+			that.set('activeView', C.ActiveViews.Calendar); 
+		},
+
+		routeDay: function(dayCode) {
+			var events = _eventCollection.get(dayCode);
+			
+			_dayModel.set('events', events);
+			_dayModel.set('dayCode', dayCode);
+
+			// Trigger modal in app_view.
+			that.set('activeView', C.ActiveViews.Day);
+		},
+
+		routeOAuth: function(response) {
+			_accountView.oauth2Callback(response);
+		},
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+		
+		// FROM APP VIEW //////////////////////////////////////////////////////
+		// Called by AppView during initialization.
+		renderCalendarView: function() {
+			_calendarView.render();
+		},
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+		// FROM CALENDAR MODEL ////////////////////////////////////////////////
 		// TODO: This should be intelligent.
 		// Not repull a million times.
 		pullEventsForMonth: function(monthCode) {
@@ -155,6 +235,7 @@ define([
 				_eventCollection.fetch({ data: $.param({ monthCode: monthCode }) });
 			}
 		},
+		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
 			// This is really important.

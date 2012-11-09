@@ -34,7 +34,6 @@ define([
 			'click #addEventButton': 'onAddEventButtonClick',
 			'click .event_listing button': 'onEventClick',
 			'keydown #addEventText': 'onAddEventTextKeydown',
-			'click #saveButton': 'onSaveButtonClick'
 		},
 
 		onAddEventButtonClick: function() {
@@ -60,10 +59,6 @@ define([
 				that.onAddEventButtonClick();
 				return false;
 			}
-		},
-
-		onSaveButtonClick: function() {
-			_appModel.saveEvent();
 		},
 		///////////////////////////////////////////////////////////////////////
 

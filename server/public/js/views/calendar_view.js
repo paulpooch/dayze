@@ -175,8 +175,9 @@ define([
 			for (var i = y - 3; i < y + 5; i++) {
 				if (i == y) {
 					html.push('<li data-year-num="' + i + '" class="disabled"><a href="#">' + i + '</a></li>');
+				} else {
+					html.push('<li data-year-num="' + i + '"><a href="#">' + i + '</a></li>');
 				}
-				html.push('<li data-year-num="' + i + '"><a href="#">' + i + '</a></li>');
 			}
 			_$yearDropdown.html(html.join(''));
 		},
