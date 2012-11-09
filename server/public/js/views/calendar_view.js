@@ -152,7 +152,6 @@ define([
 		scrollToDay: function(dayDate) {
 			var dayCode = dayDate.toISOString().split('T')[0];
 			var offset = $('.day[data-day-code=' + dayCode + ']').offset().top - _heightOfHeader;
-			console.log(offset);
 			_$window.scrollTop(offset);
 			that.setActiveMonth(dayDate.getMonth() + 1, dayDate.getFullYear());
 		},
