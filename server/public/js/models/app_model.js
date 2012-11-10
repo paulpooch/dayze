@@ -20,7 +20,9 @@ define([
 	'views/calendar_view',
 	'views/day_view',
 	'views/event_view',
-	'views/create_account_view'
+	'views/create_account_view',
+
+	'facebook'
 ], function(
 	jQuery,
 	_,
@@ -40,7 +42,9 @@ define([
 	CalendarView,
 	DayView,
 	EventView,
-	CreateAccountView
+	CreateAccountView,
+
+	Facebook
 ) {
 
 	var that,
@@ -57,7 +61,9 @@ define([
 		_accountView,
 		_calendarView,
 		_dayView,
-		_eventView;
+		_eventView,
+
+		_facebook;
 
 	var AppModel = Backbone.Model.extend({
 
@@ -202,7 +208,7 @@ define([
 		},
 
 		routeOAuth: function(response) {
-			_accountView.oauth2Callback(response);
+			_accountView.oauth(response);
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -268,14 +274,17 @@ define([
 			_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
-			
+
+			_facebook = new Facebook();
+
+
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch();
 			}
 
 			that.set('activeView', C.ActiveViews.Calendar)
 
-		}
+		},
 
 	});
 

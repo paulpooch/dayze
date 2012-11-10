@@ -100,6 +100,16 @@ requirejs([
 				res.render('index', data);	
 			});
 
+			// cache facebook channel file
+			that.app.get('/channel.html', function(req, res) {
+				// set expiration headers for 1 year
+				// tested headers with 'curl -I domain/channel.html'
+				var maxAge = 60 * 60 * 24 * 365;
+	            res.setHeader("Cache-Control", "public, max-age=" + maxAge); // 4 days
+    	        res.setHeader("Expires", new Date(Date.now() + maxAge * 1000).toUTCString());
+				res.render('channel');
+			});
+
 			// route catch-all: must appear at the end of all app.get() calls
 			that.app.get('*', function(req, res) {
 				Log.l('catch-all');
