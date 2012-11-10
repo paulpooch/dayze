@@ -147,7 +147,7 @@ requirejs([
 		// Validate & Filter req
 
 		var deferred = 	Q.defer();
-		if (Filter.approve(req, action).passed) {
+		if (Filter.clean(req, action).passed) {
 			if (req.signedCookies.cookieId) {
 				var cookieId = req.signedCookies.cookieId;	
 				Storage.Users.getUserWithCookieId(cookieId)

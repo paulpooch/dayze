@@ -20,9 +20,9 @@ define([
 	'views/calendar_view',
 	'views/day_view',
 	'views/event_view',
-	'views/create_account_view',
+	'views/create_account_view'
 
-	'facebook'
+	//'facebook'
 ], function(
 	jQuery,
 	_,
@@ -42,9 +42,9 @@ define([
 	CalendarView,
 	DayView,
 	EventView,
-	CreateAccountView,
+	CreateAccountView
 
-	Facebook
+	//Facebook
 ) {
 
 	var that,
@@ -172,6 +172,7 @@ define([
 
 		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
 		createAccount: function() {
+			log('createAccount', _accountModel);
 			_accountModel.save({}, {
 				wait: true,
 				success: function(model, response) {

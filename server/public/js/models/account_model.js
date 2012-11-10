@@ -13,12 +13,25 @@ define([
 
 	var AccountModel = Backbone.Model.extend({
 
-		url: 'rest/account',
+		url: '/rest/account',
 
 		defaults: {
 			displayName: 'Anonymous',
-			isFullyRegistered: false
+			isFullUser: false,
+			createAccountEmail: ''
 		},
+
+		toJSON: function() {
+			return {
+				displayName: that.get('displayName'),
+				isFullUser: that.get('isFullUser'),
+				createAccountEmail: that.get('createAccountEmail')
+			};
+		},
+
+		// EVENTS /////////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(user) {
 			_.bindAll(this);

@@ -5,21 +5,25 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-
+	
+	'c',
 	'text!templates/account_template.html',
 ], function(
 	jQuery,
 	_,
 	Backbone,
 	
+	C,
 	AccountTemplate
 ) {
 
 	var that,
-		_userButton,
-		_userModal,
-		_userEmail,
-		_userPassword;
+		_appModel,
+		_$userButton,
+		_$userModal,
+		_$userEmail,
+		_$userPassword,
+		_$headerEls;
 
 	var AccountView = Backbone.View.extend({
 
@@ -32,27 +36,28 @@ define([
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			'click #user_button': 'toggleModal',
-			'click #google_button': 'googleSignIn',
-			'click #facebook_button': 'facebookSignIn',
-			'click #login_button': 'onLoginButtonClick',
+			'click #user_button': 'onUserButtonClick',
+			'click #google_button': 'onGoogleButtonClick',
+			'click #facebook_button': 'onFacebookButtonClick',
 			'click #create_account_button': 'onCreateAccountButtonClick',
+			'click #login_button': 'onCreateAccountButtonClick',
 			'change input': 'syncForm',
-			'change textarea': 'syncForm'
+			'change textarea': 'syncForm',
 		},
 
 		syncForm: function(e) {
 			var target = $(e.currentTarget);
       		var data = {};
       		data[target.attr('id')] = target.val();
+      		console.log(data);
       		that.model.set(data);
 		},
 
-		toggleModal: function(event) {
-			_userModal.modal('toggle');
+		onUserButtonClick: function(event) {
+			_$userModal.modal('toggle');
 		},
 
- 		googleSignIn: function() {
+ 		onGoogleButtonClick: function() {
 			// https://developers.google.com/accounts/docs/OAuth2Login
 			var endpoint = 'https://accounts.google.com/o/oauth2/auth';
 			var params = {
@@ -65,7 +70,7 @@ define([
 			window.location = endpoint + '?' + $.param(params);
 		},
 
-		facebookSignIn: function() {
+		onFacebookButtonClick: function() {
 			// http://developers.facebook.com/docs/reference/dialogs/oauth/
 		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
 			var params = {
@@ -82,16 +87,33 @@ define([
 		},
 
 		onLoginButtonClick: function() {
-
+      		that.model.set({});
 		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
+		onActiveViewChange: function() {
+			if (_appModel.get('activeView') == C.ActiveViews.Account) {
+				_$headerEls.show();	
+				that.doUiTweaks();
+				_isActiveView = true;
+			} else {
+				_$headerEls.hide();
+				_isActiveView = false;
+			}
+		},
 
-		///////////////////////////////////////////////////////////////////////
+		onUserModalShow: function() {
+	    	_$userButton.button('toggle');
+        	setTimeout(function(){ _$userEmail.focus(); }, 500);
+	    },
+
+	    onUserModalHide: function() {
+	    	_$userButton.button('toggle');
+	    },
+	    ///////////////////////////////////////////////////////////////////////
 
 		oauth: function(response) {
-			var that = this;
 			$.ajax({
 	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + response.access_token,
 				success: function(data) {
@@ -115,26 +137,22 @@ define([
 	    	_.bindAll(this);
 			that = this;
 
-	    	var options = options || {};
-	        this.model.on('change', this.render, this);
-	        this.render();
+			_appModel = options.appModel;
 
-	        // following elements don't exist until render is called
-	        _userButton = this.$el.find('#user_button')
-	        _userModal = this.$el.find('#user_modal');
-	        _userEmail = this.$el.find('#user_email');
-	        _userPassword = this.$el.find('#user_password');
+	        that.render();
 
-			// bind user button pressed state to modal state
-	        _userModal.bind('show', function() {
-	        	_userButton.button('toggle');
+	        _$userButton = this.$el.find('#user_button')
+	        _$userModal = this.$el.find('#user_modal');
+	        _$userEmail = this.$el.find('#user_email');
+	        _$userPassword = this.$el.find('#user_password');
+	        _$headerEls = $('.account_view_header');
 
-	        	/* TODO: no idea why i need to wrap this in a timeout */
-	        	setTimeout(function(){ _userEmail.focus(); }, 500);
+	        // BINDINGS
+	        //that.model.on('change', that.render);
+	        _appModel.bind('change:activeView', that.onActiveViewChange);
+			_$userModal.bind('show', that.onUserModalShow);
+			_$userModal.bind('hide', that.onUserModalHide);
 
-	        }).bind('hide', function() {
-	        	_userButton.button('toggle');
-	        })
 	    },
 
 	   

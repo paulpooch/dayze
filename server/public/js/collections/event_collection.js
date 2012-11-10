@@ -20,7 +20,7 @@ define([
 	var EventCollection = Backbone.Collection.extend({
 	
 		model: EventModel,
-		url: 'rest/event',
+		url: '/rest/event',
 
 		getEventsWithDayCode: function(dayCode) {
 			return _eventsByDay[dayCode] || [];
