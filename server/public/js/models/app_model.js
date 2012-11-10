@@ -20,9 +20,9 @@ define([
 	'views/calendar_view',
 	'views/day_view',
 	'views/event_view',
-	'views/create_account_view'
+	'views/create_account_view',
 
-	//'facebook'
+	'facebook'
 ], function(
 	jQuery,
 	_,
@@ -42,9 +42,9 @@ define([
 	CalendarView,
 	DayView,
 	EventView,
-	CreateAccountView
+	CreateAccountView,
 
-	//Facebook
+	Facebook
 ) {
 
 	var that,
@@ -281,8 +281,7 @@ define([
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-//			_facebook = new Facebook();
-
+			_facebook = new Facebook();
 
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch();
