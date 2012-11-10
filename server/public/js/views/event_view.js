@@ -35,7 +35,7 @@ define([
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
 			'click #location_button': 'mapLocation',
-			'click #saveButton': 'onSaveButtonClick'
+			'click #save_button': 'onSaveButtonClick'
 		},
 
 		syncForm: function(e) {

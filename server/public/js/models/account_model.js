@@ -17,7 +17,7 @@ define([
 
 		defaults: {
 			displayName: 'Anonymous',
-			isFullyRegistered: 0
+			isFullyRegistered: false
 		},
 
 		initialize: function(user) {

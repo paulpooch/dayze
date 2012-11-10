@@ -45,7 +45,7 @@ define([
 			_appModel.routeCreateAccount();
 		},
 
-				oauth: function() {
+		oauth: function() {
 			// parse hash parameters
 			var response = {};
 			var queryString = location.hash.substring(1);
@@ -57,7 +57,7 @@ define([
 			location.hash = '';
 			window.history.replaceState(null, null, '/');
 
-			_appModel.oauth2Callback(response);
+			_appModel.routeOAuth(response);
 
 		},
 
