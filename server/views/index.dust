@@ -59,11 +59,11 @@
     <div id="header_left">
 
         <div class="day_view_header" style="display: none;">
-            <a id="return_to_cal_button" class="btn btn-danger" href="/calendar" style="margin: 5px 0px 0px 20px;"><i class="icon-calendar icon-white"></i> Return to Calendar</a>
+            <a id="return_to_cal_button" class="btn btn-inverse" href="/calendar" style="margin: 5px 0px 0px 20px;"><i class="icon-calendar icon-white"></i> Return to Calendar</a>
         </div>
         <!-- Reliable way around this redundancy? -->
         <div class="create_account_view_header" style="display: none;">
-            <a id="return_to_cal_button" class="btn btn-danger" href="/calendar" style="margin: 5px 0px 0px 20px;"><i class="icon-calendar icon-white"></i> Return to Calendar</a>
+            <a id="return_to_cal_button" class="btn btn-inverse" href="/calendar" style="margin: 5px 0px 0px 20px;"><i class="icon-calendar icon-white"></i> Return to Calendar</a>
         </div>
 
 

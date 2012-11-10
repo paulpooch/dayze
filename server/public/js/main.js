@@ -45,7 +45,8 @@ require.config({
 		bootstrap: 'vendor/bootstrap/bootstrap',
 		plugins: 'plugins',
 		async: 'vendor/async/async',
-		google: 'google'
+		google: 'google',
+		validator: 'vendor/validator/validator.min'
 	}
 });
 

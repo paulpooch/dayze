@@ -24,6 +24,11 @@
 //
 // Install memcached to windows.
 // http://www.codeforest.net/how-to-install-memcached-on-windows-machine
+//
+// Automatically update user's last activity time during frontDoor.
+//
+// Awesome validation framework.
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -33,7 +38,11 @@ var HTML_DEV_MODE = true; // Don't hit dynamo when playing with html/css/js
 
 requirejs.config({
 	baseUrl: __dirname,
-	nodeRequire: require	// tell requirejs to use node's 'require()'
+	nodeRequire: require,	// tell requirejs to use node's 'require()'
+	packages: [{
+		name: 'filter',
+		location: __dirname + '/public/js/filter'
+	}]
 });
 
 requirejs([
@@ -45,7 +54,8 @@ requirejs([
 	'storage',
 	'utils',
 	'q',
-	'logg'
+	'logg',
+	'public/js/filter' // Sharing client code.
 ], function(
 	express, 
 	consolidate,
@@ -55,7 +65,8 @@ requirejs([
 	Storage,
 	Utils,
 	Q,
-	Log
+	Log,
+	Filter
 ) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -130,28 +141,33 @@ requirejs([
 	// Careful of the format stuff.
 	// We're not using that.
 
-	var frontDoor = function(req) {
+	var frontDoor = function(req, res, action) {
 
 		// TODO
 		// Validate & Filter req
 
 		var deferred = 	Q.defer();
-		
-		if (req.signedCookies.cookieId) {
-			var cookieId = req.signedCookies.cookieId;	
-			Storage.Users.getUserWithCookieId(cookieId)
-			.then(function(user) {
-				Log.l('verifyUser pulled user', user);
-				deferred.resolve(user);
-			})
-			.fail(function(err) {
-				// Make sure if no user comes back, this does fail.
-				Log.e('verifyUser failed', err, err.stack);
-				deferred.reject(new Error(err));
-			})
-			.end();
+		if (Filter.approve(req, action).passed) {
+			if (req.signedCookies.cookieId) {
+				var cookieId = req.signedCookies.cookieId;	
+				Storage.Users.getUserWithCookieId(cookieId)
+				.then(function(user) {
+					Log.l('verifyUser pulled user', user);
+					deferred.resolve(user);
+				})
+				.fail(function(err) {
+					// Make sure if no user comes back, this does fail.
+					Log.e('verifyUser failed', err, err.stack);
+					deferred.reject(new Error(err));
+				})
+				.end();
+			} else {
+				res.send({ error: 'User has no cookieId.' });
+				deferred.reject(new Error('User has no cookieId.'));
+			}
 		} else {
-			deferred.reject(new Error('User has no cookieId'));
+			res.send({ error: 'Request reject by filter.' });
+			deferred.reject(new Error('Request reject by filter.'));
 		}
 
 		return deferred.promise;
@@ -265,6 +281,7 @@ requirejs([
 	var AccountRestApi = function(app) {
 
 		var path = Config.REST_PREFIX + 'account';
+
 		// List
 		app.get('/' + path, function(req, res) {
 			Log.l();
@@ -311,6 +328,30 @@ requirejs([
 				createAnonymousUser();
 			}
 
+		});
+
+		// Create 
+		app.post('/' + path, function(req, res) {
+			Log.l();
+			Log.l('ACCOUNT CREATE ////////////////////');
+			Log.l();
+
+			frontDoor(req, res, 'account.create')
+			.then(function(user) {
+				// TODO: Filter request.
+				//var post = filter(req.body);
+				var post = req.body;
+				Log.l(post);
+				Storage.Users.createAccount(user, post)
+				.then(function(result) {
+					res.send(result);
+				})
+				.end();
+			})
+			.fail(function(err) {
+				Log.e('Error in ACCOUNT CREATE', err, err.stack);
+			})
+			.end();
 		});
 
 	};

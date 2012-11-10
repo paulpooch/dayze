@@ -34,17 +34,61 @@ define([
 		events: {
 			'click #user_button': 'toggleModal',
 			'click #google_button': 'googleSignIn',
-			'click #facebook_button': 'facebookSignIn'
+			'click #facebook_button': 'facebookSignIn',
+			'click #login_button': 'onLoginButtonClick',
+			'click #create_account_button': 'onCreateAccountButtonClick',
+			'change input': 'syncForm',
+			'change textarea': 'syncForm'
+		},
+
+		syncForm: function(e) {
+			var target = $(e.currentTarget);
+      		var data = {};
+      		data[target.attr('id')] = target.val();
+      		that.model.set(data);
+		},
+
+		toggleModal: function(event) {
+			_userModal.modal('toggle');
+		},
+
+ 		googleSignIn: function() {
+			// https://developers.google.com/accounts/docs/OAuth2Login
+			var endpoint = 'https://accounts.google.com/o/oauth2/auth';
+			var params = {
+				client_id: '495360231026.apps.googleusercontent.com',
+				response_type: 'token',
+				redirect_uri: 'http://localhost:8000/oauth',
+				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
+				state: ''
+			};
+			window.location = endpoint + '?' + $.param(params);
+		},
+
+		facebookSignIn: function() {
+			// http://developers.facebook.com/docs/reference/dialogs/oauth/
+		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
+			var params = {
+				client_id: '576982815664713',
+				redirect_uri: 'http://localhost:8000/oauth',
+				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar email user_events',
+				state: ''
+			};
+			window.location = endpoint + '?' + $.param(params);
+		},
+
+		onCreateAccountButtonClick: function() {
+			_appModel.createAccount();
+		},
+
+		onLoginButtonClick: function() {
+
 		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////////////////
-
-		toggleModal: function(event) {
-			_userModal.modal('toggle');
-		},
 
 		oauth: function(response) {
 			var that = this;
@@ -65,9 +109,6 @@ define([
 					}
 				});
 			};
-
-
-
 		},
 
 	    initialize: function (options) {
@@ -96,31 +137,7 @@ define([
 	        })
 	    },
 
-	    googleSignIn: function() {
-			// https://developers.google.com/accounts/docs/OAuth2Login
-			var endpoint = 'https://accounts.google.com/o/oauth2/auth';
-			var params = {
-				client_id: '495360231026.apps.googleusercontent.com',
-				response_type: 'token',
-				redirect_uri: 'http://localhost:8000/oauth',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
-				state: ''
-			};
-			window.location = endpoint + '?' + $.param(params);
-		},
-
-		facebookSignIn: function() {
-			// http://developers.facebook.com/docs/reference/dialogs/oauth/
-		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
-			var params = {
-				client_id: '576982815664713',
-				redirect_uri: 'http://localhost:8000/oauth',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar email user_events',
-				state: ''
-			};
-			window.location = endpoint + '?' + $.param(params);
-		}
-
+	   
 	});
 
 	return AccountView;

@@ -589,7 +589,7 @@ define([
 				var user = { 
 					userId: userId,
 					cookieId: cookieId,
-					isRegistered: 0,
+					isFullUser: 0,
 					//displayName: '',
 					//passwordHash: '',
 					//passwordSalt: '',
@@ -660,6 +660,43 @@ define([
 			.end();
 
 			return deferred.promise;
+		};
+
+		Users.createAccount = function(user, post) {
+			var deferred = Q.defer();
+			// Nobody will ever know this password.
+			// It will just get reset once user creates their own via verify email link.
+			var password = Utils.generatePassword();
+			var salt = Utils.generatePassword(16);
+			var pwHash = Utils.hashSha512(password + salt);
+			var displayName = createAccountEmail.split('@')[0];
+
+			var account = {
+				userId: user.userId,
+				cookieId: user.cookieId,
+				isFullUser: user.isFullUser,
+				createTime: user.createTime,
+				passwordHash: pwHash,
+				passwordSalt: salt,
+				email: post.createAccountEmail,
+				displayName: displayName,
+				lastActivityTime: Utils.getNowIso()
+			};
+
+			Log.l('trying to create account.', account);
+			/*
+			USERS.put(user.userId, account)
+			.then(function(result) {
+				Log.l('createAccount success.', account);
+				deferred.resolve(account);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+			*/
 		};
 
 		return Users;

@@ -3,7 +3,13 @@
 // UTILS
 //
 ////////////////////////////////////////////////////////////////////////////////
-define(['q'], function(Q) {
+define([
+	'q',
+	'crypto'
+], function(
+	Q,
+	Crypto
+) {
 
 	var Utils = {};
 
@@ -29,6 +35,10 @@ define(['q'], function(Q) {
 			counter++;
 		}
 		return password;
+	};
+
+	Utils.hashSha512 = function(text) {
+		return Crypto.createHash('sha512').update(text).digest('base64');
 	};
 
 	Utils.makeISOWithDayAndTime = function(dayCode, time) {

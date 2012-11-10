@@ -42,7 +42,7 @@ define([
 			var target = $(e.currentTarget);
       		var data = {};
       		data[target.attr('id')] = target.val();
-      		this.model.set(data);
+      		that.model.set(data);
 		},
 
 		mapLocation: function() {
@@ -57,8 +57,7 @@ define([
 		},
 
 		onSaveButtonClick: function(event) {
-			_$loginModal = that.$el.find('#login_modal');
-			_appModel.saveEvent(_$loginModal);
+			_appModel.saveEvent();
 		},
 		///////////////////////////////////////////////////////////////////////
 

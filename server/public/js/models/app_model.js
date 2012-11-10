@@ -142,8 +142,8 @@ define([
 
 
 		// FROM EVENT VIEW ////////////////////////////////////////////////////
-		saveEvent: function($loginModal) {
-			if (_accountModel.get('isFullyRegistered')) {
+		saveEvent: function() {
+			if (_accountModel.get('isFullUser')) {
 				var eventCid = _dayModel.get('selectedEventId');
 				var eventModel = _eventCollection.getByCid(eventCid);
 				eventModel.save({}, {
@@ -156,12 +156,8 @@ define([
 					}
 				});
 			} else {
-				$loginModal.modal('show');
+				_accountView.$el.find('#event_login_modal').modal('show');
 			}
-		},
-
-		createAccount: function() {
-			
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -175,7 +171,16 @@ define([
 
 
 		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
-
+		createAccount: function() {
+			_accountModel.save({}, {
+				wait: true,
+				success: function(model, response) {
+					console.log('account created', model, response);
+				},
+				error: function(model, error) {
+				}
+			});
+		},
 		///////////////////////////////////////////////////////////////////////
 
 
@@ -275,7 +280,7 @@ define([
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			_facebook = new Facebook();
+//			_facebook = new Facebook();
 
 
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
