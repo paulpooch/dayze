@@ -33,7 +33,8 @@ define([
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'click #user_button': 'toggleModal',
-			'click #google_button': 'googleSignIn'
+			'click #google_button': 'googleSignIn',
+			'click #facebook_button': 'facebookSignIn'
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -45,25 +46,27 @@ define([
 			_userModal.modal('toggle');
 		},
 
-		oauth2Callback: function(response) {
+		oauth: function(response) {
 			var that = this;
 			$.ajax({
 	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + response.access_token,
 				success: function(data) {
 					console.log(data);
 				    that.model.set('displayName', data.name);
-				    dog();
+				    fetchCalendars();
 				}
 			});
 
-			function dog() {
-			$.ajax({
-	  			url:  'https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=' + response.access_token,
-				success: function(data) {
-					console.log(data);
-				}
-			});
+			var fetchCalendars = function() {
+				$.ajax({
+		  			url:  'https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=' + response.access_token,
+					success: function(data) {
+						console.log(data);
+					}
+				});
 			};
+
+
 
 		},
 
@@ -111,8 +114,8 @@ define([
 		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
 			var params = {
 				client_id: '576982815664713',
-				redirect_uri: 'http://localhost:8000/oauth2callback',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
+				redirect_uri: 'http://localhost:8000/oauth',
+				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar email user_events',
 				state: ''
 			};
 			window.location = endpoint + '?' + $.param(params);

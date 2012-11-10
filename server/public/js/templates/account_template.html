@@ -1,4 +1,4 @@
-<div id="user_dropdown">
+<div id="user_dropdown" class="pull-left">
     <div class="btn-group">
         <a id="user_button" class="btn btn-primary" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
         <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
@@ -10,6 +10,17 @@
             <li><a href="#"><i class="icon-ban-circle"></i> Ban</a></li>
             <li class="divider"></li>
             <li><a href="#"><i class="i"></i> Make admin</a></li>
+        </ul>
+    </div>
+</div>
+<div id="google_dropdown" class="pull-left">
+    <div class="btn-group">
+        <a id="google_button" class="btn" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> Synced Calendars</a>
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="/create_account"><i class="icon-refresh"></i> Google<div class="sync-syncing"><div class="progress progress-striped active" style="height:8px"><div class="bar" style="width: 40%;"></div></div></div></a></li>
+            <li><a href="/create_account"><i class="icon-ok"></i> Facebook</a></li>
+            <li class="divider"></li>
         </ul>
     </div>
 </div>
@@ -26,7 +37,8 @@
         <label class="checkbox">
             <input type="checkbox" checked>Stay signed in?
         </label>
-        <a href="#" id="google_button" class="btn btn-success">Sign in with Google</a>
+        <a href="#" id="google_button" class="btn">Sign in with Google</a>
+        <a href="#" id="facebook_button" class="btn">Sign in with Facebook</a>
     </div>
 
 </div>
