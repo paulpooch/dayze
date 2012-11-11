@@ -79,7 +79,11 @@ requirejs([
 	///////////////////////////////////////////////////////////////////////////////
 	var frontDoor = function(req, res, action) {
 			var deferred = 	Q.defer();
-			if (Filter.clean(req, action).passed) {
+			var filterResult = Filter.clean(req, action);
+			req.body = null; // Make sure nobody uses dirty vals.
+			req.query = null;
+			if (filterResult.passed) { 
+				req.clean = filterResult.cleaned;
 				if (req.signedCookies.cookieId) {
 					var cookieId = req.signedCookies.cookieId;	
 					Storage.Users.getUserWithCookieId(cookieId)
@@ -121,7 +125,7 @@ requirejs([
 
 			frontDoor(req)
 			.then(function(user) {
-				var monthCode = req.query['monthCode'];
+				var monthCode = req.clean['monthCode'];
 				if (monthCode) {
 					Storage.Events.getEventsForMonth(user, monthCode)
 					.then(function(events) {
@@ -146,7 +150,7 @@ requirejs([
 			.then(function(user) {
 				// TODO: Filter request.
 				//var post = filter(req.body);
-				var post = req.body;
+				var post = req.clean;
 				Log.l(post);
 
 				Storage.Events.createEvent(user, post)
@@ -258,7 +262,7 @@ requirejs([
 			.then(function(user) {
 				// TODO: Filter request.
 				//var post = filter(req.body);
-				var post = req.body;
+				var post = req.clean;
 				Log.l(post);
 				Storage.Users.createAccount(user, post)
 				.then(function(result) {
@@ -287,9 +291,15 @@ requirejs([
 	var Tests = (function() { 
 		var Tests = {};
 
-		var FakeRequest = function() { };
+		var FakeRequest = function() {
+			this.signedCookies = {};
+			this.signedCookies.cookieId = 'yXs9Bmn8bnHZEM2FwLWJ';
+			this.body = {};
+			this.query = {};
+		};
 		var FakeResponse = function() { 
 			this.send = function(data) {
+				Log.l('FAKE RESPONSE //////////////////////////////////////');
 				Log.l(data);
 			}
 		};
@@ -299,7 +309,6 @@ requirejs([
 			var req = new FakeRequest(),
 				res = new FakeResponse();
 
-			req.body = {};
 			req.body.createAccountEmail = 'test@test.com';
 
 			accountRestApi.create(req, res);
@@ -364,7 +373,7 @@ requirejs([
 		Log.l('Listening on port ' + Config.PORT);
 
 		if (Config.RUN_TESTS) {
-			//Tests.run(accountRestApi);
+			Tests.run(accountRestApi);
 		}
 
 	})();

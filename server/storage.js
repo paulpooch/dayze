@@ -666,6 +666,7 @@ define([
 			var deferred = Q.defer();
 			// Nobody will ever know this password.
 			// It will just get reset once user creates their own via verify email link.
+			var createAccountEmail = post['createAccountEmail'];
 			var password = Utils.generatePassword();
 			var salt = Utils.generatePassword(16);
 			var pwHash = Utils.hashSha512(password + salt);
@@ -683,9 +684,7 @@ define([
 				lastActivityTime: Utils.getNowIso()
 			};
 
-			Log.l('trying to create account.', account);
-			/*
-			USERS.put(user.userId, account)
+			USERS.put(account)
 			.then(function(result) {
 				Log.l('createAccount success.', account);
 				deferred.resolve(account);
@@ -696,7 +695,6 @@ define([
 			.end();
 
 			return deferred.promise;
-			*/
 		};
 
 		return Users;

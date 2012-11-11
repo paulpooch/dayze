@@ -9,7 +9,7 @@ define(function() {
 
 	// Dev flag.
 	Config.IS_LOCAL_DEV = true;
-	Config.RUN_TESTS = true;
+	Config.RUN_TESTS = false;
 
 	Config.PORT = 8000;
 
