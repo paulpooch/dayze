@@ -71,15 +71,8 @@ define([
 		},
 
 		onFacebookButtonClick: function() {
-			// http://developers.facebook.com/docs/reference/dialogs/oauth/
-		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
-			var params = {
-				client_id: '576982815664713',
-				redirect_uri: 'http://localhost:8000/oauth',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar email user_events',
-				state: ''
-			};
-			window.location = endpoint + '?' + $.param(params);
+			var facebook = _appModel.getFacebook();
+			facebook.login();
 		},
 
 		onCreateAccountButtonClick: function() {
