@@ -9,7 +9,10 @@ define(function() {
 
 	// Dev flag.
 	Config.IS_LOCAL_DEV = true;
-	
+	Config.RUN_TESTS = true;
+
+	Config.PORT = 8000;
+
 	Config.DEFAULT_USER_NAME = 'Anonymous';
 
 	// To use AWS Elasticache:

@@ -34,7 +34,6 @@
 'use strict';
 
 var requirejs = require('requirejs');
-var HTML_DEV_MODE = true; // Don't hit dynamo when playing with html/css/js
 
 requirejs.config({
 	baseUrl: __dirname,
@@ -75,122 +74,45 @@ requirejs([
 
 // http://stackoverflow.com/questions/7042340/node-js-error-cant-set-headers-after-they-are-sent
 
-	var App = Backbone.Model.extend({
-
-		defaults: {
-			port: 8000
-		},
-
-		initialize: function() {
-
-			var that = this; // used inside anonymous functions
-
-			// configure express
-			that.app = express();
-			that.app.engine('dust', consolidate.dust);
-			that.app.configure(function() {
-			that.app.set('view engine', 'dust');
-			that.app.set('views', __dirname + '/views');
-			that.app.use(express.static(__dirname + '/public'));
-			that.app.use(express.bodyParser()); // now have access to dom via req.body.title, etc...
-			that.app.use(express.cookieParser(Config.COOKIE_SECRET_HASH));
-			that.app.use(express.session({ 
-					secret: Config.COOKIE_SECRET_HASH,
-					store: new express.session.MemoryStore({
-						reapInterval: 60000 * 10 
-					}),
-					cookie: { maxAge: Config.COOKIE_MAX_AGE }
-				}));
-			 });
-
-			// handle requests to roots
-			that.app.get('/', function(req, res) {
-				Log.l('INDEX ////////////////////');
-
-				var data = {};
-				res.render('index', data);	
-			});
-
-			// cache facebook channel file
-			that.app.get('/channel.html', function(req, res) {
-				// set expiration headers for 1 year
-				// tested headers with 'curl -I domain/channel.html'
-				var maxAge = 60 * 60 * 24 * 365;
-	            res.setHeader("Cache-Control", "public, max-age=" + maxAge); // 4 days
-    	        res.setHeader("Expires", new Date(Date.now() + maxAge * 1000).toUTCString());
-				res.render('channel');
-			});
-
-			// route catch-all: must appear at the end of all app.get() calls
-			that.app.get('*', function(req, res) {
-				Log.l('catch-all');
-				var data = {};
-				res.render('index', data);
-			});
-
-			var accountRestApi = new AccountRestApi(that.app);
-			var eventRestApi = new EventRestApi(that.app);
-
-			// begin listening
-			that.app.listen(that.get('port'));
-			Log.l('Listening on port ' + that.get('port'));
-		}
-
-	});
-
-	// Careful of the format stuff.
-	// We're not using that.
-
+	///////////////////////////////////////////////////////////////////////////////
+	// FRONT DOOR
+	///////////////////////////////////////////////////////////////////////////////
 	var frontDoor = function(req, res, action) {
-
-		// TODO
-		// Validate & Filter req
-
-		var deferred = 	Q.defer();
-		if (Filter.clean(req, action).passed) {
-			if (req.signedCookies.cookieId) {
-				var cookieId = req.signedCookies.cookieId;	
-				Storage.Users.getUserWithCookieId(cookieId)
-				.then(function(user) {
-					Log.l('verifyUser pulled user', user);
-					deferred.resolve(user);
-				})
-				.fail(function(err) {
-					// Make sure if no user comes back, this does fail.
-					Log.e('verifyUser failed', err, err.stack);
-					deferred.reject(new Error(err));
-				})
-				.end();
+			var deferred = 	Q.defer();
+			if (Filter.clean(req, action).passed) {
+				if (req.signedCookies.cookieId) {
+					var cookieId = req.signedCookies.cookieId;	
+					Storage.Users.getUserWithCookieId(cookieId)
+					.then(function(user) {
+						Log.l('verifyUser pulled user', user);
+						deferred.resolve(user);
+					})
+					.fail(function(err) {
+						// Make sure if no user comes back, this does fail.
+						Log.e('verifyUser failed', err, err.stack);
+						deferred.reject(new Error(err));
+					})
+					.end();
+				} else {
+					res.send({ error: 'User has no cookieId.' });
+					deferred.reject(new Error('User has no cookieId.'));
+				}
 			} else {
-				res.send({ error: 'User has no cookieId.' });
-				deferred.reject(new Error('User has no cookieId.'));
+				res.send({ error: 'Request reject by filter.' });
+				deferred.reject(new Error('Request reject by filter.'));
 			}
-		} else {
-			res.send({ error: 'Request reject by filter.' });
-			deferred.reject(new Error('Request reject by filter.'));
-		}
-
-		return deferred.promise;
-	};
-
-
-
-
-
-
-
-
-
+			return deferred.promise;
+		};
 
 	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
 	///////////////////////////////////////////////////////////////////////////////
 	var EventRestApi = function(app) {
 
+		var EventRestApi = {};
 		var path = Config.REST_PREFIX + 'event';
 
-		// List
-		app.get('/' + path, function(req, res) {
+		EventRestApi.list = function(req, res) {
 			Log.l();
 			Log.l('EVENT LIST ////////////////////');
 			Log.l();
@@ -213,11 +135,9 @@ requirejs([
 				Log.e('Error in EVENT LIST.', err, err.stack);
 			})
 			.end();			
-			
-		});
+		};
 
-		// Create 
-		app.post('/' + path, function(req, res) {
+		EventRestApi.create = function(req, res) {
 			Log.l();
 			Log.l('EVENT CREATE ////////////////////');
 			Log.l();
@@ -240,39 +160,35 @@ requirejs([
 				Log.e('Error in EVENT CREATE', err, err.stack);
 			})
 			.end();
+		};
 
-		});
-
-		// Read
-		app.get('/' + path + '/:id', function(req, res) {
+		EventRestApi.read = function(req, res) {
 			Log.l();
 			Log.l('EVENT READ ////////////////////');
 			Log.l();
-		});
+		};
 
-		// Update
-		app.put('/' + path + '/:id', function(req, res) {
+		EventRestApi.update = function(req, res) {
 			Log.l();
 			Log.l('EVENT UPDATE ////////////////////');
 			Log.l();
-		});
+		};
 
-		// Delete
-		app.del('/' + path + '/:id', function(req, res) {
+		EventRestApi.delete = function(req, res) {
 			Log.l();
 			Log.l('EVENT DELETE ////////////////////');
 			Log.l();
-		});
+		};
+
+		app.get('/' + path, EventRestApi.list);
+		app.post('/' + path, EventRestApi.create);
+		app.get('/' + path + '/:id', EventRestApi.read);
+		app.put('/' + path + '/:id', EventRestApi.update);
+		app.del('/' + path + '/:id', EventRestApi.delete);
+		
+		return EventRestApi;
 
 	};
-
-
-
-
-
-
-
-
 
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -280,10 +196,10 @@ requirejs([
 	///////////////////////////////////////////////////////////////////////////////
 	var AccountRestApi = function(app) {
 
+		var AccountRestApi = {};
 		var path = Config.REST_PREFIX + 'account';
 
-		// List
-		app.get('/' + path, function(req, res) {
+		AccountRestApi.list = function(req, res) {
 			Log.l();
 			Log.l('ACCOUNT LIST ////////////////////');
 			Log.l();
@@ -327,14 +243,16 @@ requirejs([
 				// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
 				createAnonymousUser();
 			}
+		};
 
-		});
-
-		// Create 
-		app.post('/' + path, function(req, res) {
+		AccountRestApi.create = function(req, res) {
 			Log.l();
 			Log.l('ACCOUNT CREATE ////////////////////');
 			Log.l();
+
+			//Log.l(req);
+			//Log.l("RESPONSE");
+			//Log.l(res);
 
 			frontDoor(req, res, 'account.create')
 			.then(function(user) {
@@ -352,12 +270,103 @@ requirejs([
 				Log.e('Error in ACCOUNT CREATE', err, err.stack);
 			})
 			.end();
-		});
+		};
+		
+		app.post('/' + path, AccountRestApi.create);
+		app.get('/' + path, AccountRestApi.list);
+
+		return AccountRestApi;
 
 	};
 
-	new App();
+	///////////////////////////////////////////////////////////////////////////////
+	// TESTS
+	///////////////////////////////////////////////////////////////////////////////
+	// We could push this to a separate process with true HTTP requests:
+	// http://docs.nodejitsu.com/articles/HTTP/clients/how-to-create-a-HTTP-request
+	var Tests = (function() { 
+		var Tests = {};
 
+		var FakeRequest = function() { };
+		var FakeResponse = function() { 
+			this.send = function(data) {
+				Log.l(data);
+			}
+		};
 
+		Tests.run = function(accountRestApi) {
+
+			var req = new FakeRequest(),
+				res = new FakeResponse();
+
+			req.body = {};
+			req.body.createAccountEmail = 'test@test.com';
+
+			accountRestApi.create(req, res);
+		
+		};
+		return Tests;
+	})();
+
+	///////////////////////////////////////////////////////////////////////////////
+	// SERVER
+	///////////////////////////////////////////////////////////////////////////////
+	var Server = (function() { 
+
+		// configure express
+		var app = express();
+		app.engine('dust', consolidate.dust);
+		app.configure(function() {
+		app.set('view engine', 'dust');
+		app.set('views', __dirname + '/views');
+		app.use(express.static(__dirname + '/public'));
+		app.use(express.bodyParser()); // now have access to dom via req.body.title, etc...
+		app.use(express.cookieParser(Config.COOKIE_SECRET_HASH));
+		app.use(express.session({ 
+				secret: Config.COOKIE_SECRET_HASH,
+				store: new express.session.MemoryStore({
+					reapInterval: 60000 * 10 
+				}),
+				cookie: { maxAge: Config.COOKIE_MAX_AGE }
+			}));
+		 });
+
+		var accountRestApi = AccountRestApi(app);
+		var eventRestApi = EventRestApi(app);
+
+		// handle requests to roots
+		app.get('/', function(req, res) {
+			Log.l('INDEX ////////////////////');
+
+			var data = {};
+			res.render('index', data);	
+		});
+
+		// cache facebook channel file
+		app.get('/channel.html', function(req, res) {
+			// set expiration headers for 1 year
+			// tested headers with 'curl -I domain/channel.html'
+			var maxAge = 60 * 60 * 24 * 365;
+            res.setHeader("Cache-Control", "public, max-age=" + maxAge); // 4 days
+	        res.setHeader("Expires", new Date(Date.now() + maxAge * 1000).toUTCString());
+			res.render('channel');
+		});
+
+		// route catch-all: must appear at the end of all app.get() calls
+		app.get('*', function(req, res) {
+			Log.l('catch-all');
+			var data = {};
+			res.render('index', data);
+		});
+
+		// begin listening
+		app.listen(Config.PORT);
+		Log.l('Listening on port ' + Config.PORT);
+
+		if (Config.RUN_TESTS) {
+			//Tests.run(accountRestApi);
+		}
+
+	})();
 
 });
