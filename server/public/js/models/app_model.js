@@ -70,10 +70,10 @@ define([
 		// Try to put every value in here so stuff is more obvious.
 		defaults: {
 			// Turns off initial model fetches so you can do UI development without crushing server.
-			SUPPRESS_SERVER_CALLS: true,
+			SUPPRESS_SERVER_CALLS: C.SUPPRESS_SERVER_CALLS,
 
-			WEEK_SCROLL_BUFFER: 50,
-			PAST_WEEKS_TO_SHOW: 20,
+			WEEK_SCROLL_BUFFER: C.WEEK_SCROLL_BUFFER,
+			PAST_WEEKS_TO_SHOW: C.PAST_WEEKS_TO_SHOW,
 			
 			activeView: '',
 			accountCollection: null,
