@@ -78,35 +78,35 @@ requirejs([
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
 	var frontDoor = function(req, res, action) {
-			var deferred = 	Q.defer();
-			var filterResult = Filter.clean(req, action);
-			req.body = null; // Make sure nobody uses dirty vals.
-			req.query = null;
-			if (filterResult.passed) { 
-				req.clean = filterResult.cleaned;
-				if (req.signedCookies.cookieId) {
-					var cookieId = req.signedCookies.cookieId;	
-					Storage.Users.getUserWithCookieId(cookieId)
-					.then(function(user) {
-						Log.l('verifyUser pulled user', user);
-						deferred.resolve(user);
-					})
-					.fail(function(err) {
-						// Make sure if no user comes back, this does fail.
-						Log.e('verifyUser failed', err, err.stack);
-						deferred.reject(new Error(err));
-					})
-					.end();
-				} else {
-					res.send({ error: 'User has no cookieId.' });
-					deferred.reject(new Error('User has no cookieId.'));
-				}
+		var deferred = 	Q.defer();
+		var filterResult = Filter.clean(req, action);
+		req.body = null; // Make sure nobody uses dirty vals.
+		req.query = null;
+		if (filterResult.passed) { 
+			req.clean = filterResult.cleaned;
+			if (req.signedCookies.cookieId) {
+				var cookieId = req.signedCookies.cookieId;	
+				Storage.Users.getUserWithCookieId(cookieId)
+				.then(function(user) {
+					Log.l('verifyUser pulled user', user);
+					deferred.resolve(user);
+				})
+				.fail(function(err) {
+					// Make sure if no user comes back, this does fail.
+					Log.e('verifyUser failed', err, err.stack);
+					deferred.reject(new Error(err));
+				})
+				.end();
 			} else {
-				res.send({ error: 'Request reject by filter.' });
-				deferred.reject(new Error('Request reject by filter.'));
+				res.send({ error: 'User has no cookieId.' });
+				deferred.reject(new Error('User has no cookieId.'));
 			}
-			return deferred.promise;
-		};
+		} else {
+			res.send({ error: 'Request reject by filter.' });
+			deferred.reject(new Error('Request reject by filter.'));
+		}
+		return deferred.promise;
+	};
 
 	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
