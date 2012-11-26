@@ -9,7 +9,7 @@
 <title>dayze</title>
 <meta name="description" content="">
 <meta name="viewport" content="width=device-width">
-<link rel="stylesheet" href="/css/bootstrap.css">
+<link rel="stylesheet" href="/css/bootstrap.metro.css">
 <link rel="stylesheet" href="/css/font-awesome.css">
 <link rel="stylesheet" href="/css/main.css">
 <script data-main="/js/main" src="/js/vendor/require/require.js"></script>
