@@ -18,7 +18,9 @@ define([
 		defaults: {
 			displayName: 'Anonymous',
 			isFullUser: false,
-			createAccountEmail: ''
+			createAccountEmail: '',
+			googleToken: '',
+			facebookToken: ''
 		},
 
 		toJSON: function() {
@@ -34,9 +36,9 @@ define([
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(user) {
-			_.bindAll(this);
 			that = this;
-			this.set({ displayName: (user && user.displayName) || this.get('displayName') });
+			_.bindAll(that);
+			that.set({ displayName: (user && user.displayName) || that.get('displayName') });
 		}
 
 	});

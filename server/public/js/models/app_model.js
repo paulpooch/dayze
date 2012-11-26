@@ -15,14 +15,16 @@ define([
 	'models/calendar_model',
 	'models/day_model',
 	'models/event_model',
-
+	'models/notification_model',
+	'models/facebook_model',
+	
 	'views/account_view',
 	'views/calendar_view',
 	'views/day_view',
 	'views/event_view',
+	'views/notification_view',
 	'views/create_account_view',
 
-	'facebook'
 ], function(
 	jQuery,
 	_,
@@ -37,14 +39,16 @@ define([
 	CalendarModel,
 	DayModel,
 	EventModel,
+	NotificationModel,
+	FacebookModel,
 
 	AccountView,
 	CalendarView,
 	DayView,
 	EventView,
-	CreateAccountView,
+	NotificationView,
+	CreateAccountView
 
-	Facebook
 ) {
 
 	var that,
@@ -57,13 +61,14 @@ define([
 		_calendarModel,
 		_dayModel,
 		_eventModel,
+		_notificationModel,
+		_facebookModel,
 
 		_accountView,
 		_calendarView,
 		_dayView,
 		_eventView,
-
-		_facebook;
+		_notificationView;
 
 	var AppModel = Backbone.Model.extend({
 
@@ -81,11 +86,13 @@ define([
 			accountModel: null,
 			calendarModel: null,
 			dayModel: null,
-			eventModel: null
+			eventModel: null,
+			notificationModel: null,
+			facebookModel: null
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-
+		/* TODO: backbone models don't have events... */
 		///////////////////////////////////////////////////////////////////////
 
 
@@ -269,19 +276,26 @@ define([
 			_calendarModel = new CalendarModel({ appModel: that });
 			_dayModel = new DayModel({ appModel: that });
 			_eventModel = new EventModel({ appModel: that });
-			
+			_notificationModel = new NotificationModel({ appModel: that });
+			_facebookModel = new FacebookModel({ appModel: that });
+
 			that.set('accountModel', _accountModel);
 			that.set('calendarModel', _calendarModel);
 			that.set('dayModel', _dayModel);
 			that.set('eventModel', _eventModel);
+			that.set('notificationModel', _notificationModel);
+			that.set('facebookModel', _facebookModel);
 
 			_accountView = new AccountView({ model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
 			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
+			_notificationView = new NotificationView({ model: that.get('notificationModel'), appModel: that, el: $('#account_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			_facebook = new Facebook();
+			_notificationModel.set('title', 'Notification Title');
+			_notificationModel.set('body', 'tenemos notificaciones')
+			_notificationView.render();
 
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch();

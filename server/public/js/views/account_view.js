@@ -19,17 +19,20 @@ define([
 
 	var that,
 		_appModel,
+		_facebookModel,
+		_googleModel,
 		_$userButton,
 		_$userModal,
 		_$userEmail,
 		_$userPassword,
-		_$headerEls;
+		_$headerEls,
+		_$facebookButton;
 
 	var AccountView = Backbone.View.extend({
 
 		template: _.template(AccountTemplate),
 
-		render: function () {
+		render: function() {
 			var data = that.model.toJSON();
 			that.$el.html(that.template(data));
 		},
@@ -58,28 +61,16 @@ define([
 		},
 
  		onGoogleButtonClick: function() {
-			// https://developers.google.com/accounts/docs/OAuth2Login
-			var endpoint = 'https://accounts.google.com/o/oauth2/auth';
-			var params = {
-				client_id: '495360231026.apps.googleusercontent.com',
-				response_type: 'token',
-				redirect_uri: 'http://localhost:8000/oauth',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
-				state: ''
-			};
-			window.location = endpoint + '?' + $.param(params);
+ 			_googleModel.login();
 		},
 
 		onFacebookButtonClick: function() {
-			// http://developers.facebook.com/docs/reference/dialogs/oauth/
-		    var endpoint = 'http://www.facebook.com/dialog/oauth/';
-			var params = {
-				client_id: '576982815664713',
-				redirect_uri: 'http://localhost:8000/oauth',
-				scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar email user_events',
-				state: ''
-			};
-			window.location = endpoint + '?' + $.param(params);
+			var isLoggedIn = _facebookModel.get('isLoggedIn');
+			if (isLoggedIn) {
+				_facebookModel.logout();
+			} else {
+				_facebookModel.login();
+			}
 		},
 
 		onCreateAccountButtonClick: function() {
@@ -134,11 +125,12 @@ define([
 		},
 
 	    initialize: function (options) {
-	    	_.bindAll(this);
 			that = this;
+			_.bindAll(that);
 
 			_appModel = options.appModel;
-
+			_facebookModel = _appModel.get('facebookModel');
+			//_googleModel = _appModel.get('googleModel');
 	        that.render();
 
 	        _$userButton = this.$el.find('#user_button')
@@ -146,6 +138,7 @@ define([
 	        _$userEmail = this.$el.find('#user_email');
 	        _$userPassword = this.$el.find('#user_password');
 	        _$headerEls = $('.account_view_header');
+	        _$facebookButton = this.$el.find('#facebook_button');
 
 	        // BINDINGS
 	        //that.model.on('change', that.render);
@@ -153,7 +146,21 @@ define([
 			_$userModal.bind('show', that.onUserModalShow);
 			_$userModal.bind('hide', that.onUserModalHide);
 
-	    },
+			//_googleModel.bind('change:isLoggedIn', function() {
+
+			//});
+
+			_facebookModel.bind('change:isLoggedIn', function(facebook) {
+				var isLoggedIn = facebook.get('isLoggedIn');
+				console.log(isLoggedIn)
+				if (isLoggedIn) {
+					_$facebookButton.html('Log out of Facebook');
+				} else {
+					_$facebookButton.html('Sign in with Facebook');
+				}
+			});
+
+	    }
 
 	   
 	});
