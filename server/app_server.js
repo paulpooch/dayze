@@ -214,7 +214,7 @@ requirejs([
 				}
 				var sanitizedUser = { 
 					displayName: user.displayName,
-					isRegistered: user.isRegistered
+					isFullUser: user.isFullUser
 				};
 				res.send(sanitizedUser);
 			};
@@ -356,7 +356,7 @@ requirejs([
 			// set expiration headers for 1 year
 			// tested headers with 'curl -I domain/channel.html'
 			var maxAge = 60 * 60 * 24 * 365;
-            res.setHeader("Cache-Control", "public, max-age=" + maxAge); // 4 days
+            res.setHeader("Cache-Control", "public, max-age=" + maxAge);
 	        res.setHeader("Expires", new Date(Date.now() + maxAge * 1000).toUTCString());
 			res.render('channel');
 		});

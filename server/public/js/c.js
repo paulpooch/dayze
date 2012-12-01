@@ -5,7 +5,7 @@ define([], function() {
 
 	var C = {};
 
-	C.SUPPRESS_SERVER_CALLS = true;
+	C.SUPPRESS_SERVER_CALLS = false;
 	C.Domain = "http://localhost:8000";
 
 	C.WEEK_SCROLL_BUFFER = 50;

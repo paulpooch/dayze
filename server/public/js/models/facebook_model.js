@@ -1,14 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// FACEBOOK MODEL
+// FACEBOOK MODEL - SUBMODEL OF ACCOUNT MODEL
 ///////////////////////////////////////////////////////////////////////////////
 define([
-	'jquery',
 	'underscore',
 	'backbone',
 
 	'c'
 ], function(
-	jQuery,
 	_,
 	Backbone,
 
@@ -17,11 +15,10 @@ define([
 
 	var that;
 
-	var _appModel;
-
 	var FacebookModel = Backbone.Model.extend({
 
 		defaults: {
+			accountModel: null,
 			isLoggedIn: false,
 			accessToken: '',
 			userId: '',
@@ -31,10 +28,9 @@ define([
 		initialize: function(options) {
 			that = this;
 			_.bindAll(that);
-			_appModel = options.appModel;
 
 			window.fbAsyncInit = function() {
-			    // init the FB JS SDK
+				// init the FB JS SDK
 				FB.init({
 					appId      : '576982815664713', // App ID from the App Dashboard
 					channelUrl : C.Domain + '/channel.html', // Channel File for x-domain communication
@@ -69,27 +65,23 @@ define([
 					that.set('userId', response.authResponse.userID);
 					that.set('accessToken', response.authResponse.accessToken);
 					that.set('isLoggedIn', true);
-					console.log('connected');
 
 				} else if (response.status === 'not_authorized') {
 					// the user is logged in to Facebook, 
 					// but has not authenticated your app
-					console.log('not authorized');
 					that.set('isLoggedIn', false);
 
 				} else {
 					// the user isn't logged in to Facebook.
 					that.set('isLoggedIn', false);
-					console.log('not logged in');
 				}
- 			});
+			});
 		},
 
 		login: function() {
 			if (!that.get('isReady')) return;
 			FB.login(function(response) {
 				if (response.authResponse) {
-					console.log(response);
 					that.set('isLoggedIn', true);
 					that.set('accessToken', response.authResponse.accessToken);
 					that.fetchEvents();
@@ -107,9 +99,8 @@ define([
 		},
 
 		fetchEvents: function() {
-			console.log('fetchEvents')
 			$.ajax({
-		  		url: 'https://graph.facebook.com/me/events?access_token=' + that.get('accessToken'),
+				url: 'https://graph.facebook.com/me/events?access_token=' + that.get('accessToken'),
 				success: function(data) {
 					console.log(data);
 				}

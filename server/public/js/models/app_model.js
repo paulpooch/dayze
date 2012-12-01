@@ -16,7 +16,6 @@ define([
 	'models/day_model',
 	'models/event_model',
 	'models/notification_model',
-	'models/facebook_model',
 	
 	'views/account_view',
 	'views/calendar_view',
@@ -40,7 +39,6 @@ define([
 	DayModel,
 	EventModel,
 	NotificationModel,
-	FacebookModel,
 
 	AccountView,
 	CalendarView,
@@ -62,7 +60,6 @@ define([
 		_dayModel,
 		_eventModel,
 		_notificationModel,
-		_facebookModel,
 
 		_accountView,
 		_calendarView,
@@ -87,8 +84,7 @@ define([
 			calendarModel: null,
 			dayModel: null,
 			eventModel: null,
-			notificationModel: null,
-			facebookModel: null
+			notificationModel: null
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -189,10 +185,6 @@ define([
 				}
 			});
 		},
-
-		getFacebook: function() {
-			return _facebook;
-		},
 		///////////////////////////////////////////////////////////////////////
 
 
@@ -225,7 +217,7 @@ define([
 		},
 
 		routeOAuth: function(response) {
-			_accountView.oauth(response);
+			_accountModel.oauth(response);
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -281,14 +273,12 @@ define([
 			_dayModel = new DayModel({ appModel: that });
 			_eventModel = new EventModel({ appModel: that });
 			_notificationModel = new NotificationModel({ appModel: that });
-			_facebookModel = new FacebookModel({ appModel: that });
 
 			that.set('accountModel', _accountModel);
 			that.set('calendarModel', _calendarModel);
 			that.set('dayModel', _dayModel);
 			that.set('eventModel', _eventModel);
 			that.set('notificationModel', _notificationModel);
-			that.set('facebookModel', _facebookModel);
 
 			_accountView = new AccountView({ model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
@@ -297,15 +287,11 @@ define([
 			_notificationView = new NotificationView({ model: that.get('notificationModel'), appModel: that, el: $('#account_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			_notificationModel.set('title', 'Notification Title');
-			_notificationModel.set('body', 'tenemos notificaciones')
-			_notificationView.render();
-
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				_accountModel.fetch();
+				console.log(_accountModel.fetch());
 			}
 
-			that.set('activeView', C.ActiveViews.Calendar)
+			that.set('activeView', C.ActiveViews.Calendar);
 
 		},
 

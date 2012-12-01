@@ -19,12 +19,17 @@ define([
 
 	var that,
 		_appModel,
-		_facebookModel,
+		_accountModel,
 		_googleModel,
+		_facebookModel,
+		_$loginForm,
+		_$createForm,
 		_$userButton,
 		_$userModal,
 		_$userEmail,
 		_$userPassword,
+		_$loginButton,
+		_$createButton,
 		_$headerEls,
 		_$facebookButton;
 
@@ -43,7 +48,8 @@ define([
 			'click #google_button': 'onGoogleButtonClick',
 			'click #facebook_button': 'onFacebookButtonClick',
 			'click #create_account_button': 'onCreateAccountButtonClick',
-			'click #login_button': 'onCreateAccountButtonClick',
+			'click #login_button': 'onLoginButtonClick',
+			'click #create_button': 'onCreateButtonClick',
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
 		},
@@ -58,6 +64,8 @@ define([
 
 		onUserButtonClick: function(event) {
 			_$userModal.modal('toggle');
+			_$createForm.hide();
+			_$loginForm.show();
 		},
 
  		onGoogleButtonClick: function() {
@@ -65,20 +73,33 @@ define([
 		},
 
 		onFacebookButtonClick: function() {
-			var isLoggedIn = _facebookModel.get('isLoggedIn');
-			if (isLoggedIn) {
+			if (_facebookModel.get('isLoggedIn')) {
 				_facebookModel.logout();
 			} else {
 				_facebookModel.login();
 			}
 		},
 
-		onCreateAccountButtonClick: function() {
+		onCreateAccountButtonClick: function() {console.log('dfdsfsdf');
 			_appModel.createAccount();
 		},
 
 		onLoginButtonClick: function() {
-      		that.model.set({});
+			if (_$loginForm.is(':visible')) {
+				_$loginButton.button('loading');
+			} else {
+				_$createForm.hide();
+				_$loginForm.show();
+			}
+		},
+
+		onCreateButtonClick: function() {
+			if (_$createForm.is(':visible')) {
+				_$loginButton.button('loading');
+			} else {
+			_$loginForm.hide();
+			_$createForm.show();
+			}
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -95,7 +116,6 @@ define([
 		},
 
 		onUserModalShow: function() {
-	    	_$userButton.button('toggle');
         	setTimeout(function(){ _$userEmail.focus(); }, 500);
 	    },
 
@@ -104,41 +124,26 @@ define([
 	    },
 	    ///////////////////////////////////////////////////////////////////////
 
-		oauth: function(response) {
-			$.ajax({
-	  			url:  'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + response.access_token,
-				success: function(data) {
-					console.log(data);
-				    that.model.set('displayName', data.name);
-				    fetchCalendars();
-				}
-			});
-
-			var fetchCalendars = function() {
-				$.ajax({
-		  			url:  'https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=' + response.access_token,
-					success: function(data) {
-						console.log(data);
-					}
-				});
-			};
-		},
 
 	    initialize: function (options) {
 			that = this;
 			_.bindAll(that);
-
-			_appModel = options.appModel;
-			_facebookModel = _appModel.get('facebookModel');
-			//_googleModel = _appModel.get('googleModel');
 	        that.render();
 
-	        _$userButton = this.$el.find('#user_button')
-	        _$userModal = this.$el.find('#user_modal');
-	        _$userEmail = this.$el.find('#user_email');
-	        _$userPassword = this.$el.find('#user_password');
+	        _appModel = options.appModel;
+	        _accountModel = that.model;
+	        _googleModel = that.model.get('googleModel');
+	        _facebookModel = that.model.get('facebookModel');
+
+	        _$createForm = that.$el.find('#create_form');
+	        _$loginForm = that.$el.find('#login_form');
+	        _$userButton = that.$el.find('#user_button');
+	        _$userModal = that.$el.find('#user_modal');
+	        _$userEmail = that.$el.find('#user_email');
+	        _$userPassword = that.$el.find('#user_password');
+	        _$loginButton = that.$el.find('#login_button');
+   	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
-	        _$facebookButton = this.$el.find('#facebook_button');
 
 	        // BINDINGS
 	        //that.model.on('change', that.render);
@@ -146,14 +151,8 @@ define([
 			_$userModal.bind('show', that.onUserModalShow);
 			_$userModal.bind('hide', that.onUserModalHide);
 
-			//_googleModel.bind('change:isLoggedIn', function() {
-
-			//});
-
 			_facebookModel.bind('change:isLoggedIn', function(facebook) {
-				var isLoggedIn = facebook.get('isLoggedIn');
-				console.log(isLoggedIn)
-				if (isLoggedIn) {
+				if (_facebookModel.get('isLoggedIn')) {
 					_$facebookButton.html('Log out of Facebook');
 				} else {
 					_$facebookButton.html('Sign in with Facebook');

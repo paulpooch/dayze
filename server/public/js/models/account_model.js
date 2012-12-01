@@ -3,10 +3,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 define([
 	'underscore',
-	'backbone'
+	'backbone',
+
+	'models/google_model',
+	'models/facebook_model'
 ], function(
 	_,
-	Backbone
+	Backbone,
+
+	GoogleModel,
+	FacebookModel
 ) {
 
 	var that;
@@ -16,11 +22,13 @@ define([
 		url: '/rest/account',
 
 		defaults: {
+			appModel: null,
+			googleModel: null,
+			facebookModel: null, 
+			isLoggedIn: false,
 			displayName: 'Anonymous',
 			isFullUser: false,
-			createAccountEmail: '',
-			googleToken: '',
-			facebookToken: ''
+			createAccountEmail: ''
 		},
 
 		toJSON: function() {
@@ -31,6 +39,10 @@ define([
 			};
 		},
 
+		oauth: function(response) {
+			that.get('googleModel').oauth(response);
+		},
+
 		// EVENTS /////////////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////////////////
@@ -38,6 +50,8 @@ define([
 		initialize: function(user) {
 			that = this;
 			_.bindAll(that);
+			that.set('googleModel', new GoogleModel({ accountModel: that }));
+			that.set('facebookModel', new FacebookModel({ accountModel: that }));
 			that.set({ displayName: (user && user.displayName) || that.get('displayName') });
 		}
 

@@ -1,72 +1,149 @@
 <div id="user_dropdown" class="pull-left">
-    <div class="btn-group">
-        <a id="user_button" class="btn btn-primary" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
-        <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-        <ul class="dropdown-menu">
-            <li><a href="/create_account"><i class="icon-plus-sign"></i> Create an Account</a></li>
-            <li><a href="#!settings"><i class="icon-cog"></i> Account Settings</a></li>
-            <li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
-            <li><a href="#"><i class="icon-trash"></i> Delete</a></li>
-            <li><a href="#"><i class="icon-ban-circle"></i> Ban</a></li>
-            <li><a href="#" id="enableNotifications"><i class="icon-ban-circle"></i> Notifications</a></li>
-            <li class="divider"></li>
-            <li><a href="#"><i class="i"></i> Make admin</a></li>
-        </ul>
-    </div>
+	<div class="btn-group inline">
+		<a id="user_button" class="btn btn-primary" href="#" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
+		<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<ul class="dropdown-menu">
+			<li><a href="#!settings"><i class="icon-cog"></i> Account Settings</a></li>
+			<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
+			<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
+			<li><a href="#"><i class="icon-ban-circle"></i> Ban</a></li>
+			<li><a href="#" id="enableNotifications"><i class="icon-ban-circle"></i> Notifications</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="i"></i> Make admin</a></li>
+		</ul>
+	</div>
 </div>
+
 
 <div id="google_dropdown" class="pull-left">
-    <div class="btn-group">
-        <a id="google_button" class="btn" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> Synced Calendars</a>
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-        <ul class="dropdown-menu">
-            <li><a href="/create_account"><i class="icon-refresh"></i> Google<div class="sync-syncing"><div class="progress progress-striped active" style="height:8px"><div class="bar" style="width: 40%;"></div></div></div></a></li>
-            <li><a href="/create_account"><i class="icon-ok"></i> Facebook</a></li>
-            <li class="divider"></li>
-        </ul>
-    </div>
+	<div class="btn-group">
+		<a id="google_button" class="btn" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> Synced Calendars</a>
+		<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<ul class="dropdown-menu">
+			<li><a href="/create_account"><i class="icon-refresh"></i> Google<div class="sync-syncing"><div class="progress progress-striped active" style="height:8px"><div class="bar" style="width: 40%;"></div></div></div></a></li>
+			<li><a href="/create_account"><i class="icon-ok"></i> Facebook</a></li>
+			<li class="divider"></li>
+		</ul>
+	</div>
 </div>
+
 
 <div id="user_modal" class="modal hide fade">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>User Information</h3>
-    </div>
-    <div class="modal-body" style="padding: 15px">
-        <label>Sign in</label>
-        <input id="user_email" type="text" class="input-small" placeholder="Email">
-        <input id="user_password" type="text" class="input-small" placeholder="Password">
-        <button type="submit" class="btn btn-primary" style="position: relative; top: -4px;">Submit</button>
-        <label class="checkbox">
-            <input type="checkbox" checked>Stay signed in?
-        </label>
-        <a href="#" id="google_button" class="btn">Sign in with Google</a>
-        <a href="#" id="facebook_button" class="btn">Sign in with Facebook</a>
-    </div>
+
+	<div id="login_form">
+
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Sign In</h3>
+		</div>
+
+		<div class="modal-body">
+			<form class="form-horizontal">
+
+				<div class="control-group">
+					<label class="control-label" for="user_email">Email</label>
+					<div class="controls">
+						<input type="text" id="user_email" placeholder="Email">
+					</div>
+				</div>
+
+				<div class="control-group">
+					<label class="control-label" for="user_password">Password</label>
+					<div class="controls">
+						<input type="password" id="user_password" placeholder="Password">
+					</div>
+				</div>
+
+				<div class="control-group">
+					<div class="controls">
+						<label class="checkbox">
+							<input type="checkbox"> Remember me
+						</label>
+					</div>
+				</div>
+
+				<hr />
+
+				<div class="control-group">
+					<label class="control-label">Or Connect</label>
+					<div class="controls">
+						<a href="#" id="google_button" class="btn">Using Google</a>
+						<a href="#" id="facebook_button" class="btn">Using Facebook</a>
+					</div>
+				</div>
+
+			</form>
+		</div>
+
+		<div class="modal-footer">
+			<div class="controls controls-row">
+				<a id="create_button" class="btn btn-large span2" href="#">Create Account</a>
+				<button id="login_button" type="submit" class="btn btn-primary btn-large span4" data-loading-text="Logging in...">Sign in</button>
+			</div>
+		</div>
+
+	</div>
+
+	<div id="create_form" style="display: none;">
+
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Create Account</h3>
+		</div>
+
+		<div class="modal-body" style="padding: 15px">
+			<form class="form-horizontal">
+
+				<div class="control-group">
+					<label class="control-label" for="user_email">Email</label>
+					<div class="controls">
+						<input type="text" id="user_email" placeholder="Email">
+					</div>
+				</div>
+
+				<div class="control-group">
+					<div class="controls">
+						<a href="#" id="google_button" class="btn">Use Google</a>
+						<a href="#" id="facebook_button" class="btn">Use Facebook</a>
+					</div>
+				</div>
+
+			</form>
+		</div>
+
+		<div class="modal-footer">
+			<div class="controls controls-row">
+				<a id="login_button" class="btn btn-large span1" href="#">Sign In</a>
+				<button id="create_button" type="submit" class="btn btn-primary btn-large span5" data-loading-text="Logging in...">Create Account</button>
+			</div>
+		</div>
+	</div>
+
 </div>
 
+
 <div id="event_login_modal" class="modal hide fade">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>You need an account to save events.</h3>
-    </div>
-    <div class="modal-body" style="padding: 15px">
-        <h3>Sign in.</h3>
-        <form class="form-inline">
-          <input id="login_email" type="text" class="input-medium" placeholder="Email">
-          <input id="login_pw" type="password" class="input-medium" placeholder="Password">
-          <button id="login_button" type="button" class="btn btn-primary">Sign in</button>
-        </form>
-        <br/>
-        <h1>OR</h1>
-        <br/><br/>
-        <h3>Create an account.</h3>
-        <form class="form-inline">
-            <input id="createAccountEmail" type="text" class="input-medium" placeholder="Email">
-            <button id="create_account_button" type="button" class="btn btn-primary">Create Account</button>
-        <form>
-    </div>
-    <div class="modal-footer">
-        <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a>
-    </div>
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3>You need an account to save events.</h3>
+	</div>
+	<div class="modal-body" style="padding: 15px">
+		<h3>Sign in.</h3>
+		<form class="form-inline">
+			<input id="login_email" type="text" class="input-medium" placeholder="Email">
+			<input id="login_pw" type="password" class="input-medium" placeholder="Password">
+			<button id="login_button" type="button" class="btn btn-primary">Sign in</button>
+		</form>
+		<br/>
+		<h1>OR</h1>
+		<br/><br/>
+		<h3>Create an account.</h3>
+		<form class="form-inline">
+			<input id="createAccountEmail" type="text" class="input-medium" placeholder="Email">
+			<button id="create_account_button" type="button" class="btn btn-primary">Create Account</button>
+		<form>
+	</div>
+	<div class="modal-footer">
+		<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a>
+	</div>
 </div>

@@ -591,8 +591,8 @@ define([
 					cookieId: cookieId,
 					isFullUser: 0,
 					//displayName: '',
-					//passwordHash: '',
 					//passwordSalt: '',
+					//passwordHash: '',
 					createTime: Utils.getNowIso()
 				};
 

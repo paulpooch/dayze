@@ -7,19 +7,6 @@ define([
 
 	var Google = {};
 
-	Google.login = function() {
-		// https://developers.google.com/accounts/docs/OAuth2Login
-		var endpoint = 'https://accounts.google.com/o/oauth2/auth';
-		var params = {
-			client_id: '495360231026.apps.googleusercontent.com',
-			response_type: 'token',
-			redirect_uri: 'http://localhost:8000/oauth',
-			scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
-			state: ''
-			};
-		window.location = endpoint + '?' + $.param(params);
-	};
-
 	Google.Maps = (function($) {
 		
 		var Maps = {};
