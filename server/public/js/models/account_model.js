@@ -15,7 +15,9 @@ define([
 	FacebookModel
 ) {
 
-	var that;
+	var that,
+		_googleModel,
+		_facebookModel;
 
 	var AccountModel = Backbone.Model.extend({
 
@@ -35,7 +37,9 @@ define([
 			return {
 				displayName: that.get('displayName'),
 				isFullUser: that.get('isFullUser'),
-				createAccountEmail: that.get('createAccountEmail')
+				createAccountEmail: that.get('createAccountEmail'),
+				googleToken: _googleModel.get('accessToken'),
+				facebookToken: _facebookModel.get('accessToken')
 			};
 		},
 
@@ -50,8 +54,13 @@ define([
 		initialize: function(user) {
 			that = this;
 			_.bindAll(that);
-			that.set('googleModel', new GoogleModel({ accountModel: that }));
-			that.set('facebookModel', new FacebookModel({ accountModel: that }));
+
+			_googleModel = new GoogleModel({ accountModel: that });
+			_facebookModel = new FacebookModel({ accountModel: that });
+
+			that.set('googleModel', _googleModel);
+			that.set('facebookModel', _facebookModel);
+
 			that.set({ displayName: (user && user.displayName) || that.get('displayName') });
 		}
 

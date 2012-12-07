@@ -32,18 +32,6 @@ define(function() {
 		accessKeyId: 'AKIAINHDEIZ3QVSHQ3PA', 
 		secretAccessKey: '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'
 	};
-	
-	Config.OAUTH_CREDENTIALS = {
-		google: {
-			clientId: '495360231026.apps.googleusercontent.com'
-		},
-		facebook: {
-
-		},
-		twitter: {
-
-		}
-	};
 
 	return Config;
 

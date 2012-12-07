@@ -33,6 +33,7 @@ define([
 		_$loginButton,
 		_$createButton,
 		_$headerEls,
+		_$googleButton,
 		_$facebookButton;
 
 	var AccountView = Backbone.View.extend({
@@ -82,7 +83,7 @@ define([
 			}
 		},
 
-		onCreateAccountButtonClick: function() {console.log('dfdsfsdf');
+		onCreateAccountButtonClick: function() {
 			_appModel.createAccount();
 		},
 
@@ -96,8 +97,7 @@ define([
 				// 	_$loginButton.button('login');
 				// }
 			} else {
-				_$createForm.hide();
-				_$loginForm.show();
+				that.showLoginForm();
 			}
 		},
 
@@ -105,9 +105,18 @@ define([
 			if (_$createForm.is(':visible')) {
 				_$loginButton.button('loading');
 			} else {
+				that.showCreateForm();
+			}
+		},
+
+		showLoginForm: function() {
+			_$createForm.hide();
+			_$loginForm.show();
+		},
+
+		showCreateForm: function() {
 			_$loginForm.hide();
 			_$createForm.show();
-			}
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -150,24 +159,33 @@ define([
 	        _$userEmail = that.$el.find('#user_email');
 	        _$userPassword = that.$el.find('#user_password');
 	        _$loginButton = that.$el.find('#login_button');
+   	        _$googleButton = that.$el.find('#google_button');
    	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
 
 	        Filter.activate(_$loginForm);
 
 	        // BINDINGS
-	        //that.model.on('change', that.render);
 	        _appModel.bind('change:activeView', that.onActiveViewChange);
-			_$userModal.bind('show', that.onUserModalShow);
-			_$userModal.bind('hide', that.onUserModalHide);
+
+	        _googleModel.bind('change:isLoggedIn', function() {
+				if (_googleModel.get('isLoggedIn')) {
+					_$googleButton.html('Log out of Google');
+				} else {
+					_$facebookButton.html('Use Google');
+				}
+	        });
 
 			_facebookModel.bind('change:isLoggedIn', function(facebook) {
 				if (_facebookModel.get('isLoggedIn')) {
 					_$facebookButton.html('Log out of Facebook');
 				} else {
-					_$facebookButton.html('Sign in with Facebook');
+					_$facebookButton.html('Use Facebook');
 				}
 			});
+
+			_$userModal.bind('show', that.onUserModalShow);
+			_$userModal.bind('hide', that.onUserModalHide);
 
 	    }
 

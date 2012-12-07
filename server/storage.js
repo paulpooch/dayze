@@ -681,6 +681,8 @@ define([
 				passwordSalt: salt,
 				email: post.createAccountEmail,
 				displayName: displayName,
+				googleToken: user.googleToken,
+				facebookToken: user.facebookToken,
 				lastActivityTime: Utils.getNowIso()
 			};
 
