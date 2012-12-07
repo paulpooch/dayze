@@ -46,7 +46,8 @@ require.config({
 		plugins: 'plugins',
 		async: 'vendor/async/async',
 		google: 'google',
-		validator: 'vendor/validator/validator.min'
+		validator: 'vendor/validator/validator.min',
+		logg: 'logg_shim'
 	}
 });
 

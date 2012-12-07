@@ -8,13 +8,15 @@ define([
 	
 	'c',
 	'text!templates/account_template.html',
+	'filter'
 ], function(
 	jQuery,
 	_,
 	Backbone,
 	
 	C,
-	AccountTemplate
+	AccountTemplate,
+	Filter
 ) {
 
 	var that,
@@ -87,6 +89,12 @@ define([
 		onLoginButtonClick: function() {
 			if (_$loginForm.is(':visible')) {
 				_$loginButton.button('loading');
+				// var clean = $_loginForm.filter();
+				// if (clean) {
+				// 	_appModel.loginUser(clean);
+				// } else {
+				// 	_$loginButton.button('login');
+				// }
 			} else {
 				_$createForm.hide();
 				_$loginForm.show();
@@ -144,6 +152,8 @@ define([
 	        _$loginButton = that.$el.find('#login_button');
    	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
+
+	        Filter.activate(_$loginForm);
 
 	        // BINDINGS
 	        //that.model.on('change', that.render);
