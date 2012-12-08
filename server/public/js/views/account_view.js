@@ -52,9 +52,10 @@ define([
 			'click #user_button': 'onUserButtonClick',
 			'click #google_button': 'onGoogleButtonClick',
 			'click #facebook_button': 'onFacebookButtonClick',
+			'click #login_button' : 'onLoginButtonClick',
 			'click #create_account_button': 'onCreateAccountButtonClick',
-			'click #login_button': 'onLoginButtonClick',
-			'click #create_button': 'onCreateButtonClick',
+			'click #show_login_button': 'onShowLoginButtonClick',
+			'click #show_create_button': 'onShowCreateButtonClick',
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
 		},
@@ -85,41 +86,35 @@ define([
 			}
 		},
 
-		onCreateAccountButtonClick: function() {
-			_appModel.createAccount();
-		},
-
 		onLoginButtonClick: function() {
-			if (_$loginForm.is(':visible')) {
-				_$loginButton.button('loading');
-				// var clean = $_loginForm.filter();
-				// if (clean) {
-				// 	_appModel.loginUser(clean);
-				// } else {
-				// 	_$loginButton.button('login');
-				// }
-			} else {
-				that.showLoginForm();
+			if (_$loginForm.data('filter-passed')) {
+				that.makeButtonStateLoading(_$loginButton);
+				_appModel.createAccount();
 			}
 		},
 
-		onCreateButtonClick: function() {
-			if (_$createForm.is(':visible')) {
-				_$loginButton.button('loading');
-			} else {
-				that.showCreateForm();
+		onCreateAccountButtonClick: function() {
+			if (_$createForm.data('filter-passed')) {
+				that.makeButtonStateLoading(_$createButton);
+				_appModel.createAccount();
 			}
 		},
 
-		showLoginForm: function() {
+		onShowLoginButtonClick: function() {
 			_$createForm.hide();
 			_$loginForm.show();
 		},
 
-		showCreateForm: function() {
+		onShowCreateButtonClick: function() {
 			_$loginForm.hide();
 			_$createForm.show();
 		},
+
+		makeButtonStateLoading: function($btn) {
+			$btn.text($btn.data('loading-text'));
+			$btn.attr('disabled', true);
+		},
+
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -142,6 +137,9 @@ define([
 	    },
 	    ///////////////////////////////////////////////////////////////////////
 
+	    onAccountCreated: function() {
+			_$loginButton.button('loading');
+	    },
 
 	    initialize: function (options) {
 	    	Log.l('init');
@@ -161,11 +159,11 @@ define([
 	        _$userEmail = that.$el.find('#user_email');
 	        _$userPassword = that.$el.find('#user_password');
 	        _$loginButton = that.$el.find('#login_button');
+	        _$createButton = that.$el.find('#create_account_button');
    	        _$googleButton = that.$el.find('#google_button');
    	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
 
-	        Log.l(1);
 	        Filter.activate(_$createForm);
 
 	        // BINDINGS

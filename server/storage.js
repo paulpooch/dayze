@@ -690,11 +690,12 @@ define([
 				passwordSalt: salt,
 				email: post.createAccountEmail,
 				displayName: displayName,
-				googleToken: user.googleToken,
-				facebookToken: user.facebookToken,
+				googleToken: user.googleToken || 0,
+				facebookToken: user.facebookToken || 0,
 				lastActivityTime: Utils.getNowIso()
 			};
 
+Log.l('Users.createAccount', account);
 			USERS.put(account)
 			.then(function(result) {
 				Log.l('createAccount success.', account);

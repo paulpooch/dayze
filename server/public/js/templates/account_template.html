@@ -77,14 +77,14 @@
 
 		<div class="modal-footer">
 			<div class="controls controls-row">
-				<a id="create_button" class="btn btn-large span2" href="#">Create Account</a>
-				<button id="login_button" type="submit" class="btn btn-primary btn-large span4" data-loading-text="Logging in...">Sign in</button>
+				<a id="show_create_button" class="btn btn-large span2" href="#">Create Account</a>
+				<button id="login_button" type="submit" class="btn btn-primary btn-large span4" data-loading-text="Signing in...">Sign in</button>
 			</div>
 		</div>
 
 	</div>
 
-	<div id="create_form" data-filter="account.create" data-filter-trigger="click:create_button" style="display: none;">
+	<div id="create_form" data-filter="account.create" data-filter-trigger="click:create_account_button" style="display: none;">
 
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -117,8 +117,8 @@
 
 		<div class="modal-footer">
 			<div class="controls controls-row">
-				<a id="login_button" class="btn btn-large span1" href="#">Sign In</a>
-				<button id="create_button" type="submit" class="btn btn-primary btn-large span5" data-loading-text="Logging in..." data-run-filter="1">Create Account</button>
+				<a id="show_login_button" class="btn btn-large span1" href="#">Sign In</a>
+				<button id="create_account_button" type="submit" class="btn btn-primary btn-large span5" data-loading-text="Creating account..." data-run-filter="1">Create Account</button>
 			</div>
 		</div>
 	</div>

@@ -172,8 +172,8 @@ define([
 	  	trigger = trigger.split(':');
 	  	$el.on(trigger[0], '#' + trigger[1], function() {
 	  		var result = Filter.clean($el, action, true);
+	  		$el.data('filter-passed', result.passed);
 	  	});
-	  	return true;
 	};
 
 	return Filter;

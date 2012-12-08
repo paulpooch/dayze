@@ -5,6 +5,8 @@
 // PACKAGE DOCUMENTATION //////////////////////////////////////////////////////
 // dynamodb = https://github.com/teleportd/node-dynamodb
 // node-uuid = https://github.com/broofa/node-uuid
+// amazon-ses = https://github.com/jjenkins/node-amazon-ses
+// validator = https://github.com/chriso/node-validator
 // q = 	https://github.com/kriskowal/q
 //	   	https://github.com/bellbind/using-promise-q
 // 	   	http://www.slideshare.net/domenicdenicola/callbacks-promises-and-coroutines-oh-my-the-evolution-of-asynchronicity-in-javascript
@@ -54,7 +56,8 @@ requirejs([
 	'utils',
 	'q',
 	'logg',
-	'public/js/filter' // Sharing client code.
+	'public/js/filter', // Sharing client code.
+	'email'
 ], function(
 	express, 
 	consolidate,
@@ -65,7 +68,8 @@ requirejs([
 	Utils,
 	Q,
 	Log,
-	Filter
+	Filter,
+	Email
 ) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -258,8 +262,19 @@ requirejs([
 				var post = req.clean;
 				Log.l(post);
 				Storage.Users.createAccount(user, post)
-				.then(function(result) {
-					res.send(result);
+				.then(function(user) {
+					Email.sendCreateAccountEmailConfirmation(user)
+					.then(function(data) {
+						console.log('sendmail success', data);
+						// Don't send result - it has password.
+						res.send({});
+					})
+					.fail(function(err) {
+						console.log('sendmail fail', err);
+						// TODO: Send errors back if they happen.
+						res.send({});
+					})
+					.end();
 				})
 				.end();
 			})

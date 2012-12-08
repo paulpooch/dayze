@@ -66,8 +66,8 @@ define([
 
 	Utils.makeMonthRange = function(monthCode) {
 		var dParts = monthCode.split('-');
-		var year = (dParts.length > 0) ? dParts[0] : null;
-		var month = (dParts.length > 1) ? dParts[1] - 1 : null;
+		var year = (dParts.length > 0) ? Number(dParts[0]) : null;
+		var month = (dParts.length > 1) ? Number(dParts[1]) - 1 : null;
 		var endMonth = (month == 11) ? 0 : month + 1; 
 		if (year && month) {
 			return { 
@@ -75,7 +75,7 @@ define([
 				end: new Date(year, endMonth).toISOString()
 			};
 		} else {
-			throw new Error('Utils.makeISOWithMonthCode cannot parse monthCode=' + monthCode);
+			throw new Error('Utils.makeMonthRange cannot parse monthCode=' + monthCode);
 		}
 	};
 

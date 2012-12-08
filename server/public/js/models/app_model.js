@@ -179,7 +179,8 @@ define([
 			_accountModel.save({}, {
 				wait: true,
 				success: function(model, response) {
-					console.log('account created', model, response);
+console.log('createAccount success', model, response);
+					_accountView.onAccountCreated();
 				},
 				error: function(model, error) {
 				}
