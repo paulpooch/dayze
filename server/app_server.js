@@ -123,7 +123,7 @@ requirejs([
 
 			Log.l('cookies =', req.signedCookies);
 
-			frontDoor(req)
+			frontDoor(req, res, 'event.list')
 			.then(function(user) {
 				var monthCode = req.clean['monthCode'];
 				if (monthCode) {
@@ -253,15 +253,8 @@ requirejs([
 			Log.l();
 			Log.l('ACCOUNT CREATE ////////////////////');
 			Log.l();
-
-			//Log.l(req);
-			//Log.l("RESPONSE");
-			//Log.l(res);
-
 			frontDoor(req, res, 'account.create')
 			.then(function(user) {
-				// TODO: Filter request.
-				//var post = filter(req.body);
 				var post = req.clean;
 				Log.l(post);
 				Storage.Users.createAccount(user, post)

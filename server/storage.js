@@ -9,6 +9,7 @@ define([
 	'underscore',
 
 	'dynamodb',
+	//'aws-sdk',
 	'node-uuid',
 	'q',
 	'memcached',
@@ -20,6 +21,7 @@ define([
 	_,
 
 	DynamoDB,
+	//AWS,
 	Uuid,
 	Q,
 	Memcached,
@@ -32,6 +34,13 @@ define([
 	var Storage = {};
 	var ddb = DynamoDB.ddb(Config.DYNAMODB_CREDENTIALS);
 	var Memcached = new Memcached(Config.CACHE_URL);
+	// For aws-sdk.  May not switch to this.
+	/*
+	var dynamoDriver = new AWS.DynamoDB.Client({
+		accessKeyId: Config.AWS_ACCESS_KEY_ID,
+		secretAccessKey: Config.AWS_SECRET_ACCESS_KEY
+	});
+	*/
 
 	///////////////////////////////////////////////////////////////////////////
 	// Cache

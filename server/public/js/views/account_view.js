@@ -8,7 +8,8 @@ define([
 	
 	'c',
 	'text!templates/account_template.html',
-	'filter'
+	'filter',
+	'logg'
 ], function(
 	jQuery,
 	_,
@@ -16,7 +17,8 @@ define([
 	
 	C,
 	AccountTemplate,
-	Filter
+	Filter,
+	Log
 ) {
 
 	var that,
@@ -124,7 +126,6 @@ define([
 		onActiveViewChange: function() {
 			if (_appModel.get('activeView') == C.ActiveViews.Account) {
 				_$headerEls.show();	
-				that.doUiTweaks();
 				_isActiveView = true;
 			} else {
 				_$headerEls.hide();
@@ -143,6 +144,7 @@ define([
 
 
 	    initialize: function (options) {
+	    	Log.l('init');
 			that = this;
 			_.bindAll(that);
 	        that.render();
@@ -163,7 +165,8 @@ define([
    	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
 
-	        Filter.activate(_$loginForm);
+	        Log.l(1);
+	        Filter.activate(_$createForm);
 
 	        // BINDINGS
 	        _appModel.bind('change:activeView', that.onActiveViewChange);

@@ -1,0 +1,38 @@
+http://regexlib.com/DisplayPatterns.aspx?cattabindex=4&categoryId=5
+Description	
+Matches the date format &quot;YYYY-mm-dd&quot; and also validates month and number of days in a month. All leap year dates &quot;YYYY-02-29&quot; passes trough. Could easily be changed to another format.
+Matches	
+2004-04-30 | 2004-02-29
+Non-Matches	
+2004-04-31 | 2004-02-30
+
+^[0-9]{4}
+-
+(
+	(
+		(
+			0[13578]|(
+				10|12
+			)
+		)
+		-(
+			0[1-9]|[1-2][0-9]|3[0-1]
+		)
+	)
+	|(
+		02-(
+			0[1-9]|[1-2][0-9]
+		)
+	)|(
+		(
+			0[469]|11
+		)
+		-(
+			0[1-9]|[1-2][0-9]|30
+		)
+	)
+)$
+
+Modified for just YYYY-MM
+
+^[0-9]{4}-(0[123456789]|10|11|12)$

@@ -1,7 +1,9 @@
 define([], function() {
 
 	return {
-		l: log
+		l: function() {
+			console.log(arguments);
+		}
 	};
 
 });

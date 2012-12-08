@@ -32,6 +32,9 @@ define(function() {
 		accessKeyId: 'AKIAINHDEIZ3QVSHQ3PA', 
 		secretAccessKey: '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'
 	};
+	// For aws-sdk.
+	//Config.AWS_ACCESS_KEY_ID = 'AKIAINHDEIZ3QVSHQ3PA';
+	//Config.AWS_SECRET_ACCESS_KEY = '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';
 
 	return Config;
 
