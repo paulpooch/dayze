@@ -4,11 +4,15 @@
 define([
 	'jquery',
 	'underscore',
-	'backbone'
+	'backbone',
+
+	'c'
 ], function(
 	jQuery,
 	_,
-	Backbone
+	Backbone,
+
+	C
 ) {
 
 	var that,
@@ -24,8 +28,17 @@ define([
 
 		// EVENTS /////////////////////////////////////////////////////////////
 		onMonthCodeChange: function() {
-			_appModel.pullEventsForMonth(that.get('monthCode'));	
-		},
+			var delay = null;
+			return function() {
+				if (delay) {
+					clearTimeout(delay);
+				}
+				delay = setTimeout(function() {
+					_appModel.pullEventsForMonth(that.get('monthCode'));
+					delay = null;
+				}, C.PULL_EVENTS_FOR_MONTH_DELAY);
+			};			
+		}(),
 
 		onEventCollectionChange: function() {
 			

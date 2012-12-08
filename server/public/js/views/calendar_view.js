@@ -161,6 +161,9 @@ define([
 			_$monthName.text(currentMonthText);
 			that.displayYear(yearNum);
 
+			if (monthNum < 10) {
+				monthNum = '0' + monthNum;
+			}
 			var monthCode = yearNum + '-' + monthNum;
 			that.model.set('monthCode', monthCode);
 
@@ -220,28 +223,36 @@ define([
 			var weekDateCopy = new Date(weekDate);
 	        var days = {};
 	        var dayCodes = {};
+	        var monthCodes = {};
 	        days['d0'] = weekDateCopy.getDate();
 	        dayCodes['d0'] = weekDateCopy.toISOString().split('T')[0];
+	        monthCodes['d0'] = dayCodes['d0'].substr(0, 7);
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d1'] = weekDateCopy.getDate();
 	       	dayCodes['d1'] = weekDateCopy.toISOString().split('T')[0];
+	       	monthCodes['d1'] = dayCodes['d1'].substr(0, 7);
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d2'] = weekDateCopy.getDate();
 	     	dayCodes['d2'] = weekDateCopy.toISOString().split('T')[0];
+	     	monthCodes['d2'] = dayCodes['d2'].substr(0, 7);
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d3'] = weekDateCopy.getDate();
 	        dayCodes['d3'] = weekDateCopy.toISOString().split('T')[0];
+	        monthCodes['d3'] = dayCodes['d3'].substr(0, 7);
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d4'] = weekDateCopy.getDate();
 	        dayCodes['d4'] = weekDateCopy.toISOString().split('T')[0];
+	        monthCodes['d4'] = dayCodes['d4'].substr(0, 7);
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d5'] = weekDateCopy.getDate();
 	        dayCodes['d5'] = weekDateCopy.toISOString().split('T')[0];
+	        monthCodes['d5'] = dayCodes['d5'].substr(0, 7);
 	        weekDateCopy.setDate(weekDateCopy.getDate() + 1);
 	        days['d6'] = weekDateCopy.getDate();
 	        dayCodes['d6'] = weekDateCopy.toISOString().split('T')[0];
+	        monthCodes['d6'] = dayCodes['d6'].substr(0, 7);
 	        
-	        var el = _template({ days: days, dayCodes: dayCodes });
+	        var el = _template({ days: days, dayCodes: dayCodes, monthCodes: monthCodes });
 			if (forwards) {
 	        	_weekElements.push({
 	        		htmlEl: el,
@@ -263,6 +274,10 @@ define([
 	        		_$calendar.find('div.week').eq(_weekElements.length - 1).remove();
 	        	}
 	       	}
+		},
+
+		onMonthLoaded: function(monthCode) {
+			$('.day[data-month-code=' + monthCode + ']').addClass('loaded');
 		},
 
 		initialize: function(options) {

@@ -251,7 +251,12 @@ define([
 		// Not repull a million times.
 		pullEventsForMonth: function(monthCode) {
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				_eventCollection.fetch({ data: $.param({ monthCode: monthCode }) });
+				_eventCollection.fetch({ 
+					data: $.param({ monthCode: monthCode }), 
+					success: function() {
+						_calendarView.onMonthLoaded(monthCode);
+					}
+				});
 			}
 		},
 		///////////////////////////////////////////////////////////////////////

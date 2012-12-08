@@ -10,6 +10,7 @@ define([], function() {
 
 	C.WEEK_SCROLL_BUFFER = 50;
 	C.PAST_WEEKS_TO_SHOW = 20;
+	C.PULL_EVENTS_FOR_MONTH_DELAY = 1000;
 
 	C.ActiveViews = {};
 	C.ActiveViews.Day = 1;
