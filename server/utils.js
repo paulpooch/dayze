@@ -17,6 +17,20 @@ define([
   		return (new Date().toISOString());
   	};
 
+  	Utils.generateCustomLink = function() {
+		var validChars = 'abcdefghjkmnpqrstuvwxyz0123456789';
+		var password = '';
+		var counter = 0;
+		var length = 30;
+		while (counter < length) {
+			var rand = Math.round(Math.random() * (validChars.length - 1));
+			var oneChar = validChars.substr(rand, 1);
+			password += oneChar;
+			counter++;
+		}
+		return password;
+  	}
+
   	Utils.generatePassword = function(pLength, pLevel) {
 		var length = (typeof pLength == 'undefined') ? 32 : pLength;
 		var level = (typeof pLevel == 'undefined') ? 3 : pLevel;

@@ -38,6 +38,9 @@ define(function() {
 
 	Config.EMAIL_FROM_ADDRESS = 'virtuability@gmail.com';
 
+	Config.LINK_TYPE_EMAIL_CONFIRMATION = 'email_confirmation';
+	Config.LINK_EXPIRATION_EMAIL_CONFIRMATION = 7; // days
+
 	return Config;
 
 });

@@ -140,7 +140,7 @@ requirejs([
 				}
 			})
 			.fail(function(err) {
-				Log.e('Error in EVENT LIST.', err, err.stack);
+				//Log.e('Error in EVENT LIST.', err, err.stack);
 			})
 			.end();			
 		};
@@ -263,18 +263,19 @@ requirejs([
 				Log.l(post);
 				Storage.Users.createAccount(user, post)
 				.then(function(user) {
-					Email.sendCreateAccountEmailConfirmation(user)
-					.then(function(data) {
-						console.log('sendmail success', data);
-						// Don't send result - it has password.
-						res.send({});
-					})
-					.fail(function(err) {
-						console.log('sendmail fail', err);
-						// TODO: Send errors back if they happen.
-						res.send({});
+
+					Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user)
+					.then(function(link) {
+
+						Email.sendCreateAccountEmailConfirmation(user, link)
+						.then(function(data) {
+							res.send({});
+						})
+						.end();					
+
 					})
 					.end();
+
 				})
 				.end();
 			})

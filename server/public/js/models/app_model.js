@@ -294,7 +294,7 @@ console.log('createAccount success', model, response);
 			_appView = new AppView({ model: that, el: $('body') });
 
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				//console.log(_accountModel.fetch());
+				console.log(_accountModel.fetch());
 			}
 
 			that.set('activeView', C.ActiveViews.Calendar);

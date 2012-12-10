@@ -374,6 +374,17 @@ define([
 		get: _get
 	};
 		
+	CUSTOM_LINKS = {
+		tableName: 'DAYZE_CUSTOM_LINKS',
+		cachePrefix: '05_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.linkId;
+		},
+		put: _put,
+		get: _get
+	};
+
 	///////////////////////////////////////////////////////////////////////////
 	// Events
 	///////////////////////////////////////////////////////////////////////////
@@ -711,6 +722,45 @@ Log.l('Users.createAccount', account);
 
 		return Users;
 
+	})();
+
+	///////////////////////////////////////////////////////////////////////////
+	// Custom Links
+	///////////////////////////////////////////////////////////////////////////
+	Storage.CustomLinks = (function() {
+
+		var CustomLinks = {};
+
+		CustomLinks.makeCreateAccountEmailConfirmationLink = function(user) {
+			var deferred = Q.defer();
+
+			var expiration = new Date();
+			expiration.setDate(expiration.getDate() + Config.LINK_EXPIRATION_EMAIL_CONFIRMATION);
+			expiration = expiration.toISOString();
+
+			var link = {
+				linkId: Utils.generateCustomLink(),
+				type: Config.LINK_TYPE_EMAIL_CONFIRMATION,
+				isSingleUse: 1,
+				createTime: Utils.getNowIso(),
+				expiration: expiration,
+				used: 0,
+				userId: user.userId,
+			};
+
+			CUSTOM_LINKS.put(link)
+			.then(function(result) {
+				deferred.resolve(link);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};		
+
+		return CustomLinks;
 	})();
 
 	return Storage;
