@@ -97,7 +97,14 @@ define([
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
+		onActiveViewChange: function() {
+			var currView = that.get('activeView');
+			if (currView == C.ActiveViews.Account) {
+				that.buildAccountView();
+				_accountView.render();
+			}
 
+		},
 		///////////////////////////////////////////////////////////////////////
 
 		// Only instantiate as needed.
@@ -154,7 +161,6 @@ define([
 
 		// FROM ROUTER ////////////////////////////////////////////////////////
 		routeAccount: function(action, linkId) {
-log('routeAccount');
 			switch (action) {
 				case 'confirm_email':
 					var linkModel = new LinkModel({ appModel: that, id: linkId });
@@ -162,19 +168,14 @@ log('routeAccount');
 					linkModel.fetch({
 						success: function() {
 							if (link.type == 'email_confirmation') {
-
-								that.buildAccountView();
 								that.set('activeView', C.ActiveViews.Account);
-
 							}
 						}				
 					});
 					break;
 				case 'created':
-log('created');
 					_accountModel.fetch({
 						success: function() {
-							that.buildAccountView();
 							that.set('activeView', C.ActiveViews.Account);
 						}
 					});
@@ -389,12 +390,15 @@ log('createAccount error');
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
 				_accountModel.fetch({ 
 					success: function() { 
-log('Pulled account from server:', _accountModel); 
+log('Pulled account from server [move this to be route specific]:', _accountModel); 
 					}
 				});
 			}
 
 			that.set('activeView', C.ActiveViews.Calendar);
+
+			// BINDINGS
+			that.bind('change:activeView', that.onActiveViewChange);
 
 		},
 
