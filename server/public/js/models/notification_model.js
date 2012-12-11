@@ -20,8 +20,8 @@ define([
 			icon: '',
 			title: '',
 			body: '',
-			onDisplay: undefined,
-			onClose: undefined
+			onDisplay: null,
+			onClose: null
 		},
 
 		initialize: function(options) {

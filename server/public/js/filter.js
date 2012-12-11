@@ -68,39 +68,71 @@ define([
 	};
 
 	Filter.rules.boolean = function(t) {
-		return { passed: true, cleanVal: t, errors: false };
+Log.l('boolean filter', t);
+		var msg = 'Invalid boolean value.';
+		var result = { passed: true, cleanVal: false, error: msg };
+		try {
+			t = Validator.sanitize(t).toBooleanStrict();
+			result.cleanVal = t;
+		} catch (e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
+	// Keep this in sync with Utils.generateCustomLink
+	Filter.rules.linkId = function(t) {
+		var msg = 'Invalid linkId.';
+		var result = { passed: true, cleanVal: false, error: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			Validator.check(t).is(/^[abcdefghjkmnpqrstuvwxyz0123456789]{30}$/);
+			result.cleanVal = t;
+		} catch (e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
+	Filter.rules.action = function(t) {
+		var msg = 'Invalid action.';
+		var result = { passed: false, cleanVal: false, error: msg };
+		var validActions = {
+			create_account: 1
+		};
+		if (validActions.hasOwnProperty(t)) {
+			result.passed = true;
+			result.cleanVal = t;
+		}
+		return result;
 	};
 	
 	// FILTER FIELDS //////////////////////////////////////////////////////////
 
 	Filter.fields = {
+		'link.read': [{
+			name: 'id',
+			rules: [ Filter.rules.linkId ],
+			immutable: true,
+			required: true
+		}],
 		'event.list': [{
 			name: 'monthCode',
 			rules: [ Filter.rules.monthCode	],
-			immutable: true, // TODO: do something with these
+			immutable: true,
 			required: true
 		}],
-		'account.create': [{ 
+		'account.update': [{ 
 			name: 'createAccountEmail',
 			rules: [ Filter.rules.email	],
-			immutable: true, // TODO: do something with these
-			required: true
-		}],
-		'account.login': [{
-			name: 'loginEmail',
-			rules: [ Filter.rules.email	],
 			immutable: true,
 			required: true
 		}, {
-			name: 'loginPassword',
-			rules: [ Filter.rules.password ],
+			name: 'isBeingCreated',
+			rules: [ Filter.rules.boolean],
 			immutable: true,
-			required: true
-		}, {
-			name: 'loginRemember',
-			rules: [ Filter.rules.boolean ],
-			immutable: true,
-			required: false
+			required: false,
+			serverOnly: true
 		}]
 	};
 
@@ -118,28 +150,35 @@ define([
 			var name = field.name;
 			var rules = field.rules;
 			if (isClient) {
-				var $fieldEl = req.find('#' + name);
-				var $controlGroup = $fieldEl.closest('.control-group');
-				var $helpInline = $controlGroup.find('.help-inline');
-				$controlGroup.attr('class', 'control-group'); // Reset class	
-				$helpInline.text('');
-				var dirtyVal = $fieldEl.val();
-				for (var j = 0; j < rules.length; j++) {
-					var rule = rules[j];
-					var ruleResult = rule(dirtyVal);
-					if (!ruleResult.passed) {
-		 				passed = false;
-		 				errors[name] = ruleResult.error;
-						$controlGroup.addClass('error');
-		 				$helpInline.text(ruleResult.error);
-		 				break;
-		 			} else {
-		 				$controlGroup.addClass('success');
-		 			}
-		 			dirtyVal = ruleResult.cleanVal;
-		 		}
+				if (!field.serverOnly) {
+					var $fieldEl = req.find('#' + name);
+					if (!$fieldEl) {
+Log.l('WARNING: field element ', name, ' not found in during client filter.');
+					}
+					var $controlGroup = $fieldEl.closest('.control-group');
+					var $helpInline = $controlGroup.find('.help-inline');
+					$controlGroup.attr('class', 'control-group'); // Reset class	
+					$helpInline.text('');
+					var dirtyVal = $fieldEl.val();
+					for (var j = 0; j < rules.length; j++) {
+						var rule = rules[j];
+						var ruleResult = rule(dirtyVal);
+						if (!ruleResult.passed) {
+			 				passed = false;
+			 				errors[name] = ruleResult.error;
+							$controlGroup.addClass('error');
+			 				$helpInline.text(ruleResult.error);
+			 				break;
+			 			} else {
+			 				$controlGroup.addClass('success');
+			 			}
+			 			dirtyVal = ruleResult.cleanVal;
+			 		}
+			 		var cleanVal = ruleResult.cleanVal;
+					cleaned[name] = cleanVal;
+			 	}
 			} else {
-				var dirtyVal = (req.query && req.query[name]) || (req.body && req.body[name]);
+				var dirtyVal = (req.query && req.query[name]) || (req.body && req.body[name]) || (req.params && req.params[name]);
 				for (var j = 0; j < rules.length; j++) {
 					var rule = rules[j];
 					var ruleResult = rule(dirtyVal);
@@ -150,9 +189,9 @@ define([
 					}
 					dirtyVal = ruleResult.cleanVal;
 		 		}
+		 		var cleanVal = ruleResult.cleanVal;
+				cleaned[name] = cleanVal;
 			}
-			var cleanVal = ruleResult.cleanVal;
-			cleaned[name] = cleanVal;
 			if (field.required && !cleanVal) {
 				passed = false;
 				cleaned[name] = null;
@@ -174,6 +213,34 @@ define([
 	  		var result = Filter.clean($el, action, true);
 	  		$el.data('filter-passed', result.passed);
 	  	});
+	};
+
+	Filter.clientBlacklist = {};
+
+	Filter.clientBlacklist.user = [
+		'cookieId',
+		'createTime',
+		'passwordHash',
+		'passwordSalt',
+		'lastActivityTime'
+	];
+
+	Filter.clientBlacklist.link = [
+		'isSingleUse',
+		'createTime',
+		'expiration',
+		'used',
+		'userId'
+	];
+
+	Filter.forClient = function(item, blacklist) {
+		for (var i = 0; i < blacklist.length; i++) {
+			var field = blacklist[i];
+			if (item[field]) {
+				delete item[field];
+			}
+		}
+		return item;
 	};
 
 	return Filter;

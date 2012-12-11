@@ -24,25 +24,23 @@ define([
 	var App = Backbone.Router.extend({
 
 		routes: {
-			'day/:dayCode':		'day',
-			'calendar':			'calendar',
-			'create_account':	'createAccount',
-			'oauth': 			'oauth', 
+			'day/:dayCode':				'day',
+			'calendar':					'calendar',
+			'oauth': 					'oauth',
+			'link/:linkId': 			'link',
+			'error': 					'error',
+			'account/:action/:linkId': 	'account',
+			'account/:action': 			'account'
 		},
 
 		day: function(dayCode) {
-			log('ROUTE: day/', dayCode);
+log('ROUTE: day/', dayCode);
 			_appModel.routeDay(dayCode);
 		},
 
 		calendar: function() {
-			log('ROUTE: calendar');
+log('ROUTE: calendar');
 			_appModel.routeCalendar();
-		},
-
-		createAccount: function() {
-			log('ROUTE: create_account');
-			_appModel.routeCreateAccount();
 		},
 
 		oauth: function() {
@@ -61,6 +59,21 @@ define([
 
 		},
 
+		link: function(linkId) {
+log('ROUTE: link');
+			_appModel.routeLink(linkId);
+		},
+
+		error: function() {
+log('ROUTE: error');
+			_appModel.routeError();
+		},
+
+		account: function(action, linkId) {
+log('ROUTE: account', action, linkId);			
+			_appModel.routeAccount(action, linkId);
+		},
+		
 		initialize: function(options) {
 			that = this;
 			

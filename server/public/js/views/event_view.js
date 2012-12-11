@@ -46,13 +46,13 @@ define([
 		},
 
 		mapLocation: function() {
-			console.log('WARNING - mapLocation is currently useless.')
+log('WARNING - mapLocation is currently useless.')
 			if (_delayedMapAction) {
 				clearTimeout(_delayedMapAction);
 			}
 			_delayedMapAction = setTimeout(function() {
 				var loc = $('#location').val();
-				console.log(loc);
+log(loc);
 			}, 2000);
 		},
 

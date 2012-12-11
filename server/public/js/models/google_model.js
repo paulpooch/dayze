@@ -28,11 +28,11 @@ define([
 		},
 
 		validateToken: function(options) {
-			console.log(options)
+log(options)
 			$.ajax({
 				url:  'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + options.accessToken,
 				success: function(response) {
-					console.log(response);
+log(response);
 					if (response.error === undefined) {
 						// valid oauth token, proceed
 
@@ -84,7 +84,9 @@ define([
 					that.validateToken({ accessToken: response.access_token, data: data, action: response.action, callback: fetchCalendars});
 				},
 				statusCode: {
-					401: function() { console.log('invalid oauth token!') }
+					401: function() { 
+log('invalid oauth token!');
+					}
 				}
 			});
 
@@ -92,7 +94,7 @@ define([
 				$.ajax({
 					url:  'https://www.googleapis.com/calendar/v3/users/me/calendarList?access_token=' + response.access_token,
 					success: function(data) {
-						console.log(data);
+log(data);
 					}
 				});
 			};

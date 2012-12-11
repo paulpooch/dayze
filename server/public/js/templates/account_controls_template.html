@@ -1,0 +1,125 @@
+<div id="user_dropdown" class="pull-left">
+	<div class="btn-group inline">
+		<a id="user_button" class="btn btn-primary" href="#" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
+		<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<ul class="dropdown-menu">
+			<li><a href="#!settings"><i class="icon-cog"></i> Account Settings</a></li>
+			<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
+			<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
+			<li><a href="#"><i class="icon-ban-circle"></i> Ban</a></li>
+			<li><a href="#" id="enableNotifications"><i class="icon-ban-circle"></i> Notifications</a></li>
+			<li class="divider"></li>
+			<li><a href="#"><i class="i"></i> Make admin</a></li>
+		</ul>
+	</div>
+</div>
+
+<div id="google_dropdown" class="pull-left">
+	<div class="btn-group">
+		<a id="google_button" class="btn" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> Synced Calendars</a>
+		<a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<ul class="dropdown-menu">
+			<li><a href="/account/create_account"><i class="icon-refresh"></i> Google<div class="sync-syncing"><div class="progress progress-striped active" style="height:8px"><div class="bar" style="width: 40%;"></div></div></div></a></li>
+			<li><a href="/account/create_account"><i class="icon-ok"></i> Facebook</a></li>
+			<li class="divider"></li>
+		</ul>
+	</div>
+</div>
+
+<div id="user_modal" class="modal hide fade">
+
+	<div id="login_form">
+
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Sign In</h3>
+		</div>
+
+		<div class="modal-body">
+			<form class="form-horizontal">
+
+				<div class="control-group">
+					<label class="control-label" for="loginEmail">Email</label>
+					<div class="controls">
+						<input type="text" id="loginEmail" placeholder="Email">
+					</div>
+				</div>
+
+				<div class="control-group">
+					<label class="control-label" for="loginPassword">Password</label>
+					<div class="controls">
+						<input type="password" id="loginPassword" placeholder="Password">
+					</div>
+				</div>
+
+				<div class="control-group">
+					<div class="controls">
+						<label class="checkbox">
+							<input type="checkbox" id="loginRemember"> Remember me
+						</label>
+					</div>
+				</div>
+
+				<hr />
+
+				<div class="control-group">
+					<label class="control-label">Or Connect</label>
+					<div class="controls">
+						<a href="#" id="google_button" class="btn">Use Google</a>
+						<a href="#" id="facebook_button" class="btn">Use Facebook</a>
+					</div>
+				</div>
+
+			</form>
+		</div>
+
+		<div class="modal-footer">
+			<div class="controls controls-row">
+				<a id="show_create_button" class="btn btn-large span2" href="#">Create Account</a>
+				<button id="login_button" type="submit" class="btn btn-primary btn-large span4" data-loading-text="Signing in...">Sign in</button>
+			</div>
+		</div>
+
+	</div>
+
+	<div id="create_form" data-filter="account.update" data-filter-trigger="click:create_account_button" style="display: none;">
+
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Create Account</h3>
+		</div>
+
+		<div class="modal-body" style="padding: 15px">
+			<form class="form-horizontal">
+
+				<div class="control-group">
+					<label class="control-label" for="createAccountEmail">Email</label>
+					<div class="controls">
+						<input type="text" id="createAccountEmail" placeholder="Email">
+						<span class="help-inline"></span>
+					</div>
+				</div>
+
+				<hr />
+
+				<div class="control-group">
+					<label class="control-label">Or Connect</label>
+					<div class="controls">
+						<a href="#" id="google_button" class="btn">Use Google</a>
+						<a href="#" id="facebook_button" class="btn">Use Facebook</a>
+					</div>
+				</div>
+
+			</form>
+		</div>
+
+		<div class="modal-footer">
+			<div class="controls controls-row">
+				<a id="show_login_button" class="btn btn-large span1" href="#">Sign In</a>
+				<button id="create_account_button" type="submit" class="btn btn-primary btn-large span5" data-loading-text="Creating account..." data-run-filter="1">Create Account</button>
+			</div>
+		</div>
+	</div>
+
+</div>
+

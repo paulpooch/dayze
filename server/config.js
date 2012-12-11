@@ -9,6 +9,7 @@ define(function() {
 
 	// Dev flag.
 	Config.IS_LOCAL_DEV = true;
+	Config.URL_ROOT = Config.IS_LOCAL_DEV ? '//localhost:8000/' : '//daypaint.co/'; // Protocol-less.
 	Config.RUN_TESTS = false;
 
 	Config.PORT = 8000;
@@ -36,7 +37,7 @@ define(function() {
 	Config.AWS_ACCESS_KEY_ID = 'AKIAINHDEIZ3QVSHQ3PA';
 	Config.AWS_SECRET_ACCESS_KEY = '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';
 
-	Config.EMAIL_FROM_ADDRESS = 'virtuability@gmail.com';
+	Config.EMAIL_FROM_ADDRESS = 'daypaint@gmail.com';
 
 	Config.LINK_TYPE_EMAIL_CONFIRMATION = 'email_confirmation';
 	Config.LINK_EXPIRATION_EMAIL_CONFIRMATION = 7; // days

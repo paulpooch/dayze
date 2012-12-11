@@ -36,8 +36,9 @@ define([
 					_$pageViewHolder.hide();
 					_$calendarViewHolder.show();
 					break;
-				case C.ActiveViews.CreateAccount:
+				case C.ActiveViews.Account:
 				case C.ActiveViews.Day:
+				case C.ActiveViews.Basic:
 					_$calendarViewHolder.hide();
 					_$pageViewHolder.show();
 					break;

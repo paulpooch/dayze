@@ -31,6 +31,9 @@
 //
 // Awesome validation framework.
 //
+// Clean out table job
+// -expired links
+// -temp accounts with lastactivity > 1 month
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -102,15 +105,76 @@ requirejs([
 				})
 				.end();
 			} else {
-				res.send({ error: 'User has no cookieId.' });
+				//res.send({ errors: 'User has no cookieId.' });
 				deferred.reject(new Error('User has no cookieId.'));
 			}
 		} else {
-			res.send({ error: 'Request reject by filter.' });
-			deferred.reject(new Error('Request reject by filter.'));
+			var errorHtml = [];
+			for (var key in filterResult.errors) {
+				if (filterResult.errors.hasOwnProperty(key)) {
+					var error = filterResult.errors[key];
+					errorHtml.push('<p><strong>', key, ': </strong>', error, '</p>');
+				}
+			}
+			errorHtml = errorHtml.join('');
+			//res.send({ errors: 'Request rejected by filter.<br/>' + errorHtml });
+			deferred.reject(new Error('Request rejected by filter.<br/>' + errorHtml));
 		}
 		return deferred.promise;
 	};
+
+	///////////////////////////////////////////////////////////////////////////////
+	// LINK REST
+	///////////////////////////////////////////////////////////////////////////////
+	var LinkRestApi = function(app) {
+		var LinkRestApi = {};
+		var path = Config.REST_PREFIX + 'link';
+
+		LinkRestApi.read = function(req, res) {
+			Log.l();
+			Log.l('LINK READ ////////////////////');
+			Log.l();
+
+			frontDoor(req, res, 'link.read')
+			.then(function(user) {
+				Log.l(req.clean);
+				var linkId = req.clean.id;
+				Storage.CustomLinks.getLink(user, linkId)
+				.then(function(link) {
+
+					var returnLink = function(link) {
+						res.send(Filter.forClient(link, Filter.clientBlacklist.link));
+					};
+
+					switch(link.type) {
+						case 'email_confirmation':
+							user.isFullUser = 1;
+							Storage.Users.update(user)
+							.then(function(result) {
+								returnLink(link);			
+							})
+							.end();
+							break;
+						default:
+							res.send({ errors: 'Link was invalid.'});
+							break;
+					}
+				})
+				.fail(function(err) {
+					res.send({ errors: err.message });
+				})
+				.end();
+			})
+			.fail(function(err) {
+				Log.e('Error in LINK READ.', err, err.stack);
+			})
+			.end();
+		};
+
+		app.get('/' + path + '/:id', LinkRestApi.read);
+		return LinkRestApi;
+	};
+
 
 	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
@@ -140,7 +204,8 @@ requirejs([
 				}
 			})
 			.fail(function(err) {
-				//Log.e('Error in EVENT LIST.', err, err.stack);
+				Log.e('Error in EVENT LIST.', err, err.stack);
+				res.send({ errors: err.message });
 			})
 			.end();			
 		};
@@ -216,11 +281,7 @@ requirejs([
 				if (!user.displayName) {
 					user.displayName = Config.DEFAULT_USER_NAME;
 				}
-				var sanitizedUser = { 
-					displayName: user.displayName,
-					isFullUser: user.isFullUser
-				};
-				res.send(sanitizedUser);
+				res.send(Filter.forClient(user, Filter.clientBlacklist.user));
 			};
 
 			var createAnonymousUser = function() {
@@ -253,40 +314,45 @@ requirejs([
 			}
 		};
 
-		AccountRestApi.create = function(req, res) {
+		AccountRestApi.update = function(req, res) {
 			Log.l();
-			Log.l('ACCOUNT CREATE ////////////////////');
+			Log.l('ACCOUNT UPDATE ////////////////////');
 			Log.l();
-			frontDoor(req, res, 'account.create')
+			frontDoor(req, res, 'account.update')
 			.then(function(user) {
 				var post = req.clean;
 				Log.l(post);
-				Storage.Users.createAccount(user, post)
-				.then(function(user) {
-
-					Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user)
-					.then(function(link) {
-
-						Email.sendCreateAccountEmailConfirmation(user, link)
-						.then(function(data) {
-							res.send({});
+				var isBeingCreated = post['isBeingCreated'];
+				
+				if (isBeingCreated) {
+					Storage.Users.createAccount(user, post)
+					.then(function(user) {
+						Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user)
+						.then(function(link) {
+							Email.sendCreateAccountEmailConfirmation(user, link)
+							.then(function(data) {
+								res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+							})
+							.end();					
 						})
-						.end();					
-
+						.end();
 					})
 					.end();
+				} else {
 
-				})
-				.end();
+					// User update
+
+				}
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT CREATE', err, err.stack);
+				res.send({ errors: err.message });
 			})
 			.end();
 		};
 		
-		app.post('/' + path, AccountRestApi.create);
 		app.get('/' + path, AccountRestApi.list);
+		app.put('/' + path + '/:id', AccountRestApi.update);
 
 		return AccountRestApi;
 
@@ -351,6 +417,7 @@ requirejs([
 
 		var accountRestApi = AccountRestApi(app);
 		var eventRestApi = EventRestApi(app);
+		var linkRestApi = LinkRestApi(app);
 
 		// handle requests to roots
 		app.get('/', function(req, res) {

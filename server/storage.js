@@ -397,7 +397,6 @@ define([
 
 			var eventId = Uuid.v4();
 			var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
-			Log.l('eventTime = ', eventTime);
 
 			var event = {
 				eventId: eventId,
@@ -454,7 +453,6 @@ define([
 			var deferred = Q.defer();
 
 			var eventTimeRange = Utils.makeMonthRange(monthCode);
-			Log.l(eventTimeRange);
 
 			var options = {
 				RangeKeyCondition: {
@@ -470,16 +468,13 @@ define([
 			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
 			.then(function(eventsByTime) {
 				if (eventsByTime.length) {
-					Log.l('EVENTS!', eventsByTime);
 					eventsByTime.forEach(function(eventsAtTime) {
 						// Less than optimal.
 						eventIds = eventIds.concat(eventsAtTime.events);
 					});
-					Log.l(eventIds);
 					if (eventIds.length) {
 						EVENTS.batchGet(eventIds)
 						.then(function(events) {
-							Log.l(events);
 							deferred.resolve(events);
 						})
 						.end();
@@ -602,20 +597,16 @@ define([
 			var cookieId = Utils.generatePassword(20, 2);
 			var userId = Uuid.v4();
 
-			
 			var putUser = function() {
 				var def1 = Q.defer();
-
+				// Minimalist version.
+				// Real entry made if user decides to create account.
 				var user = { 
 					userId: userId,
 					cookieId: cookieId,
 					isFullUser: 0,
-					//displayName: '',
-					//passwordSalt: '',
-					//passwordHash: '',
 					createTime: Utils.getNowIso()
 				};
-
 				USERS.put(user)
 				.then(function(result) {
 					var result = {
@@ -628,18 +619,15 @@ define([
 					def1.reject(err);
 				})
 				.end();
-
 				return def1.promise;
 			};
 
 			var putCookie = function(putUserResult) {
 				var def2 = Q.defer();
-
 				var cookie = {
 					cookieId: putUserResult.cookieId,
 					userId: putUserResult.user.userId
 				};
-
 				USERS_BY_COOKIE.put(cookie)
 				.then(function(result) {
 					def2.resolve(putUserResult);
@@ -648,7 +636,6 @@ define([
 					def2.reject(err);
 				})
 				.end();
-
 				return def2.promise;
 
 			};
@@ -706,11 +693,24 @@ define([
 				lastActivityTime: Utils.getNowIso()
 			};
 
-Log.l('Users.createAccount', account);
 			USERS.put(account)
 			.then(function(result) {
-				Log.l('createAccount success.', account);
 				deferred.resolve(account);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.update = function(user) {
+			var deferred = Q.defer();
+
+			Users.put(user)
+			.then(function(result) {
+				deferred.resolve(user);
 			})
 			.fail(function(err) {
 				deferred.reject(err);
@@ -730,6 +730,47 @@ Log.l('Users.createAccount', account);
 	Storage.CustomLinks = (function() {
 
 		var CustomLinks = {};
+
+		CustomLinks.getLink = function(user, linkId) {
+			var deferred = Q.defer();
+
+			CUSTOM_LINKS.get(linkId)
+			.then(function(link) {
+				var needsToBeMarkedUsed = false;
+				if (link.userId && link.userId != user.userId) {
+					deferred.reject(new Error('Link is not for this user.'));
+				}
+				if (link.isSingleUse) {
+					needsToBeMarkedUsed = true;
+					if (link.used) {
+						deferred.reject(new Error('Link was already used.'));
+					}
+				}
+				if (link.expiration) {
+					var now = new Date();
+					var expiration = new Date(link.expiration);
+					if (now > expiration) {
+						deferred.reject(new Error('Link is expired.'));
+					}
+				}
+				if (needsToBeMarkedUsed) {
+					link.used = 1;
+					CUSTOM_LINKS.put(link)
+					.then(function(result) {
+						deferred.resolve(link);
+					})
+					.end();
+				} else {
+					deferred.resolve(link);
+				}
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
 
 		CustomLinks.makeCreateAccountEmailConfirmationLink = function(user) {
 			var deferred = Q.defer();

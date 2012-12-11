@@ -25,7 +25,7 @@ define([
       that = this;
       that.model.set('isSupported', true);
       if (window.webkitNotifications === undefined) {
-        console.log('Notifications not supported!');
+log('Notifications not supported!');
         that.model.set('isSupported', false);
       }
     },
@@ -41,7 +41,7 @@ define([
           _notification.ondisplay = that.model.get('onDisplay');
           _notification.onclose = that.model.get('onClose');
           _notification.show();
-          console.log('show')
+log('show')
         } else {
           window.webkitNotifications.requestPermission(that.onEnableNotificationsClick);
         }

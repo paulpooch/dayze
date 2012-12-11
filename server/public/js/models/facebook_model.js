@@ -102,7 +102,7 @@ define([
 			$.ajax({
 				url: 'https://graph.facebook.com/me/events?access_token=' + that.get('accessToken'),
 				success: function(data) {
-					console.log(data);
+log(data);
 				}
 			});
 		}

@@ -32,8 +32,6 @@ define([
 			var existingEvents = _eventsByDay[dayCode] || [];
 			existingEvents.push(event);
 			_eventsByDay[dayCode] = existingEvents;
-
-			console.log(event);
 		},
 
 		onChange: function() {

@@ -16,13 +16,16 @@ define([
 	'models/day_model',
 	'models/event_model',
 	'models/notification_model',
+	'models/link_model',
+	'models/basic_model',
 	
+	'views/account_controls_view',
 	'views/account_view',
 	'views/calendar_view',
 	'views/day_view',
 	'views/event_view',
 	'views/notification_view',
-	'views/create_account_view',
+	'views/basic_view'
 
 ], function(
 	jQuery,
@@ -39,13 +42,16 @@ define([
 	DayModel,
 	EventModel,
 	NotificationModel,
+	LinkModel,
+	BasicModel,
 
+	AccountControlsView,
 	AccountView,
 	CalendarView,
 	DayView,
 	EventView,
 	NotificationView,
-	CreateAccountView
+	BasicView
 
 ) {
 
@@ -60,12 +66,15 @@ define([
 		_dayModel,
 		_eventModel,
 		_notificationModel,
+		_basicModel,
 
+		_accountControlsView,
 		_accountView,
 		_calendarView,
 		_dayView,
 		_eventView,
-		_notificationView;
+		_notificationView,
+		_basicView;
 
 	var AppModel = Backbone.Model.extend({
 
@@ -88,9 +97,133 @@ define([
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-		/* TODO: backbone models don't have events... */
+
 		///////////////////////////////////////////////////////////////////////
 
+		// Only instantiate as needed.
+		buildDayModel: function() {
+			if (!_dayModel) {
+				_dayModel = new DayModel({ appModel: that });
+				that.set('dayModel', _dayModel);
+				_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
+			}
+		},
+
+		buildEventModel: function() {
+			if (!_eventModel) {
+				_eventModel = new EventModel({ appModel: that });
+				that.set('eventModel', _eventModel);
+				_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
+			}	
+		},
+
+		buildNotificationModel: function() {
+			if (!_notificationModel) {
+				_notificationModel = new NotificationModel({ appModel: that });
+				that.set('notificationModel', _notificationModel);
+				_notificationView = new NotificationView({ model: that.get('notificationModel'), appModel: that, el: $('#account_view_holder') });
+			}
+		},
+
+		buildBasicModel: function() {
+			if (!_basicModel) {
+				_basicModel = new BasicModel({ appModel: that });
+				that.set('basicModel', _basicModel);
+				_basicView = new BasicView({ model: that.get('basicModel'), appModel: that, el: $('#page_holder') });
+			}
+		},
+
+		buildAccountView: function() {
+			if (!_accountView) {
+				_accountView = new AccountView({ model: that.get('accountModel'), appModel: that, el: $('#page_holder') });			
+			}
+		},
+
+		showError: function(error) {
+			that.buildBasicModel();
+			_basicModel.set('error', error);
+			_router.navigate('error', { trigger: true });
+		},
+
+
+
+
+
+
+
+
+		// FROM ROUTER ////////////////////////////////////////////////////////
+		routeAccount: function(action, linkId) {
+log('routeAccount');
+			switch (action) {
+				case 'confirm_email':
+					var linkModel = new LinkModel({ appModel: that, id: linkId });
+					that.set('activeView', C.ActiveViews.Account)
+					linkModel.fetch({
+						success: function() {
+							if (link.type == 'email_confirmation') {
+
+								that.buildAccountView();
+								that.set('activeView', C.ActiveViews.Account);
+
+							}
+						}				
+					});
+					break;
+				case 'created':
+log('created');
+					_accountModel.fetch({
+						success: function() {
+							that.buildAccountView();
+							that.set('activeView', C.ActiveViews.Account);
+						}
+					});
+					break;
+			}			
+		},
+
+		routeCalendar: function() {
+			that.set('activeView', C.ActiveViews.Calendar); 
+		},
+
+		routeDay: function(dayCode) {
+			var events = _eventCollection.get(dayCode);
+			
+			that.buildDayModel();
+			_dayModel.set('events', events);
+			_dayModel.set('dayCode', dayCode);
+
+			// Trigger modal in app_view.
+			that.set('activeView', C.ActiveViews.Day);
+		},
+
+		routeOAuth: function(response) {
+			_accountModel.oauth(response);
+		},
+
+		routeLink: function(linkId) {
+			var linkModel = new LinkModel({ appModel: that, id: linkId });
+			linkModel.fetch({
+				success: function() {
+					switch (linkModel.get('type')) {
+						default:
+							alert('Done fetching link.  Build this out.');
+							break;
+					}
+				}				
+			});
+		},
+
+		routeError: function() {
+			that.set('activeView', C.ActiveViews.Basic);
+		},
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+		
 
 
 
@@ -102,6 +235,7 @@ define([
 
 		// FROM DAY VIEW //////////////////////////////////////////////////////
 		renderEventView: function(dayViewEl) {
+			that.buildEventModel();
 			var eventViewEl = dayViewEl.find('#event_view_holder');
 			_eventView.setElAndRender(eventViewEl);
 		},
@@ -147,12 +281,12 @@ define([
 		// FROM EVENT VIEW ////////////////////////////////////////////////////
 		saveEvent: function() {
 			if (_accountModel.get('isFullUser')) {
-				var eventCid = _dayModel.get('selectedEventId');
+				var eventCid = that.getDayModel().get('selectedEventId');
 				var eventModel = _eventCollection.getByCid(eventCid);
 				eventModel.save({}, {
 					wait: true,
 					success: function(model, response) {
-						console.log('event saved', model, response);
+log('event saved', model, response);
 					},
 					error: function(model, error) {
 
@@ -175,14 +309,16 @@ define([
 
 		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
 		createAccount: function() {
-			log('createAccount', _accountModel);
+			_accountModel.set('isBeingCreated', true);
 			_accountModel.save({}, {
 				wait: true,
-				success: function(model, response) {
-console.log('createAccount success', model, response);
-					_accountView.onAccountCreated();
+				success: function() {
+log('createAccount success');
+					_accountModel.set('isBeingCreated', false);
+					_router.navigate('account/created', { trigger: true });
 				},
-				error: function(model, error) {
+				error: function(){
+log('createAccount error');
 				}
 			});
 		},
@@ -197,40 +333,6 @@ console.log('createAccount success', model, response);
 
 
 
-		// FROM ROUTER ////////////////////////////////////////////////////////
-		routeCreateAccount: function() {
-			var createAccountView = new CreateAccountView({ model: that.get('accountModel'), appModel: that, el: $('#page_holder') });
-			that.set('activeView', C.ActiveViews.CreateAccount); 
-		},
-
-		routeCalendar: function() {
-			that.set('activeView', C.ActiveViews.Calendar); 
-		},
-
-		routeDay: function(dayCode) {
-			var events = _eventCollection.get(dayCode);
-			
-			_dayModel.set('events', events);
-			_dayModel.set('dayCode', dayCode);
-
-			// Trigger modal in app_view.
-			that.set('activeView', C.ActiveViews.Day);
-		},
-
-		routeOAuth: function(response) {
-			_accountModel.oauth(response);
-		},
-		///////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-		
 		// FROM APP VIEW //////////////////////////////////////////////////////
 		// Called by AppView during initialization.
 		renderCalendarView: function() {
@@ -276,25 +378,20 @@ console.log('createAccount success', model, response);
 	
 			_accountModel = new AccountModel({ appModel: that  });
 			_calendarModel = new CalendarModel({ appModel: that });
-			_dayModel = new DayModel({ appModel: that });
-			_eventModel = new EventModel({ appModel: that });
-			_notificationModel = new NotificationModel({ appModel: that });
-
+			
 			that.set('accountModel', _accountModel);
 			that.set('calendarModel', _calendarModel);
-			that.set('dayModel', _dayModel);
-			that.set('eventModel', _eventModel);
-			that.set('notificationModel', _notificationModel);
-
-			_accountView = new AccountView({ model: that.get('accountModel'), appModel: that, el: $('#account_view_holder') });
+			
+			_accountControlsView = new AccountControlsView({ model: that.get('accountModel'), appModel: that, el: $('#account_controls_view_holder') });
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
-			_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
-			_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
-			_notificationView = new NotificationView({ model: that.get('notificationModel'), appModel: that, el: $('#account_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				console.log(_accountModel.fetch());
+				_accountModel.fetch({ 
+					success: function() { 
+log('Pulled account from server:', _accountModel); 
+					}
+				});
 			}
 
 			that.set('activeView', C.ActiveViews.Calendar);

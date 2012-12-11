@@ -15,7 +15,8 @@ define([
 
 	var EventModel = Backbone.Model.extend({
 
-		url: '/rest/event',
+		urlRoot: '/rest/event',
+		idAttribute: 'eventId',
 
 		defaults: {
 			name: 'No Events',
@@ -38,6 +39,7 @@ define([
 		// Line 235 of backbone.js
 		toJSON: function() {
 			return {
+				eventId: this.get('eventId'),
 				name: this.get('name'),
 				dayCode: this.get('dayCode'),
 				description: this.get('description'),
@@ -60,10 +62,6 @@ define([
 			_.bindAll(this);
 			that = this;
 			
-			that.set('name', options.name || '');
-			that.set('dayCode', options.dayCode || '');
-			
-
 			// BINDINGS
 			that.bind('change', that.onChange);			
 		}
