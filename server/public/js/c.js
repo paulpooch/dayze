@@ -18,6 +18,9 @@ define([], function() {
 	C.ActiveViews.Account = 3;
 	C.ActiveViews.Basic = 4;
 
+	C.Strings = {};
+	C.Strings.AccountCreated = 'Account was created successfully.<br/>Please check your email and click the confirmation link to finish registration.';
+
 	return C;
 
 });

@@ -116,10 +116,10 @@ define([
 	var _get = function(hashKey, rangeKey) {
 		var that = this;
 		rangeKey = rangeKey || null;
-		Log.l('Storage.get');
-		Log.l('table = ', that.tableName);
-		Log.l('hashKey = ', hashKey);
-		Log.l('rangeKey = ', rangeKey);
+Log.l('Storage.get');
+Log.l('table = ', that.tableName);
+Log.l('hashKey = ', hashKey);
+Log.l('rangeKey = ', rangeKey);
 		
 		var deferred = Q.defer();
 		var cacheKey = (rangeKey) ? hashKey + rangeKey : hashKey;
@@ -127,12 +127,12 @@ define([
 
 		Cache.get(cacheKey)
 		.then(function(cacheResult) {
-			Log.l('CACHE HIT');
-			Log.l(cacheResult);
+Log.l('CACHE HIT');
+Log.l(cacheResult);
 			deferred.resolve(cacheResult);
 		})
 		.fail(function(err) {
-			Log.l('CACHE MISS');
+Log.l('CACHE MISS');
 			Q.ncall(
 				ddb.getItem,
 				that,
@@ -241,9 +241,9 @@ define([
 
 	var _put = function(item) {
 		var that = this;
-		Log.l('Storage.put');
-		Log.l('table = ', that.tableName);
-		Log.l('item = ', item);
+//Log.l('Storage.put');
+//Log.l('table = ', that.tableName);
+//Log.l('item = ', item);
 			
 		var deferred = Q.defer();
 		cacheKey = item[that.cacheKey];	
@@ -258,7 +258,7 @@ define([
 		.then(function(dbResult) {
 			Cache.set(that.cacheKey(item), item, that.cacheTimeout)
 			.then(function(cacheResult) {
-				Log.l(true);
+//Log.l(true);
 				deferred.resolve(true);
 			})
 			.end();	
@@ -706,9 +706,10 @@ define([
 		};
 
 		Users.update = function(user) {
+Log.l('Users.update', user);
 			var deferred = Q.defer();
 
-			Users.put(user)
+			USERS.put(user)
 			.then(function(result) {
 				deferred.resolve(user);
 			})

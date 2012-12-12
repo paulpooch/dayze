@@ -85,27 +85,31 @@ requirejs([
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
 	var frontDoor = function(req, res, action) {
+Log.l('FRONT DOOR [cookie = ', req.signedCookies.cookieId, ' ]');
 		var deferred = 	Q.defer();
+		// Run filter.
 		var filterResult = Filter.clean(req, action);
-		req.body = null; // Make sure nobody uses dirty vals.
+		// Make sure nobody uses dirty vals.
+		req.body = null;
 		req.query = null;
+		req.params = null;
+
 		if (filterResult.passed) { 
 			req.clean = filterResult.cleaned;
 			if (req.signedCookies.cookieId) {
 				var cookieId = req.signedCookies.cookieId;	
 				Storage.Users.getUserWithCookieId(cookieId)
 				.then(function(user) {
-					Log.l('verifyUser pulled user', user);
 					deferred.resolve(user);
 				})
 				.fail(function(err) {
-					// Make sure if no user comes back, this does fail.
-					Log.e('verifyUser failed', err, err.stack);
 					deferred.reject(new Error(err));
 				})
 				.end();
 			} else {
-				//res.send({ errors: 'User has no cookieId.' });
+				if (action == 'account.list') {
+					deferred.resolve(null);
+				}
 				deferred.reject(new Error('User has no cookieId.'));
 			}
 		} else {
@@ -117,7 +121,6 @@ requirejs([
 				}
 			}
 			errorHtml = errorHtml.join('');
-			//res.send({ errors: 'Request rejected by filter.<br/>' + errorHtml });
 			deferred.reject(new Error('Request rejected by filter.<br/>' + errorHtml));
 		}
 		return deferred.promise;
@@ -137,21 +140,18 @@ requirejs([
 
 			frontDoor(req, res, 'link.read')
 			.then(function(user) {
+Log.l('in link read');
 				Log.l(req.clean);
-				var linkId = req.clean.id;
+				var linkId = req.clean.linkId;
 				Storage.CustomLinks.getLink(user, linkId)
 				.then(function(link) {
-
-					var returnLink = function(link) {
-						res.send(Filter.forClient(link, Filter.clientBlacklist.link));
-					};
-
+Log.l('pulled link', link)
 					switch(link.type) {
 						case 'email_confirmation':
 							user.isFullUser = 1;
 							Storage.Users.update(user)
 							.then(function(result) {
-								returnLink(link);			
+								res.send(Filter.forClient(link, Filter.clientBlacklist.link));			
 							})
 							.end();
 							break;
@@ -171,7 +171,7 @@ requirejs([
 			.end();
 		};
 
-		app.get('/' + path + '/:id', LinkRestApi.read);
+		app.get('/' + path + '/:linkId', LinkRestApi.read);
 		return LinkRestApi;
 	};
 
@@ -272,47 +272,50 @@ requirejs([
 		var AccountRestApi = {};
 		var path = Config.REST_PREFIX + 'account';
 
+		// Doing login stuff?
+		// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
+
 		AccountRestApi.list = function(req, res) {
 			Log.l();
 			Log.l('ACCOUNT LIST ////////////////////');
 			Log.l();
+			frontDoor(req, res, 'account.list')
+			.then(function(user) {
 
-			var proceedWithUser = function(user) {
-				if (!user.displayName) {
-					user.displayName = Config.DEFAULT_USER_NAME;
+				if (req.params && req.params['id'] && (!user || user.userId != req.params['id'])) {
+					res.send({ errors: 'Account requested was not your account.'});
 				}
-				res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-			};
 
-			var createAnonymousUser = function() {
-				Storage.Users.createTempUser()
-				.then(function(tempUserObj) {
-					var cookieId = tempUserObj.cookieId;
-					// Set cookie.
-					res.cookie('cookieId', cookieId, { signed: true });
-					var user = tempUserObj.user;
-					proceedWithUser(user);
-				})
-				.fail(function(err) {
-					Log.e('createTempUser failed.', err, err.stack);
-				})
-				.end();
-			}
+				if (!user) {
+					Storage.Users.createTempUser()
+					.then(function(tempUserObj) {
+						var cookieId = tempUserObj.cookieId;
+						var user = tempUserObj.user;
+						
+						// Set cookie.
+						res.cookie('cookieId', cookieId, { signed: true });
+						res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+					})
+					.fail(function(err) {
+						Log.e('createTempUser failed.', err, err.stack);
+					})
+					.end();
+				} else {
+					res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+				}
 
-			if (req.signedCookies.cookieId) {
-				Storage.Users.getUserWithCookieId(req.signedCookies.cookieId)
-				.then(proceedWithUser)
-				.fail(function(err) {
-					Log.e('getUserWithCookieId failed.', err, err.stack);
-					// Couldn't find cookieId in db.
-					createAnonymousUser();
-				})
-				.end();
-			} else {
-				// http://dailyjs.com/2011/01/10/node-tutorial-9/ - find login part
-				createAnonymousUser();
-			}
+			})
+			.fail(function(err) {
+				Log.e('Error in ACCOUNT LIST', err, err.stack);
+				res.send({ errors: err.message });
+			})
+			.end();
+
 		};
+
+		// Read has same functionality as list.
+		// Either way you can only read 1 account - yours.
+		AccountRestApi.read = AccountRestApi.list;
 
 		AccountRestApi.update = function(req, res) {
 			Log.l();
@@ -345,13 +348,14 @@ requirejs([
 				}
 			})
 			.fail(function(err) {
-				Log.e('Error in ACCOUNT CREATE', err, err.stack);
+				Log.e('Error in ACCOUNT UPDATE', err, err.stack);
 				res.send({ errors: err.message });
 			})
 			.end();
 		};
 		
 		app.get('/' + path, AccountRestApi.list);
+		app.get('/' + path + '/:id', AccountRestApi.read);
 		app.put('/' + path + '/:id', AccountRestApi.update);
 
 		return AccountRestApi;
@@ -439,7 +443,7 @@ requirejs([
 
 		// route catch-all: must appear at the end of all app.get() calls
 		app.get('*', function(req, res) {
-			Log.l('catch-all');
+Log.l('catch-all');
 			var data = {};
 			res.render('index', data);
 		});

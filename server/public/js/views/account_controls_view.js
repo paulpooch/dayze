@@ -47,6 +47,10 @@ define([
 			that.$el.html(that.template(data));
 		},
 
+		hideUserModal: function() {
+			_$userModal.modal('hide');
+		},
+
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'click #user_button': 'onUserButtonClick',

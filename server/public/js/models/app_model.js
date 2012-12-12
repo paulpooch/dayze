@@ -97,15 +97,25 @@ define([
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-		onActiveViewChange: function() {
-			var currView = that.get('activeView');
-			if (currView == C.ActiveViews.Account) {
-				that.buildAccountView();
-				_accountView.render();
-			}
 
-		},
 		///////////////////////////////////////////////////////////////////////
+
+		showView: function(view) {
+			// Will trigger header change in views.
+			that.set('activeView', view);
+			switch (view) {
+				case C.ActiveViews.Account:
+					that.buildAccountView();
+					_accountView.render();
+					break;
+				case C.ActiveViews.Calendar:
+					break;
+				case C.ActiveViews.Day:
+					break;
+				case C.ActiveViews.Basic:
+					break;
+			}
+		},
 
 		// Only instantiate as needed.
 		buildDayModel: function() {
@@ -163,12 +173,20 @@ define([
 		routeAccount: function(action, linkId) {
 			switch (action) {
 				case 'confirm_email':
-					var linkModel = new LinkModel({ appModel: that, id: linkId });
-					that.set('activeView', C.ActiveViews.Account)
+					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
+					// Some kind of loading view instead?
+					that.showView(C.ActiveViews.Account);
+
 					linkModel.fetch({
 						success: function() {
-							if (link.type == 'email_confirmation') {
-								that.set('activeView', C.ActiveViews.Account);
+							if (linkModel.get('type') == 'email_confirmation') {
+								_accountModel.fetch({
+									success: function() {
+										_accountModel.set('message', C.Strings.EmailConfirmed);
+										_accountControlsView.render();
+										that.showView(C.ActiveViews.Account);
+									}
+								});
 							}
 						}				
 					});
@@ -176,7 +194,10 @@ define([
 				case 'created':
 					_accountModel.fetch({
 						success: function() {
-							that.set('activeView', C.ActiveViews.Account);
+							_accountModel.set('message', C.Strings.AccountCreated);
+							_accountControlsView.hideUserModal();
+							_accountControlsView.render();
+							that.showView(C.ActiveViews.Account);
 						}
 					});
 					break;
@@ -184,7 +205,7 @@ define([
 		},
 
 		routeCalendar: function() {
-			that.set('activeView', C.ActiveViews.Calendar); 
+			that.showView(C.ActiveViews.Calendar); 
 		},
 
 		routeDay: function(dayCode) {
@@ -195,7 +216,7 @@ define([
 			_dayModel.set('dayCode', dayCode);
 
 			// Trigger modal in app_view.
-			that.set('activeView', C.ActiveViews.Day);
+			that.showView(C.ActiveViews.Day);
 		},
 
 		routeOAuth: function(response) {
@@ -216,7 +237,7 @@ define([
 		},
 
 		routeError: function() {
-			that.set('activeView', C.ActiveViews.Basic);
+			that.showView(C.ActiveViews.Basic);
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -314,12 +335,10 @@ log('event saved', model, response);
 			_accountModel.save({}, {
 				wait: true,
 				success: function() {
-log('createAccount success');
 					_accountModel.set('isBeingCreated', false);
 					_router.navigate('account/created', { trigger: true });
 				},
 				error: function(){
-log('createAccount error');
 				}
 			});
 		},
@@ -387,19 +406,19 @@ log('createAccount error');
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				_accountModel.fetch({ 
-					success: function() { 
-log('Pulled account from server [move this to be route specific]:', _accountModel); 
-					}
-				});
+			that.showView(C.ActiveViews.Calendar);
+
+			// IF NO ACCOUNT...
+			if (!_accountModel.get('userId')) {
+				if (!that.get('SUPPRESS_SERVER_CALLS')) {
+					_accountModel.fetch({ 
+						success: function() { 
+	log('Pulled account from server', _accountModel); 
+						}
+					});
+				}
 			}
-
-			that.set('activeView', C.ActiveViews.Calendar);
-
-			// BINDINGS
-			that.bind('change:activeView', that.onActiveViewChange);
-
+			
 		},
 
 	});

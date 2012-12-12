@@ -14,8 +14,6 @@ define(function() {
 
 	Config.PORT = 8000;
 
-	Config.DEFAULT_USER_NAME = 'Anonymous';
-
 	// To use AWS Elasticache:
 	//this.CACHE_URL = 'cache-001.ardkb4.0001.use1.cache.amazonaws.com:11211',
 	// To use local EC2 box (cheaper):

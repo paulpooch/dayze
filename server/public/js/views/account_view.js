@@ -33,6 +33,7 @@ define([
 		render: function() {
 			var data = that.model.toJSON();
 			that.$el.html(that.template(data));
+			//that.model.set('message', '');
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////

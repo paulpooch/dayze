@@ -40,7 +40,7 @@ define([
 
 	Filter.rules.monthCode = function(t) {
 		var msg = 'monthCode must be a valid YYYY-MM-DD format.';
-		var result = { passed: true, cleanVal: false, error: msg };
+		var result = { passed: true, cleanVal: null, error: msg };
 		try {
 			Validator.check(t).is(/^[0-9]{4}|-|(0[123456789]|10|11|12)$/);
 			result.cleanVal = t;
@@ -52,7 +52,7 @@ define([
 
 	Filter.rules.email = function(t) {
 		var msg = 'Email must be a valid email between 1 and 100 characters long.';
-		var result = { passed: true, cleanVal: false, error: msg };
+		var result = { passed: true, cleanVal: null, error: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).isEmail().len(1, 100);
@@ -70,7 +70,7 @@ define([
 	Filter.rules.boolean = function(t) {
 Log.l('boolean filter', t);
 		var msg = 'Invalid boolean value.';
-		var result = { passed: true, cleanVal: false, error: msg };
+		var result = { passed: true, cleanVal: null, error: msg };
 		try {
 			t = Validator.sanitize(t).toBooleanStrict();
 			result.cleanVal = t;
@@ -83,7 +83,7 @@ Log.l('boolean filter', t);
 	// Keep this in sync with Utils.generateCustomLink
 	Filter.rules.linkId = function(t) {
 		var msg = 'Invalid linkId.';
-		var result = { passed: true, cleanVal: false, error: msg };
+		var result = { passed: true, cleanVal: null, error: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).is(/^[abcdefghjkmnpqrstuvwxyz0123456789]{30}$/);
@@ -94,9 +94,22 @@ Log.l('boolean filter', t);
 		return result;
 	};
 
+	Filter.rules.uuid = function(t) {
+		var msg = 'Invalid UUID.';
+		var result = { passed: true, cleanVal: null, error: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			Validator.check(t).isUUID();
+			result.cleanVal = t;
+		} catch (e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
 	Filter.rules.action = function(t) {
 		var msg = 'Invalid action.';
-		var result = { passed: false, cleanVal: false, error: msg };
+		var result = { passed: false, cleanVal: null, error: msg };
 		var validActions = {
 			create_account: 1
 		};
@@ -111,7 +124,7 @@ Log.l('boolean filter', t);
 
 	Filter.fields = {
 		'link.read': [{
-			name: 'id',
+			name: 'linkId',
 			rules: [ Filter.rules.linkId ],
 			immutable: true,
 			required: true
@@ -121,6 +134,12 @@ Log.l('boolean filter', t);
 			rules: [ Filter.rules.monthCode	],
 			immutable: true,
 			required: true
+		}],
+		'account.list': [{
+			name: 'id',
+			rules: [ Filter.rules.uuid ],
+			immutable: true,
+			required: false
 		}],
 		'account.update': [{ 
 			name: 'createAccountEmail',
@@ -140,10 +159,12 @@ Log.l('boolean filter', t);
 	Filter.clean = function(req, action, isClient) {
 		Log.l('CLEAN ////////////////////////////');
 		Log.l('action', action);
-		Log.l('DIRTY', req.body, req.query);
 		var cleaned = {};
 		var passed = true;
 		var fields = Filter.fields[action];
+		if (!fields) {
+			return { passed: false, cleaned: null, errors: { Filter: 'Filter.fields had no entry for action: ' + action } };
+		}
 		var errors = {};
 		for (var i = 0; i < fields.length; i++) {
 			var field = fields[i];
@@ -178,14 +199,20 @@ Log.l('WARNING: field element ', name, ' not found in during client filter.');
 					cleaned[name] = cleanVal;
 			 	}
 			} else {
+				//(req.params) Checks route params, ex: /user/:id
+				//(req.query) Checks query string params, ex: ?id=12 Checks urlencoded body params
+				//(req.body), ex: id=12 To utilize urlencoded request bodies, req.body should be an object. This can be done by using the _express.bodyParser middleware.
 				var dirtyVal = (req.query && req.query[name]) || (req.body && req.body[name]) || (req.params && req.params[name]);
+Log.l('dirtyVal = ', dirtyVal);
 				for (var j = 0; j < rules.length; j++) {
 					var rule = rules[j];
 					var ruleResult = rule(dirtyVal);
 					if (!ruleResult.passed) {
-		 				passed = false;
-		 				errors[name] = ruleResult.error;
-		 				break;
+						if (field.required || dirtyVal !== undefined) {
+		 					passed = false;
+		 					errors[name] = ruleResult.error;
+		 					break;
+		 				}
 					}
 					dirtyVal = ruleResult.cleanVal;
 		 		}
@@ -201,7 +228,7 @@ Log.l('WARNING: field element ', name, ' not found in during client filter.');
 				cleaned[name] = null;
 			}
 		}
-		Log.l('CLEAN', cleaned);
+Log.l('cleaned', cleaned);
 		return { passed: passed, cleaned: cleaned, errors: errors };
 	};
 
