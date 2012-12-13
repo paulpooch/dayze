@@ -77,6 +77,7 @@ header {
 
 .calendar_view_header {
   float: left;
+  margin-left: 30%;
   border-left: 1px solid #999;
   border-right: 1px solid #fff;
 }
@@ -217,12 +218,7 @@ header {
 
 #page_holder {
   margin: 64px 20px 20px 20px;
-  background: -moz-linear-gradient(left, rgba(255,255,255,.7) 180px, rgba(255,255,255,0.25) 215px, rgba(255,255,255,1.0) 216px); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, right top, color-stop(180px,rgba(255,255,255,.7)), color-stop(215px,rgba(255,255,255,0.9)), color-stop(216px,rgba(255,255,255,1.0))); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(left, rgba(255,255,255,0.75) 24%, rgba(255,255,255,0.9) 26%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(left,  rgba(255,255,255,1) 180px,rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* Opera 11.10+ */
-  background: -ms-linear-gradient(left,  rgba(255,255,255,1) 180px,rgba(204,204,204,0.25) 215px, rgba(255,255,255,1.0) 216px); /* IE10+ */
-  background: linear-gradient(to right,  rgba(255,255,255,.7) 180px,rgba(255,255,255,.5) 215px, rgba(255,255,255,1.0) 216px); /* W3C */
+  background: rgba(255, 255, 255, 0.9); 
   border-radius: 10px; 
   -moz-border-radius: 10px; 
   -webkit-border-radius: 10px; 
@@ -231,9 +227,54 @@ header {
   box-shadow:  3px 3px 10px 0 rgba(0, 0, 0, .7);
 }
 
+#blank_holder {
+  margin-top: 64px;
+}
+
 #event_map {
   width: 100%;
   height: 400px;
+}
+
+/* THINKING SPINNER ---------------------------------------------------------*/
+/* http://37signals.com/svn/posts/2577-loading-spinner-animation-using-css-and-webkit */
+div.spinner {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  display: inline-block;
+  margin: 50px 0px 100px 0px;
+}
+  div.spinner div {
+ /* width: 12%;
+    height: 26%; */
+    width: 24%;
+    height: 52%;
+    background: #1589ff;
+    position: absolute;
+    left: 44.5%;
+    top: 37%;
+    opacity: 0;
+    -webkit-animation: fade 1s linear infinite;
+    -webkit-border-radius: 50px;
+    -webkit-box-shadow: 0 0 3px rgba(0,0,0,0.2);
+  }
+  div.spinner div.bar1 {-webkit-transform:rotate(0deg) translate(0, -142%); -webkit-animation-delay: 0s;}    
+  div.spinner div.bar2 {-webkit-transform:rotate(30deg) translate(0, -142%); -webkit-animation-delay: -0.9167s;}
+  div.spinner div.bar3 {-webkit-transform:rotate(60deg) translate(0, -142%); -webkit-animation-delay: -0.833s;}
+  div.spinner div.bar4 {-webkit-transform:rotate(90deg) translate(0, -142%); -webkit-animation-delay: -0.75s;}
+  div.spinner div.bar5 {-webkit-transform:rotate(120deg) translate(0, -142%); -webkit-animation-delay: -0.667s;}
+  div.spinner div.bar6 {-webkit-transform:rotate(150deg) translate(0, -142%); -webkit-animation-delay: -0.5833s;}
+  div.spinner div.bar7 {-webkit-transform:rotate(180deg) translate(0, -142%); -webkit-animation-delay: -0.5s;}
+  div.spinner div.bar8 {-webkit-transform:rotate(210deg) translate(0, -142%); -webkit-animation-delay: -0.41667s;}
+  div.spinner div.bar9 {-webkit-transform:rotate(240deg) translate(0, -142%); -webkit-animation-delay: -0.333s;}
+  div.spinner div.bar10 {-webkit-transform:rotate(270deg) translate(0, -142%); -webkit-animation-delay: -0.25s;}
+  div.spinner div.bar11 {-webkit-transform:rotate(300deg) translate(0, -142%); -webkit-animation-delay: -0.1667s;}
+  div.spinner div.bar12 {-webkit-transform:rotate(330deg) translate(0, -142%); -webkit-animation-delay: -0.0833s;}
+
+@-webkit-keyframes fade {
+  from {opacity: 1;}
+  to {opacity: 0.25;}
 }
 
 /*///////////////////////////////////////////////////////////////////////////*/

@@ -17,10 +17,11 @@ define([], function() {
 	C.ActiveViews.Calendar = 2;
 	C.ActiveViews.Account = 3;
 	C.ActiveViews.Basic = 4;
+	C.ActiveViews.Thinking = 5;
 
 	C.Strings = {};
 	C.Strings.AccountCreated = 'Account was created successfully.<br/>Please check your email and click the confirmation link to finish registration.';
-
+	C.Strings.EmailConfirmed = 'Thanks for confirming your email.<br/>Your account now has full privileges.';
 	return C;
 
 });

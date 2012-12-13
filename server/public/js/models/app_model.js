@@ -18,14 +18,16 @@ define([
 	'models/notification_model',
 	'models/link_model',
 	'models/basic_model',
-	
+	'models/thinking_model',
+
 	'views/account_controls_view',
 	'views/account_view',
 	'views/calendar_view',
 	'views/day_view',
 	'views/event_view',
 	'views/notification_view',
-	'views/basic_view'
+	'views/basic_view',
+	'views/thinking_view'
 
 ], function(
 	jQuery,
@@ -44,6 +46,7 @@ define([
 	NotificationModel,
 	LinkModel,
 	BasicModel,
+	ThinkingModel,
 
 	AccountControlsView,
 	AccountView,
@@ -51,7 +54,8 @@ define([
 	DayView,
 	EventView,
 	NotificationView,
-	BasicView
+	BasicView,
+	ThinkingView
 
 ) {
 
@@ -67,6 +71,7 @@ define([
 		_eventModel,
 		_notificationModel,
 		_basicModel,
+		_thinkingModel,
 
 		_accountControlsView,
 		_accountView,
@@ -74,7 +79,8 @@ define([
 		_dayView,
 		_eventView,
 		_notificationView,
-		_basicView;
+		_basicView,
+		_thinkingView;
 
 	var AppModel = Backbone.Model.extend({
 
@@ -109,12 +115,26 @@ define([
 					_accountView.render();
 					break;
 				case C.ActiveViews.Calendar:
+					// Built in init.
 					break;
 				case C.ActiveViews.Day:
+					that.buildDayModel();
 					break;
 				case C.ActiveViews.Basic:
+					that.buildBasicModel();
+					_basicView.render();
+					break;
+				case C.ActiveViews.Thinking:
+					that.buildThinkingModel();
+					_thinkingView.render();
 					break;
 			}
+		},
+
+		showError: function(error) {
+			that.showView(C.ActiveViews.Basic);
+			_basicModel.set('error', error);
+			_router.navigate('error', { trigger: true });
 		},
 
 		// Only instantiate as needed.
@@ -156,11 +176,15 @@ define([
 			}
 		},
 
-		showError: function(error) {
-			that.buildBasicModel();
-			_basicModel.set('error', error);
-			_router.navigate('error', { trigger: true });
+		buildThinkingModel: function() {
+			if (!_thinkingModel) {
+log('buildThinkingModel');
+				_thinkingModel = new ThinkingModel({ appModel: that });
+				that.set('thinkingModel', _thinkingModel);
+				_thinkingView = new ThinkingView({ model: that.get('thinkingModel'), appModel: that, el: $('#blank_holder') });
+			}
 		},
+
 
 
 
@@ -174,8 +198,7 @@ define([
 			switch (action) {
 				case 'confirm_email':
 					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
-					// Some kind of loading view instead?
-					that.showView(C.ActiveViews.Account);
+					that.showView(C.ActiveViews.Thinking);
 
 					linkModel.fetch({
 						success: function() {
@@ -418,6 +441,8 @@ log('event saved', model, response);
 					});
 				}
 			}
+
+
 			
 		},
 

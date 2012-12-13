@@ -80,7 +80,11 @@
 <div id="content">
     
     <div id="page_holder">
-        <!-- DayView, CreateAccountView, anything but CalendarView -->
+        <!-- DayView, CreateAccountView, BasicView, EventView, AccountView, anything but CalendarView -->
+    </div>
+
+    <div id="blank_holder">
+        <!-- ThinkingView -->
     </div>
 
     <div id="calendar_view_holder">
