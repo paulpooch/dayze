@@ -40,6 +40,7 @@ define([
 		events: {
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
+			'click create_password_button': 'onCreatePasswordButtonClick'
 		},
 
 		syncForm: function(e) {
@@ -47,6 +48,10 @@ define([
       		var data = {};
       		data[target.attr('id')] = target.val();
       		that.model.set(data);
+		},
+
+		onCreatePasswordButtonClick: function() {
+			
 		},
 		///////////////////////////////////////////////////////////////////////
 

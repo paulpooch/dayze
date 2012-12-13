@@ -205,7 +205,7 @@ log('buildThinkingModel');
 							if (linkModel.get('type') == 'email_confirmation') {
 								_accountModel.fetch({
 									success: function() {
-										_accountModel.set('message', C.Strings.EmailConfirmed);
+										_accountModel.set('state', 'emailConfirmed');
 										_accountControlsView.render();
 										that.showView(C.ActiveViews.Account);
 									}
@@ -217,7 +217,7 @@ log('buildThinkingModel');
 				case 'created':
 					_accountModel.fetch({
 						success: function() {
-							_accountModel.set('message', C.Strings.AccountCreated);
+							_accountModel.set('state', 'created');
 							_accountControlsView.hideUserModal();
 							_accountControlsView.render();
 							that.showView(C.ActiveViews.Account);
@@ -429,7 +429,8 @@ log('event saved', model, response);
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			that.showView(C.ActiveViews.Calendar);
+_accountModel.set('state', 'emailConfirmed')
+			that.showView(C.ActiveViews.Account);
 
 			// IF NO ACCOUNT...
 			if (!_accountModel.get('userId')) {

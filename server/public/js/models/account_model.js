@@ -20,6 +20,15 @@ define([
 		_googleModel,
 		_facebookModel;
 
+	var states = {
+		'created': {
+			message: 'Account was created successfully.<br/>Please check your email and click the confirmation link to finish registration.'
+		},
+		'emailConfirmed': {
+			message: 'Thanks for confirming your email.<br/>You can set a password now if you want.'
+		}
+	};
+
 	var AccountModel = Backbone.Model.extend({
 
 		urlRoot: '/rest/account',
@@ -37,7 +46,8 @@ define([
 			email: '',
 			message: '',
 			isBeingCreated: false,
-			errors: null
+			errors: null,
+			state: null
 		},
 
 		validate: function(attrs) {
@@ -58,7 +68,8 @@ log('AccountModel validate failed', attrs.errors);
 				facebookToken: _facebookModel.get('accessToken'),
 				email: that.get('email'),
 				message: that.get('message'),
-				isBeingCreated: that.get('isBeingCreated')
+				isBeingCreated: that.get('isBeingCreated'),
+				state: that.get('state')
 			};
 		},
 
@@ -67,7 +78,13 @@ log('AccountModel validate failed', attrs.errors);
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////
-
+		onStateChange: function() {
+			var state = that.get('state');
+			var stateInfo = states[state];
+			if (stateInfo && stateInfo.message) {
+				that.set('message', stateInfo.message);
+			}
+		},
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
@@ -81,6 +98,8 @@ log('AccountModel validate failed', attrs.errors);
 			that.set('googleModel', _googleModel);
 			that.set('facebookModel', _facebookModel);
 
+			// EVENTS
+			that.bind('change:state', that.onStateChange);
 			//that.set({ displayName: (user && user.displayName) || that.get('displayName') });
 		}
 

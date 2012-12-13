@@ -501,6 +501,7 @@ Log.l('CACHE MISS');
 	
 		var Users = {};
 
+		/*
 		// Users.resetTable ///////////////////////////////////////////////////
 		Users.resetTables = function() {
 
@@ -589,7 +590,8 @@ Log.l('CACHE MISS');
 
 			
 		};
-
+		*/
+		
 		// Users.createTempUser
 		Users.createTempUser = function() {
 			var deferred = Q.defer();
