@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="row-fluid">
-        <h1><%= displayName %></h1>
+        <h1><%= displayName %><%= isFullUser %></h1>
     </div>
     <div class="row-fluid">
         <h3><%= message %></h3>
@@ -46,7 +46,7 @@
  			</tr>
  			<tr class="error">
  				<td class="span4"><strong>Password</strong></td>
- 				<td class="span8">Set via email link</td>
+ 				<td class="span8">You will set this using the link we emailed you.</td>
  			</tr>
 <%	} %>
 		</table>

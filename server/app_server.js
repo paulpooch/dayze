@@ -27,8 +27,7 @@
 // Install memcached to windows.
 // http://www.codeforest.net/how-to-install-memcached-on-windows-machine
 //
-// Automatically update user's last activity time during frontDoor.
-//
+// Automatically update user's last activity time during frontDoor?  maybe login======//
 // Awesome validation framework.
 //
 // Clean out table job
@@ -84,35 +83,40 @@ requirejs([
 	///////////////////////////////////////////////////////////////////////////////
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
-	var frontDoor = function(req, res, action) {
-Log.l('FRONT DOOR [cookie = ', req.signedCookies.cookieId, ' ]');
+	var frontDoor = function(req, res, restAction) {
+		Log.l('FRONT DOOR [cookie = ', req.signedCookies.cookieId, ' ]');
 		var deferred = 	Q.defer();
-		// Run filter.
+		if (req.signedCookies.cookieId) {
+			var cookieId = req.signedCookies.cookieId;	
+			Storage.Users.getUserWithCookieId(cookieId)
+			.then(function(user) {
+				deferred.resolve(user);
+			})
+			.fail(function(err) {
+				deferred.reject(new Error(err));
+			})
+			.end();
+		} else {
+			if (restAction == 'account.list') {
+				deferred.resolve(null);
+			} else {
+				deferred.reject(new Error('User has no cookieId.'));
+			}
+		}
+		return deferred.promise;
+	};
+
+	var filterAction = function(req, res, action) {
+		var deferred = 	Q.defer();
 		var filterResult = Filter.clean(req, action);
 		// Make sure nobody uses dirty vals.
 		req.body = null;
 		req.query = null;
 		req.params = null;
-
 		if (filterResult.passed) { 
-			req.clean = filterResult.cleaned;
-			if (req.signedCookies.cookieId) {
-				var cookieId = req.signedCookies.cookieId;	
-				Storage.Users.getUserWithCookieId(cookieId)
-				.then(function(user) {
-					deferred.resolve(user);
-				})
-				.fail(function(err) {
-					deferred.reject(new Error(err));
-				})
-				.end();
-			} else {
-				if (action == 'account.list') {
-					deferred.resolve(null);
-				}
-				deferred.reject(new Error('User has no cookieId.'));
-			}
+			deferred.resolve(filterResult.cleaned);
 		} else {
+			// Compile filter errors
 			var errorHtml = [];
 			for (var key in filterResult.errors) {
 				if (filterResult.errors.hasOwnProperty(key)) {
@@ -188,26 +192,29 @@ Log.l('pulled link', link)
 			Log.l();
 			Log.l('EVENT LIST ////////////////////');
 			Log.l();
-
-			Log.l('cookies =', req.signedCookies);
-
-			frontDoor(req, res, 'event.list')
+			frontDoor(req, res)
 			.then(function(user) {
-				var monthCode = req.clean['monthCode'];
-				if (monthCode) {
-					Storage.Events.getEventsForMonth(user, monthCode)
-					.then(function(events) {
-						Log.l('got events for month', events);
-						res.send(events);
-					})
-					.end();					
-				}
-			})
+				filterAction(req, res, 'event.list')
+				.then(function(clean) {
+					//---------------------------------------------------------
+					var monthCode = clean['monthCode'];
+					if (monthCode) {
+						Storage.Events.getEventsForMonth(user, monthCode)
+						.then(function(events) {
+							Log.l('got events for month', events);
+							res.send(events);
+						})
+						.end();					
+					}
+					//---------------------------------------------------------
+				})
+				.end();
+			})	
 			.fail(function(err) {
-				Log.e('Error in EVENT LIST.', err, err.stack);
+				Log.e('Error in EVENT LIST', err, err.stack);
 				res.send({ errors: err.message });
 			})
-			.end();			
+			.end();
 		};
 
 		EventRestApi.create = function(req, res) {
@@ -282,29 +289,33 @@ Log.l('pulled link', link)
 			frontDoor(req, res, 'account.list')
 			.then(function(user) {
 
-				if (req.params && req.params['id'] && (!user || user.userId != req.params['id'])) {
-					res.send({ errors: 'Account requested was not your account.'});
-				}
-
-				if (!user) {
-					Storage.Users.createTempUser()
-					.then(function(tempUserObj) {
-						var cookieId = tempUserObj.cookieId;
-						var user = tempUserObj.user;
-						
-						// Set cookie.
-						res.cookie('cookieId', cookieId, { signed: true });
+				filterAction(req, res, 'account.list')
+				.then(function(clean) {
+					//---------------------------------------------------------
+					if (clean['id'] && (!user || user.userId != clean['id'])) {
+						res.send({ errors: 'Account requested was not your account.'});
+					}
+					if (!user) {
+						Storage.Users.createTempUser()
+						.then(function(tempUserObj) {
+							var cookieId = tempUserObj.cookieId;
+							var user = tempUserObj.user;
+							
+							// Set cookie.
+							res.cookie('cookieId', cookieId, { signed: true });
+							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						})
+						.fail(function(err) {
+							Log.e('createTempUser failed.', err, err.stack);
+						})
+						.end();
+					} else {
 						res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-					})
-					.fail(function(err) {
-						Log.e('createTempUser failed.', err, err.stack);
-					})
-					.end();
-				} else {
-					res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-				}
-
-			})
+					}
+					//---------------------------------------------------------
+				})
+				.end();
+			})	
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT LIST', err, err.stack);
 				res.send({ errors: err.message });
@@ -321,31 +332,40 @@ Log.l('pulled link', link)
 			Log.l();
 			Log.l('ACCOUNT UPDATE ////////////////////');
 			Log.l();
-			frontDoor(req, res, 'account.update')
+			frontDoor(req, res)
 			.then(function(user) {
-				var post = req.clean;
-				Log.l(post);
-				var isBeingCreated = post['isBeingCreated'];
-				
+
+				var isBeingCreated = req.body['isBeingCreated'];
 				if (isBeingCreated) {
-					Storage.Users.createAccount(user, post)
-					.then(function(user) {
-						Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user)
-						.then(function(link) {
-							Email.sendCreateAccountEmailConfirmation(user, link)
-							.then(function(data) {
-								res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+					filterAction(req, res, 'account.create')
+					.then(function(clean) {
+						//-----------------------------------------------------
+						Storage.Users.createAccount(user, clean)
+						.then(function(user) {
+							Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user)
+							.then(function(link) {
+								Email.sendCreateAccountEmailConfirmation(user, link)
+								.then(function(data) {
+									res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+								})
+								.end();					
 							})
-							.end();					
+							.end();
 						})
 						.end();
+						//-----------------------------------------------------
 					})
 					.end();
 				} else {
-
-					// User update
-
+					filterAction(req, res, 'account.update')
+					.then(function(clean) {
+						//-----------------------------------------------------
+						// User update
+						//-----------------------------------------------------
+					})
+					.end();
 				}
+
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT UPDATE', err, err.stack);

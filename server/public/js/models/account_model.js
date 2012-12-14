@@ -69,7 +69,8 @@ log('AccountModel validate failed', attrs.errors);
 				email: that.get('email'),
 				message: that.get('message'),
 				isBeingCreated: that.get('isBeingCreated'),
-				state: that.get('state')
+				state: that.get('state'),
+				isLoggedIn: that.get('isLoggedIn')
 			};
 		},
 

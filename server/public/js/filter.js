@@ -141,7 +141,7 @@ Log.l('boolean filter', t);
 			immutable: true,
 			required: false
 		}],
-		'account.update': [{ 
+		'account.create': [{ 
 			name: 'createAccountEmail',
 			rules: [ Filter.rules.email	],
 			immutable: true,
@@ -230,16 +230,6 @@ Log.l('dirtyVal = ', dirtyVal);
 		}
 Log.l('cleaned', cleaned);
 		return { passed: passed, cleaned: cleaned, errors: errors };
-	};
-
-	Filter.activate = function($el) {
-  		var action = $el.data('filter');
-	  	var trigger = $el.data('filter-trigger');
-	  	trigger = trigger.split(':');
-	  	$el.on(trigger[0], '#' + trigger[1], function() {
-	  		var result = Filter.clean($el, action, true);
-	  		$el.data('filter-passed', result.passed);
-	  	});
 	};
 
 	Filter.clientBlacklist = {};

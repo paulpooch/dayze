@@ -429,9 +429,11 @@ log('event saved', model, response);
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-_accountModel.set('state', 'emailConfirmed')
-			that.showView(C.ActiveViews.Account);
+			//_accountModel.set('state', 'emailConfirmed')
+			//that.showView(C.ActiveViews.Account);
 
+			that.showView(C.ActiveViews.Calendar);
+			
 			// IF NO ACCOUNT...
 			if (!_accountModel.get('userId')) {
 				if (!that.get('SUPPRESS_SERVER_CALLS')) {

@@ -1,7 +1,8 @@
+<% if (isLoggedIn) { %>
 <div id="user_dropdown" class="pull-left">
 	<div class="btn-group inline">
-		<a id="user_button" class="btn btn-primary" href="#" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
-		<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+		<a id="user_button" class="btn btn-small btn-primary" href="#" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
+		<a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
 		<ul class="dropdown-menu">
 			<li><a href="#!settings"><i class="icon-cog"></i> Account Settings</a></li>
 			<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
@@ -14,6 +15,13 @@
 	</div>
 </div>
 
+<% } else { %>
+<a id="controls_create_account_button" class="btn btn-small btn-info account_control_button" href="#"><i class="icon-heart icon-white"></i> Create Account</a>
+<a id="controls_login_button" class="btn btn-small btn-primary account_control_button" href="#"><i class="icon-lock icon-white"></i> Sign In</a>
+<% } %>
+
+
+<!--
 <div id="google_dropdown" class="pull-left">
 	<div class="btn-group">
 		<a id="google_button" class="btn" href="#"><i class="icon-user icon-white" style="margin-right: 5px;"></i> Synced Calendars</a>
@@ -25,6 +33,7 @@
 		</ul>
 	</div>
 </div>
+-->
 
 <div id="user_modal" class="modal hide fade">
 
@@ -82,7 +91,11 @@
 
 	</div>
 
-	<div id="create_form" data-filter="account.update" data-filter-trigger="click:create_account_button" style="display: none;">
+	<!-- Follow this style for proper forms. -->
+	<form id="create_form" 
+	data-filter="account.create" 
+	style="display: none;"
+	onsubmit="return false;">
 
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -90,12 +103,12 @@
 		</div>
 
 		<div class="modal-body" style="padding: 15px">
-			<form class="form-horizontal">
+			<div class="form-horizontal">
 
 				<div class="control-group">
 					<label class="control-label" for="createAccountEmail">Email</label>
 					<div class="controls">
-						<input type="text" id="createAccountEmail" placeholder="Email">
+						<input tabindex="1" data-focus="1" type="text" id="createAccountEmail" placeholder="Email">
 						<span class="help-inline"></span>
 					</div>
 				</div>
@@ -105,21 +118,28 @@
 				<div class="control-group">
 					<label class="control-label">Or Connect</label>
 					<div class="controls">
-						<a href="#" id="google_button" class="btn">Use Google</a>
-						<a href="#" id="facebook_button" class="btn">Use Facebook</a>
+						<a tabindex="3" href="#" id="google_button" class="btn">Use Google</a>
+						<a tabindex="4" href="#" id="facebook_button" class="btn">Use Facebook</a>
 					</div>
 				</div>
 
-			</form>
+			</div>
 		</div>
 
 		<div class="modal-footer">
 			<div class="controls controls-row">
-				<a id="show_login_button" class="btn btn-large span1" href="#">Sign In</a>
-				<button id="create_account_button" type="submit" class="btn btn-primary btn-large span5" data-loading-text="Creating account..." data-run-filter="1">Create Account</button>
+				<a tabindex="5" id="show_login_button" class="btn btn-large span1" href="#">Sign In</a>
+				<button tabindex="2" 
+				id="create_account_button" 
+				type="button" 
+				class="btn btn-primary btn-large span5" 
+				data-submit-trigger="1" 
+				data-loading-text="Creating account...">Create Account</button>
 			</div>
 		</div>
-	</div>
+
+	</form>
+
 
 </div>
 

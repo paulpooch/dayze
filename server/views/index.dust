@@ -20,37 +20,64 @@
 <![endif]-->
 <div id="fb-root"></div>
 <header>
+    <!--
+<div id="contentwrapper" style="float: left;
+width: 100%;">
+    <div id="contentcolumn" style="margin: 0 200px 0 230px; text-align:center; ">
+        <div class="innertube"><b>Content Column: <em>Fluid</em></b></div>
+    </div>
+</div>
+<div id="leftcolumn" style="float: left;
+width: 230px;
+margin-left: -100%;
+background: #C8FC98;">
+    <div class="innertube"><b>Left Column: <em>230px</em></b></div>
+</div>
+<div id="rightcolumn" style="float: left;
+width: 200px; /*Width of right column*/
+margin-left: -200px; background: #FDE95E;">
+    <div class="innertube"><b>Right Column: <em>200px</em></b></div>
+</div>-->
+    
     <div id="header_center_wrap">
         <div id="header_center">
                 
-            <div class="day_view_header" style="display: none;">
-                <h2 id="day_display_date" style="margin-top: 1px;"></h2>
-            </div>
-
-            <div class="calendar_view_header" style="display: none;">
-                <div class="month_button">
-                    <span id="month_name" class="month_heading"></span>&nbsp;&nbsp;
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
-                    <ul id="month_dropdown" class="dropdown-menu" >
-                        <li data-month-num="1"><a href="#">January</a></li>
-                        <li data-month-num="2"><a href="#">February</a></li>
-                        <li data-month-num="3"><a href="#">March</a></li>
-                        <li data-month-num="4"><a href="#">April</a></li>
-                        <li data-month-num="5"><a href="#">May</a></li>
-                        <li data-month-num="6"><a href="#">June</a></li>
-                        <li data-month-num="7"><a href="#">July</a></li>
-                        <li data-month-num="8"><a href="#">August</a></li>
-                        <li data-month-num="9"><a href="#">September</a></li>
-                        <li data-month-num="10"><a href="#">October</a></li>
-                        <li data-month-num="11"><a href="#">November</a></li>
-                        <li data-month-num="12"><a href="#">December</a></li>
-                    </ul>
+            <div id="calendar_controls">
+                <div class="day_view_header" style="display: none;">
+                    <h2 id="day_display_date" style="margin-top: 1px;"></h2>
                 </div>
-                <div class="month_button">
-                    <span id="year_name" class="month_heading"></span>&nbsp;&nbsp;
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
-                    <ul id="year_dropdown" class="dropdown-menu" >
-                    </ul>
+
+                <div class="calendar_view_header" style="display: none;">
+                    <div style="float: left; width: 1px; background: #999;">
+                         <span class="month_heading">&nbsp;</span>
+                    </div>
+                    <div class="month_button">
+                        <span id="month_name" class="month_heading"></span>&nbsp;&nbsp;
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
+                        <ul id="month_dropdown" class="dropdown-menu" >
+                            <li data-month-num="1"><a href="#">January</a></li>
+                            <li data-month-num="2"><a href="#">February</a></li>
+                            <li data-month-num="3"><a href="#">March</a></li>
+                            <li data-month-num="4"><a href="#">April</a></li>
+                            <li data-month-num="5"><a href="#">May</a></li>
+                            <li data-month-num="6"><a href="#">June</a></li>
+                            <li data-month-num="7"><a href="#">July</a></li>
+                            <li data-month-num="8"><a href="#">August</a></li>
+                            <li data-month-num="9"><a href="#">September</a></li>
+                            <li data-month-num="10"><a href="#">October</a></li>
+                            <li data-month-num="11"><a href="#">November</a></li>
+                            <li data-month-num="12"><a href="#">December</a></li>
+                        </ul>
+                    </div>
+                    <div class="month_button">
+                        <span id="year_name" class="month_heading"></span>&nbsp;&nbsp;
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="icon-caret-down"></span></a>
+                        <ul id="year_dropdown" class="dropdown-menu" >
+                        </ul>
+                    </div>
+                    <div style="float: left; width: 1px; background: #fff;">
+                         <span class="month_heading">&nbsp;</span>
+                    </div>
                 </div>
             </div>
 
@@ -72,10 +99,9 @@
 
     </div>
     <div id="header_right">
-        <div id="account_controls_view_holder">
-            <!-- AccountView -->
-        </div>
+        <div id="account_controls_view_holder"></div>
     </div>
+    
 </header>
 <div id="content">
     

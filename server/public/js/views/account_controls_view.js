@@ -9,7 +9,8 @@ define([
 	'c',
 	'text!templates/account_controls_template.html',
 	'filter',
-	'logg'
+	'logg',
+	'smart_form'
 ], function(
 	jQuery,
 	_,
@@ -18,7 +19,8 @@ define([
 	C,
 	AccountControlsTemplate,
 	Filter,
-	Log
+	Log,
+	SmartForm
 ) {
 
 	var that,
@@ -33,10 +35,11 @@ define([
 		_$userEmail,
 		_$userPassword,
 		_$loginButton,
-		_$createButton,
 		_$headerEls,
 		_$googleButton,
-		_$facebookButton;
+		_$facebookButton,
+		_formManager,
+		_createAccountForm;
 
 	var AccountControlsView = Backbone.View.extend({
 
@@ -57,19 +60,10 @@ define([
 			'click #google_button': 'onGoogleButtonClick',
 			'click #facebook_button': 'onFacebookButtonClick',
 			'click #login_button' : 'onLoginButtonClick',
-			'click #create_account_button': 'onCreateAccountButtonClick',
-			'click #show_login_button': 'onShowLoginButtonClick',
-			'click #show_create_button': 'onShowCreateButtonClick',
-			'change input': 'syncForm',
-			'change textarea': 'syncForm',
-		},
-
-		syncForm: function(e) {
-			var target = $(e.currentTarget);
-      		var data = {};
-      		data[target.attr('id')] = target.val();
-log(data);
-      		that.model.set(data);
+			'click #show_login_button': 'showLoginForm',
+			'click #show_create_button': 'showCreateAccountForm',
+			'click #controls_create_account_button': 'showCreateAccountForm',
+			'click #controls_login_button': 'showLoginForm'
 		},
 
 		onUserButtonClick: function(event) {
@@ -97,27 +91,19 @@ log(data);
 			}
 		},
 
-		onCreateAccountButtonClick: function() {
-log('filter passed?: ', _$createForm.data('filter-passed'));
-			if (_$createForm.data('filter-passed')) {
-				that.makeButtonStateLoading(_$createButton);
-				_appModel.createAccount();
-			}
-		},
-
-		onShowLoginButtonClick: function() {
+		showLoginForm: function() {
+			_$userModal.modal('show');
 			_$createForm.hide();
 			_$loginForm.show();
 		},
 
-		onShowCreateButtonClick: function() {
+		showCreateAccountForm: function() {
+			_$userModal.modal('show');
 			_$loginForm.hide();
 			_$createForm.show();
-		},
-
-		makeButtonStateLoading: function($btn) {
-			$btn.text($btn.data('loading-text'));
-			$btn.attr('disabled', true);
+			setTimeout(function() {
+				_$createForm.find('[data-focus=1]').focus();
+			}, 500);
 		},
 
 		///////////////////////////////////////////////////////////////////////
@@ -159,13 +145,13 @@ log('filter passed?: ', _$createForm.data('filter-passed'));
 	        _$userEmail = that.$el.find('#user_email');
 	        _$userPassword = that.$el.find('#user_password');
 	        _$loginButton = that.$el.find('#login_button');
-	        _$createButton = that.$el.find('#create_account_button');
    	        _$googleButton = that.$el.find('#google_button');
    	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
 
-	        Filter.activate(_$createForm);
-
+	        _createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
+log('_createAccountForm', _createAccountForm);
+	        
 	        // BINDINGS
 	        _appModel.bind('change:activeView', that.onActiveViewChange);
 
