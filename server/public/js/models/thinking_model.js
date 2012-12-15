@@ -31,7 +31,6 @@ define([
 		initialize: function(options) {
 			that = this;
 			_.bindAll(that);
-log('thinking init');
 			_appModel = options.appModel;
 		}
 

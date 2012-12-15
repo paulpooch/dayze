@@ -201,6 +201,7 @@ log('buildThinkingModel');
 				_accountModel.fetch({ 
 					success: function() { 
 log('Pulled account from server', _accountModel, route);
+						_accountControlsView.render();
 						dest();
 					},
 					error: function() {
@@ -213,7 +214,7 @@ log('Pulled account from server', _accountModel, route);
 		},
 
 		routeCatchall: function() {
-			that.showView(C.AccountViews.Calendar);
+			that.showView(C.ActiveViews.Calendar);
 		},
 
 		routeAccount: function(action, linkId) {
@@ -221,10 +222,8 @@ log('Pulled account from server', _accountModel, route);
 				case 'confirm_email':
 					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
 					that.showView(C.ActiveViews.Thinking);
-log('fetch link model');
 					linkModel.fetch({
 						success: function() {
-log('done');
 							if (linkModel.get('type') == 'email_confirmation') {
 								_accountModel.fetch({
 									success: function() {
@@ -385,12 +384,10 @@ log('event saved', model, response);
 
 		// FROM ACCOUNT CONTROLS VIEW /////////////////////////////////////////
 		createAccount: function() {
-log('createAccount', _accountModel);
 			_accountModel.set('state', 'createAccount');
 			_accountModel.save({}, {
 				wait: true,
 				success: function() {
-log('createAccount done');
 					_router.navigate('account/created', { trigger: true });
 				},
 				error: function(){

@@ -5,6 +5,7 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
+	'editable',
 	
 	'c',
 	'text!templates/account_template.html',
@@ -15,6 +16,7 @@ define([
 	jQuery,
 	_,
 	Backbone,
+	Editable,
 	
 	C,
 	AccountTemplate,
@@ -40,6 +42,25 @@ define([
 			_$accountForm = that.$el.find('#account_form');
 			_accountForm = new SmartForm(that.model, _$accountForm, _appModel.editAccount);
 			//that.model.set('message', '');
+
+/*
+			var $editTriggers = $('[data-edits]');
+			$editTriggers.each(function(index, el) {
+				var $el = $(el);
+				var edits = $el.data('edits');
+				var $edits = $('#' + edits);
+				var editable = $edits.editable({
+					type: 'text'
+				});
+				$el.on('click', function() {
+					$($edits).editable('activate');
+				});			
+			});*/$('#displayName').editable();
+			$('#shit').on('click', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				$('#displayName').editable('show');
+			});
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -82,7 +103,8 @@ define([
 	        // BINDINGS
 	        _appModel.bind('change:activeView', that.onActiveViewChange);
 
-	   		that.render();
+	        // Useless on initialize.
+	   		//that.render();
 	    }
 	   
 	});

@@ -25,21 +25,26 @@ define([
 
 	var that,
 		_appModel,
-		_accountModel,
-		_googleModel,
-		_facebookModel,
+		_$headerEls,
+		_$createForm,
+		_$userModal,
 		_$loginForm,
 		_$createForm,
 		_$userButton,
-		_$userModal,
+		_createAccountForm;
+
+		/*
+		_accountModel,
+		_googleModel,
+		_facebookModel,
+
 		_$userEmail,
 		_$userPassword,
 		_$loginButton,
-		_$headerEls,
+
 		_$googleButton,
 		_$facebookButton,
-		_formManager,
-		_createAccountForm;
+		*/
 
 	var AccountControlsView = Backbone.View.extend({
 
@@ -48,6 +53,15 @@ define([
 		render: function() {
 			var data = that.model.toJSON();
 			that.$el.html(that.template(data));
+
+			_$userModal = that.$el.find('#user_modal');
+			_$createForm = that.$el.find('#create_form');
+	        _$loginForm = that.$el.find('#login_form');
+			_$userButton = that.$el.find('#user_button');
+
+			_createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
+			_$userModal.bind('show', that.onUserModalShow);
+			_$userModal.bind('hide', that.onUserModalHide);
 		},
 
 		hideUserModal: function() {
@@ -67,7 +81,7 @@ define([
 		},
 
 		onUserButtonClick: function(event) {
-			_$userModal.modal('toggle');
+	        _$userModal.modal('toggle');
 			_$createForm.hide();
 			_$loginForm.show();
 		},
@@ -131,30 +145,28 @@ define([
 	    initialize: function (options) {
 			that = this;
 			_.bindAll(that);
-	        that.render();
 
 	        _appModel = options.appModel;
+	        _$headerEls = $('.account_view_header');
+
+			// BINDINGS
+	        _appModel.bind('change:activeView', that.onActiveViewChange);
+
+	        // Don't do shit like this.
+	        // These dom els are reset every render.
+	        // And we re-render whenever user logs in and shit.
+	        /*
 	        _accountModel = that.model;
 	        _googleModel = that.model.get('googleModel');
 	        _facebookModel = that.model.get('facebookModel');
-
-	        _$createForm = that.$el.find('#create_form');
-	        _$loginForm = that.$el.find('#login_form');
-	        _$userButton = that.$el.find('#user_button');
-	        _$userModal = that.$el.find('#user_modal');
 	        _$userEmail = that.$el.find('#user_email');
 	        _$userPassword = that.$el.find('#user_password');
 	        _$loginButton = that.$el.find('#login_button');
    	        _$googleButton = that.$el.find('#google_button');
    	        _$facebookButton = that.$el.find('#facebook_button');
 	        _$headerEls = $('.account_view_header');
-
-	        _createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
-log('_createAccountForm', _createAccountForm);
 	        
-	        // BINDINGS
-	        _appModel.bind('change:activeView', that.onActiveViewChange);
-
+	        
 	        _googleModel.bind('change:isLoggedIn', function() {
 				if (_googleModel.get('isLoggedIn')) {
 					_$googleButton.html('Log out of Google');
@@ -170,9 +182,7 @@ log('_createAccountForm', _createAccountForm);
 					_$facebookButton.html('Use Facebook');
 				}
 			});
-
-			_$userModal.bind('show', that.onUserModalShow);
-			_$userModal.bind('hide', that.onUserModalHide);
+			*/
 
 	    }
 

@@ -47,7 +47,8 @@ require.config({
 		async: 'vendor/async/async',
 		google: 'google',
 		validator: 'vendor/validator/validator.min',
-		logg: 'logg_shim'
+		logg: 'logg_shim',
+		editable: 'vendor/editable/bootstrap-editable-inline.min'
 	}
 });
 

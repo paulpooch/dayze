@@ -56,7 +56,6 @@ define([
 
 		validate: function(attrs) {
 			if (attrs.errors) {
-log('AccountModel validate failed', attrs.errors);
 				_appModel.showError(attrs.errors);
 				return attrs.errors;
 			}

@@ -37,7 +37,10 @@
 
 <div id="user_modal" class="modal hide fade">
 
-	<div id="login_form">
+	<form id="login_form"
+	data-filter="account.login" 
+	style="display: none;"
+	onsubmit="return false;">
 
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -45,26 +48,26 @@
 		</div>
 
 		<div class="modal-body">
-			<form class="form-horizontal">
+			<div class="form-horizontal">
 
 				<div class="control-group">
 					<label class="control-label" for="loginEmail">Email</label>
 					<div class="controls">
-						<input type="text" id="loginEmail" placeholder="Email">
+						<input tabindex="1" type="text" id="loginEmail" placeholder="Email">
 					</div>
 				</div>
 
 				<div class="control-group">
 					<label class="control-label" for="loginPassword">Password</label>
 					<div class="controls">
-						<input type="password" id="loginPassword" placeholder="Password">
+						<input tabindex="2" type="password" id="loginPassword" placeholder="Password">
 					</div>
 				</div>
 
 				<div class="control-group">
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" id="loginRemember"> Remember me
+							<input tabindex="3" type="checkbox" id="loginRemember"> Remember me
 						</label>
 					</div>
 				</div>
@@ -74,22 +77,27 @@
 				<div class="control-group">
 					<label class="control-label">Or Connect</label>
 					<div class="controls">
-						<a href="#" id="google_button" class="btn">Use Google</a>
-						<a href="#" id="facebook_button" class="btn">Use Facebook</a>
+						<a href="#" tabindex="5" id="google_button" class="btn">Use Google</a>
+						<a href="#" tabindex="6" id="facebook_button" class="btn">Use Facebook</a>
 					</div>
 				</div>
 
-			</form>
+			</div>
 		</div>
 
 		<div class="modal-footer">
 			<div class="controls controls-row">
 				<a id="show_create_button" class="btn btn-large span2" href="#">Create Account</a>
-				<button id="login_button" type="submit" class="btn btn-primary btn-large span4" data-loading-text="Signing in...">Sign in</button>
+				<button tabindex="4" 
+				id="login_button" 
+				type="button" 
+				class="btn btn-primary btn-large span5" 
+				data-submit-trigger="1" 
+				data-loading-text="Signing in...">Sign In</button>
 			</div>
 		</div>
 
-	</div>
+	</form>
 
 	<!-- Follow this style for proper forms. -->
 	<form id="create_form" 

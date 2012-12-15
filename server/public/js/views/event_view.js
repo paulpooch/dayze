@@ -95,7 +95,7 @@ log(loc);
 			_appModel = options.appModel;
 
 			// BINDINGS
-			that.update();
+			//that.update();
 		}
 
 	});

@@ -102,7 +102,7 @@ define([
 			that.model.on('change:selectedEventId', that.onSelectedEventIdChange);
 			_appModel.on('change:activeView', that.onActiveViewChange);
 
-			that.update();
+			//that.update();
 		}
 
 	});

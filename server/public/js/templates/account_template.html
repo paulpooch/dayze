@@ -11,28 +11,33 @@
 		<div class="row-fluid">
 			<table class="table span10">
 				<tr>
-					<td class="span4"><strong>Profile Picture</strong></td>
-	 				<td class="span8">coming soon</td>
+					<td class="span3"><strong>Profile Picture</strong></td>
+	 				<td class="span3">...coming soon...</td>
+	 			</tr>
+
+				<tr class="control-group">
+					<td class="span3"><strong>Display Name</strong></td>
+	 				<td class="span3">
+	 					<div id="displayName"><%= displayName %></div>
+	 				</td>
+	 				<td class="span1">
+	 					<button id="shit" data-edits="displayName" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 				</td>
 	 			</tr>
 
 				<tr>
-					<td class="span4"><strong>Display Name</strong></td>
-	 				<td class="span8"><%= displayName %></td>
-	 			</tr>
-
-				<tr>
-					<td class="span4"><strong>Email</strong></td>
-	 				<td class="span8"><%= email %></td>
+					<td class="span3"><strong>Email</strong></td>
+	 				<td class="span3"><%= email %></td>
 	 			</tr>
 <%	if (isFullUser) { %>
 				<tr>
-	 				<td class="span4"><strong>Email Confirmed?</strong></td>
-	 				<td class="span8">Yes</td>
+	 				<td class="span3"><strong>Email Confirmed?</strong></td>
+	 				<td class="span3">Yes</td>
 	 			</tr>
 <%		if (state == 'emailConfirmed') { %>
 				<tr class="control-group">
-	 				<td class="span4"><strong>Password</strong></td>
-	 				<td class="span8">
+	 				<td class="span3"><strong>Password</strong></td>
+	 				<td class="span3">
 						<div class="form-inline">
 							<input tabindex="1" type="password" id="createPassword" placeholder="Password">
 							<button tabindex="2" 
@@ -47,20 +52,20 @@
 	 			</tr>
 <%		} else { %>
 				<tr>
-		 			<td class="span4"><strong>Password</strong></td>
-		 			<td class="span8">*****</td>
+		 			<td class="span3"><strong>Password</strong></td>
+		 			<td class="span3">*****</td>
 		 		</tr>
 <%
 		}
 	} else { 
 %>
 				<tr class="error">
-	 				<td class="span4"><strong>Email Confirmed?</strong></td>
-	 				<td class="span8">No</td>
+	 				<td class="span3"><strong>Email Confirmed?</strong></td>
+	 				<td class="span3">No</td>
 	 			</tr>
 	 			<tr class="error">
-	 				<td class="span4"><strong>Password</strong></td>
-	 				<td class="span8">You will set this using the link we emailed you.</td>
+	 				<td class="span3"><strong>Password</strong></td>
+	 				<td class="span3">You will set this using the link we emailed you.</td>
 	 			</tr>
 <%	} %>
 			</table>
