@@ -45,8 +45,15 @@
 						</div>
 					</td>
 	 			</tr>
-<%		} %>
-<%	} else { %>
+<%		} else { %>
+				<tr>
+		 			<td class="span4"><strong>Password</strong></td>
+		 			<td class="span8">*****</td>
+		 		</tr>
+<%
+		}
+	} else { 
+%>
 				<tr class="error">
 	 				<td class="span4"><strong>Email Confirmed?</strong></td>
 	 				<td class="span8">No</td>

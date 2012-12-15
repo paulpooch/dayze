@@ -30,50 +30,103 @@ define([
 			'link/:linkId': 			'link',
 			'error': 					'error',
 			'account/:action/:linkId': 	'account',
-			'account/:action': 			'account'
+			'account/:action': 			'account',
+			'account':  				'account',
+			'*path':  					'catchall'
+		},
+
+		catchall: function() {
+log('ROUTE: catchall');
+			var route = {
+				dest: function() { 
+					_appModel.routeCatchall(); 
+				},
+				pullAccountFirst: true
+			};
+			_appModel.route(route);
 		},
 
 		day: function(dayCode) {
-log('ROUTE: day/', dayCode);
-			_appModel.routeDay(dayCode);
+log('ROUTE: day', dayCode);
+			var route = {
+				dest: function() { 
+					_appModel.routeDay(dayCode);
+				},
+				pullAccountFirst: true
+			}
+
+			_appModel.route(route);				
 		},
+
+		account: function(action, linkId) {
+log('ROUTE: account', action, linkId);
+			var route = {
+				dest: function() { 
+					_appModel.routeAccount(action, linkId);
+				},
+				pullAccountFirst: true
+			}
+			if (action == 'confirm_email' || action == 'created') {
+				route.pullAccountFirst = false;
+			}
+			_appModel.route(route);	
+		},		
 
 		calendar: function() {
 log('ROUTE: calendar');
-			_appModel.routeCalendar();
+			var route = {
+				dest: function() { 
+					_appModel.routeCalendar();
+				},
+				pullAccountFirst: true
+			};
+			_appModel.route(route);
 		},
 
 		oauth: function() {
-			// parse hash parameters
-			var response = {};
-			var queryString = location.hash.substring(1);
-    		var regex = /([^&=]+)=([^&]*)/g, m;
-			while (m = regex.exec(queryString)) {
-			  response[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-			}
-			// clear hash
-			location.hash = '';
-			window.history.replaceState(null, null, '/');
-
-			_appModel.routeOAuth(response);
-
+log('ROUTE: oauth');
+			var route = {
+				dest: function() { 
+					// parse hash parameters
+					var response = {};
+					var queryString = location.hash.substring(1);
+		    		var regex = /([^&=]+)=([^&]*)/g, m;
+					while (m = regex.exec(queryString)) {
+					  response[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+					}
+					// clear hash
+					location.hash = '';
+					window.history.replaceState(null, null, '/');
+					_appModel.routeOAuth(response);
+				},
+				pullAccountFirst: false
+			};
+			_appModel.route(route);
 		},
 
 		link: function(linkId) {
-log('ROUTE: link');
-			_appModel.routeLink(linkId);
+log('ROUTE: link', linkId);
+			var route = {
+				dest: function() { 
+					_appModel.routeLink(linkId);
+				},
+				pullAccountFirst: false
+			};
+			_appModel.route(route);
 		},
 
 		error: function() {
 log('ROUTE: error');
-			_appModel.routeError();
+			var route = {
+				dest: function() { 
+					_appModel.routeError();
+				},
+				pullAccountFirst: false
+			};
+			_appModel.route(route);
 		},
 
-		account: function(action, linkId) {
-log('ROUTE: account', action, linkId);			
-			_appModel.routeAccount(action, linkId);
-		},
-		
+
 		initialize: function(options) {
 			that = this;
 			

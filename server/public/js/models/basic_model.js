@@ -33,7 +33,7 @@ define([
 		onErrorChange: function() {
 			var error = that.get('error');
 			that.set('header', 'Error');
-			that.set('body', that.get('error'));
+			that.set('body', error);
 		},
 		///////////////////////////////////////////////////////////////////////
 

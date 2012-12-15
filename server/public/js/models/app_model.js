@@ -194,6 +194,28 @@ log('buildThinkingModel');
 
 
 		// FROM ROUTER ////////////////////////////////////////////////////////
+		route: function(route) {
+			var dest = route.dest;
+			if (route.pullAccountFirst && !_accountModel.get('userId')) {
+				that.showView(C.ActiveViews.Thinking);
+				_accountModel.fetch({ 
+					success: function() { 
+log('Pulled account from server', _accountModel, route);
+						dest();
+					},
+					error: function() {
+						that.showError('Could not get account info.');
+					}
+				});
+			} else {
+				dest();
+			}
+		},
+
+		routeCatchall: function() {
+			that.showView(C.AccountViews.Calendar);
+		},
+
 		routeAccount: function(action, linkId) {
 			switch (action) {
 				case 'confirm_email':
@@ -224,6 +246,14 @@ log('done');
 							that.showView(C.ActiveViews.Account);
 						}
 					});
+					break;
+				case 'saved':
+					_accountModel.set('state', 'saved');
+					that.showView(C.ActiveViews.Account);
+					break;
+				default:
+					_accountModel.set('state', '');
+					that.showView(C.ActiveViews.Account);
 					break;
 			}			
 		},
@@ -382,7 +412,7 @@ log('createAccount done');
 			_accountModel.save({}, {
 				wait: true,
 				success: function() {
-					_router.navigate('account', { trigger: true });
+					_router.navigate('account/saved', { trigger: true });
 				},
 				error: function(){
 				}
@@ -453,23 +483,7 @@ log('createAccount done');
 			_appView = new AppView({ model: that, el: $('body') });
 
 			//_accountModel.set('state', 'emailConfirmed')
-			//that.showView(C.ActiveViews.Account);
-
-			that.showView(C.ActiveViews.Calendar);
-			
-			// IF NO ACCOUNT...
-			if (!_accountModel.get('userId')) {
-				if (!that.get('SUPPRESS_SERVER_CALLS')) {
-					_accountModel.fetch({ 
-						success: function() { 
-	log('Pulled account from server', _accountModel); 
-						}
-					});
-				}
-			}
-
-
-			
+			//that.showView(C.ActiveViews.Account);			
 		},
 
 	});

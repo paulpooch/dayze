@@ -26,7 +26,11 @@ define([
 		},
 		'emailConfirmed': {
 			message: 'Thanks for confirming your email.<br/>You can set a password now if you want.'
+		},
+		'saved': {
+			message: 'Your account has been updated.'
 		}
+
 	};
 
 	var AccountModel = Backbone.Model.extend({
