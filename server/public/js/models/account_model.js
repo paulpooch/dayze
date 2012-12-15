@@ -46,7 +46,8 @@ define([
 			email: '',
 			message: '',
 			errors: null,
-			state: null
+			state: null,
+			createPassword: null
 		},
 
 		validate: function(attrs) {
@@ -68,7 +69,8 @@ log('AccountModel validate failed', attrs.errors);
 				email: that.get('email'),
 				message: that.get('message'),
 				state: that.get('state'),
-				isLoggedIn: that.get('isLoggedIn')
+				isLoggedIn: that.get('isLoggedIn'),
+				createPassword: that.get('createPassword'),
 			};
 		},
 

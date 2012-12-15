@@ -143,30 +143,34 @@ requirejs([
 			Log.l();
 			frontDoor(req, res)
 			.then(function(user) {
-				filterAction(req, res, 'link.read')
+
+				return filterAction(req, res, 'link.read')
 				.then(function(clean) {
-					//---------------------------------------------------------
+
 					var linkId = clean.linkId;
-					Storage.CustomLinks.getLink(user, linkId)
-					.then(function(link) {
-						switch(link.type) {
-							case 'email_confirmation':
-								user.isFullUser = 1;
-								Storage.Users.update(user)
-								.then(function(result) {
-									res.send(Filter.forClient(link, Filter.clientBlacklist.link));			
-								})
-								.end();
-								break;
-							default:
-								res.send({ errors: 'Link was invalid.'});
-								break;
-						}
-					}).end();
-					//---------------------------------------------------------
+					return Storage.CustomLinks.getLink(user, linkId);
+
+				})
+				.then(function(link) {
+					
+					if (link.type === 'email_confirmation') {
+						user.isFullUser = 1;
+	
+						return Storage.Users.update(user)
+						.then(function(result) {
+							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
+							return;
+						})
+						.end();
+
+					} else {
+						res.send({ errors: 'Link was invalid.'});
+						return;
+					}
 				})
 				.end();
-			})	
+
+			})			
 			.fail(function(err) {
 				Log.e('Error in LINK READ', err, err.stack);
 				res.send({ errors: err.message });
@@ -193,21 +197,24 @@ requirejs([
 			Log.l();
 			frontDoor(req, res)
 			.then(function(user) {
-				filterAction(req, res, 'event.list')
+
+				return filterAction(req, res, 'event.list')
 				.then(function(clean) {
-					//---------------------------------------------------------
 					var monthCode = clean['monthCode'];
 					if (monthCode) {
-						Storage.Events.getEventsForMonth(user, monthCode)
+					
+						return Storage.Events.getEventsForMonth(user, monthCode)
 						.then(function(events) {
 							Log.l('got events for month', events);
 							res.send(events);
+							return;
 						})
-						.end();					
-					}
-					//---------------------------------------------------------
+						.end();
+
+					}			
 				})
 				.end();
+
 			})	
 			.fail(function(err) {
 				Log.e('Error in EVENT LIST', err, err.stack);
@@ -223,22 +230,26 @@ requirejs([
 
 			frontDoor(req)
 			.then(function(user) {
-				// TODO: Filter request.
-				//var post = filter(req.body);
-				var post = req.clean;
-				Log.l(post);
 
-				Storage.Events.createEvent(user, post)
-				.then(function(result) {
-					res.send(result);
+				return filterAction(req, res, 'event.create')
+				.then(function(clean) {
+				
+					return Storage.Events.createEvent(user, clean)
+					.then(function(result) {
+						res.send(result);
+						return;
+					})
+					.end();
+			
 				})
 				.end();
-			
+
 			})
 			.fail(function(err) {
 				Log.e('Error in EVENT CREATE', err, err.stack);
 			})
 			.end();
+
 		};
 
 		EventRestApi.read = function(req, res) {
@@ -287,40 +298,41 @@ requirejs([
 			Log.l();
 			frontDoor(req, res, 'account.list')
 			.then(function(user) {
-
-				filterAction(req, res, 'account.list')
+				
+				return filterAction(req, res, 'account.list')
 				.then(function(clean) {
-					//---------------------------------------------------------
+
 					if (clean['id'] && (!user || user.userId != clean['id'])) {
 						res.send({ errors: 'Account requested was not your account.'});
+						return;
 					}
 					if (!user) {
-						Storage.Users.createTempUser()
+
+						return Storage.Users.createTempUser()
 						.then(function(tempUserObj) {
 							var cookieId = tempUserObj.cookieId;
 							var user = tempUserObj.user;
-							
 							// Set cookie.
 							res.cookie('cookieId', cookieId, { signed: true });
 							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-						})
-						.fail(function(err) {
-							Log.e('createTempUser failed.', err, err.stack);
+							return;
 						})
 						.end();
+
 					} else {
+
 						res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						return;
 					}
-					//---------------------------------------------------------
 				})
 				.end();
-			})	
+
+			})			
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT LIST', err, err.stack);
 				res.send({ errors: err.message });
 			})
 			.end();
-
 		};
 
 		// Read has same functionality as list.
@@ -333,42 +345,56 @@ requirejs([
 			Log.l();
 			frontDoor(req, res)
 			.then(function(user) {
-
 				var state = req.body['state'];
-				if (state == 'created') {
-					filterAction(req, res, 'account.create')
-					.then(function(clean) {
-						//-----------------------------------------------------
-						Storage.Users.createAccount(user, clean)
-						.then(function(user) {
-							Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user)
-							.then(function(link) {
-								Email.sendCreateAccountEmailConfirmation(user, link)
-								.then(function(data) {
-									res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-								})
-								.end();					
-							})
-							.end();
-						})
-						.end();
-						//-----------------------------------------------------
-					})
-					.end();
-				} else if (state =='emailConfirmed') {
-					filterAction(req, res, 'account.edit')
-					.then(function(clean) {
-						//-----------------------------------------------------
-						Storage.Users.updateAccount(user, clean)
-						.then(function(user) {
-							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-						})
-						.end();					
-						//-----------------------------------------------------
-					})
-					.end();
-				}
 
+				if (state == 'createAccount') {
+					
+					return filterAction(req, res, 'account.create')
+					.then(function(clean) {
+						return Storage.Users.createAccount(user, clean);
+					})
+					.then(function(user) {
+						return Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user);
+					})
+					.then(function(link) {
+						return Email.sendCreateAccountEmailConfirmation(user, link);
+					})
+					.then(function(data) {
+						res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						return;
+					})
+					.end();
+
+				} else if (state =='emailConfirmed') {
+					
+					return filterAction(req, res, 'account.edit')
+					.then(function(clean) {
+
+						var anyChange;
+						if (clean['createPassword']) {
+							anyChange = true;
+							var pw = clean['createPassword'];
+							var salt = Utils.generatePassword(16);
+							var pwHash = Utils.hashSha512(pw + salt);
+							user.passwordHash = pwHash;
+							user.passwordSalt = salt;
+						}
+						if (anyChange) {
+							return Storage.Users.update(user);	
+						} else {
+							return;
+						}						
+					
+					})
+					.then(function(user) {
+						if (user) {
+							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						}
+						return false;
+					})
+					.end();
+
+				}
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT UPDATE', err, err.stack);

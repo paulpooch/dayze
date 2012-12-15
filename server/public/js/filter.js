@@ -64,22 +64,20 @@ define([
 	};
 
 	Filter.rules.password = function(t) {
-log(t);
 		var msg = 'Password must be at least 5 characters long.';
 		var result = { passed: true, cleanVal: null, error: msg };
 		try {
+Log.l('validatepw');
 			Validator.check(t).len(5, 100);
 			result.cleanVal = t;
-log('pass');
 		} catch (e) {
-log('fail');
+Log.l('failed');
 			result.passed = false;
 		}
 		return result;
 	};
 
 	Filter.rules.boolean = function(t) {
-Log.l('boolean filter', t);
 		var msg = 'Invalid boolean value.';
 		var result = { passed: true, cleanVal: null, error: msg };
 		try {

@@ -355,9 +355,12 @@ log('event saved', model, response);
 
 		// FROM ACCOUNT CONTROLS VIEW /////////////////////////////////////////
 		createAccount: function() {
+log('createAccount', _accountModel);
+			_accountModel.set('state', 'createAccount');
 			_accountModel.save({}, {
 				wait: true,
 				success: function() {
+log('createAccount done');
 					_router.navigate('account/created', { trigger: true });
 				},
 				error: function(){

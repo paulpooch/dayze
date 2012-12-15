@@ -708,7 +708,6 @@ Log.l('CACHE MISS');
 		};
 
 		Users.update = function(user) {
-Log.l('Users.update', user);
 			var deferred = Q.defer();
 
 			USERS.put(user)
