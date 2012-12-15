@@ -45,7 +45,6 @@ define([
 			createAccountEmail: '',
 			email: '',
 			message: '',
-			isBeingCreated: false,
 			errors: null,
 			state: null
 		},
@@ -68,7 +67,6 @@ log('AccountModel validate failed', attrs.errors);
 				facebookToken: _facebookModel.get('accessToken'),
 				email: that.get('email'),
 				message: that.get('message'),
-				isBeingCreated: that.get('isBeingCreated'),
 				state: that.get('state'),
 				isLoggedIn: that.get('isLoggedIn')
 			};

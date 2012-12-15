@@ -199,9 +199,10 @@ log('buildThinkingModel');
 				case 'confirm_email':
 					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
 					that.showView(C.ActiveViews.Thinking);
-
+log('fetch link model');
 					linkModel.fetch({
 						success: function() {
+log('done');
 							if (linkModel.get('type') == 'email_confirmation') {
 								_accountModel.fetch({
 									success: function() {
@@ -352,14 +353,33 @@ log('event saved', model, response);
 
 
 
-		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
+		// FROM ACCOUNT CONTROLS VIEW /////////////////////////////////////////
 		createAccount: function() {
-			_accountModel.set('isBeingCreated', true);
 			_accountModel.save({}, {
 				wait: true,
 				success: function() {
-					_accountModel.set('isBeingCreated', false);
 					_router.navigate('account/created', { trigger: true });
+				},
+				error: function(){
+				}
+			});
+		},
+		///////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
+		editAccount: function() {
+			_accountModel.save({}, {
+				wait: true,
+				success: function() {
+					_router.navigate('account', { trigger: true });
 				},
 				error: function(){
 				}

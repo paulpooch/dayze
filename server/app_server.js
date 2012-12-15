@@ -141,36 +141,35 @@ requirejs([
 			Log.l();
 			Log.l('LINK READ ////////////////////');
 			Log.l();
-
-			frontDoor(req, res, 'link.read')
+			frontDoor(req, res)
 			.then(function(user) {
-Log.l('in link read');
-				Log.l(req.clean);
-				var linkId = req.clean.linkId;
-				Storage.CustomLinks.getLink(user, linkId)
-				.then(function(link) {
-Log.l('pulled link', link)
-					switch(link.type) {
-						case 'email_confirmation':
-							user.isFullUser = 1;
-							Storage.Users.update(user)
-							.then(function(result) {
-								res.send(Filter.forClient(link, Filter.clientBlacklist.link));			
-							})
-							.end();
-							break;
-						default:
-							res.send({ errors: 'Link was invalid.'});
-							break;
-					}
-				})
-				.fail(function(err) {
-					res.send({ errors: err.message });
+				filterAction(req, res, 'link.read')
+				.then(function(clean) {
+					//---------------------------------------------------------
+					var linkId = clean.linkId;
+					Storage.CustomLinks.getLink(user, linkId)
+					.then(function(link) {
+						switch(link.type) {
+							case 'email_confirmation':
+								user.isFullUser = 1;
+								Storage.Users.update(user)
+								.then(function(result) {
+									res.send(Filter.forClient(link, Filter.clientBlacklist.link));			
+								})
+								.end();
+								break;
+							default:
+								res.send({ errors: 'Link was invalid.'});
+								break;
+						}
+					}).end();
+					//---------------------------------------------------------
 				})
 				.end();
-			})
+			})	
 			.fail(function(err) {
-				Log.e('Error in LINK READ.', err, err.stack);
+				Log.e('Error in LINK READ', err, err.stack);
+				res.send({ errors: err.message });
 			})
 			.end();
 		};
@@ -335,8 +334,8 @@ Log.l('pulled link', link)
 			frontDoor(req, res)
 			.then(function(user) {
 
-				var isBeingCreated = req.body['isBeingCreated'];
-				if (isBeingCreated) {
+				var state = req.body['state'];
+				if (state == 'created') {
 					filterAction(req, res, 'account.create')
 					.then(function(clean) {
 						//-----------------------------------------------------
@@ -356,11 +355,15 @@ Log.l('pulled link', link)
 						//-----------------------------------------------------
 					})
 					.end();
-				} else {
-					filterAction(req, res, 'account.update')
+				} else if (state =='emailConfirmed') {
+					filterAction(req, res, 'account.edit')
 					.then(function(clean) {
 						//-----------------------------------------------------
-						// User update
+						Storage.Users.updateAccount(user, clean)
+						.then(function(user) {
+							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						})
+						.end();					
 						//-----------------------------------------------------
 					})
 					.end();

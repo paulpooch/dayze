@@ -64,7 +64,18 @@ define([
 	};
 
 	Filter.rules.password = function(t) {
-		return { passed: true, cleanVal: t, errors: false };
+log(t);
+		var msg = 'Password must be at least 5 characters long.';
+		var result = { passed: true, cleanVal: null, error: msg };
+		try {
+			Validator.check(t).len(5, 100);
+			result.cleanVal = t;
+log('pass');
+		} catch (e) {
+log('fail');
+			result.passed = false;
+		}
+		return result;
 	};
 
 	Filter.rules.boolean = function(t) {
@@ -152,6 +163,12 @@ Log.l('boolean filter', t);
 			immutable: true,
 			required: false,
 			serverOnly: true
+		}],
+		'account.edit': [{
+			name: 'createPassword',
+			rules: [ Filter.rules.password ],
+			immutable: true,
+			required: false
 		}]
 	};
 
@@ -177,7 +194,7 @@ Log.l('boolean filter', t);
 Log.l('WARNING: field element ', name, ' not found in during client filter.');
 					}
 					var $controlGroup = $fieldEl.closest('.control-group');
-					var $helpInline = $controlGroup.find('.help-inline');
+					var $helpInline = $fieldEl.siblings('.help-inline');
 					$controlGroup.attr('class', 'control-group'); // Reset class	
 					$helpInline.text('');
 					var dirtyVal = $fieldEl.val();

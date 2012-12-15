@@ -9,7 +9,8 @@ define([
 	'c',
 	'text!templates/account_template.html',
 	'filter',
-	'logg'
+	'logg',
+	'smart_form'
 ], function(
 	jQuery,
 	_,
@@ -18,12 +19,15 @@ define([
 	C,
 	AccountTemplate,
 	Filter,
-	Log
+	Log,
+	SmartForm
 ) {
 
 	var that,
 		_appModel,
 		_accountModel,
+		_$accountForm,
+		_accountForm,
 		_$headerEls;
 
 	var AccountView = Backbone.View.extend({
@@ -33,6 +37,8 @@ define([
 		render: function() {
 			var data = that.model.toJSON();
 			that.$el.html(that.template(data));
+			_$accountForm = that.$el.find('#account_form');
+			_accountForm = new SmartForm(that.model, _$accountForm, _appModel.editAccount);
 			//that.model.set('message', '');
 		},
 

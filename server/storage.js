@@ -757,7 +757,8 @@ Log.l('Users.update', user);
 					}
 				}
 				if (needsToBeMarkedUsed) {
-					link.used = 1;
+link.used = 0;
+//link.used = 1;
 					CUSTOM_LINKS.put(link)
 					.then(function(result) {
 						deferred.resolve(link);
