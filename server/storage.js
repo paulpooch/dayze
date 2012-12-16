@@ -500,6 +500,226 @@ Log.l('CACHE MISS');
 	Storage.Users = (function() {
 	
 		var Users = {};
+		
+		// Users.createTempUser
+		Users.createTempUser = function() {
+			var deferred = Q.defer();
+
+			var cookieId = Utils.generatePassword(20, 2);
+			var userId = Uuid.v4();
+
+			var putUser = function() {
+				var def1 = Q.defer();
+				// Minimalist version.
+				// Real entry made if user decides to create account.
+				var user = { 
+					userId: userId,
+					cookieId: cookieId,
+					isFullUser: 0,
+					createTime: Utils.getNowIso()
+				};
+				USERS.put(user)
+				.then(function(result) {
+					var result = {
+						cookieId: cookieId,
+						user: user
+					};
+					def1.resolve(result);
+				})
+				.fail(function(err) {
+					def1.reject(err);
+				})
+				.end();
+				return def1.promise;
+			};
+
+			var putCookie = function(putUserResult) {
+				var def2 = Q.defer();
+				var cookie = {
+					cookieId: putUserResult.cookieId,
+					userId: putUserResult.user.userId
+				};
+				USERS_BY_COOKIE.put(cookie)
+				.then(function(result) {
+					def2.resolve(putUserResult);
+				})
+				.fail(function(err) {
+					def2.reject(err);
+				})
+				.end();
+				return def2.promise;
+
+			};
+
+			putUser()
+			.then(putCookie)
+			.then(function(putUserResult) {
+				deferred.resolve(putUserResult);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+			
+			return deferred.promise;
+		};
+
+		Users.getUserWithCookieId = function(cookieId) {
+			var deferred = Q.defer();
+
+			USERS_BY_COOKIE.get(cookieId)
+			.then(function(user) {
+				USERS.get(user.userId)
+				.then(function(user) {
+					deferred.resolve(user);
+				})
+				.end();
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.createAccount = function(user, post) {
+			var deferred = Q.defer();
+			// Nobody will ever know this password.
+			// It will just get reset once user creates their own via verify email link.
+			var unconfirmedEmail = post['unconfirmedEmail'];
+			//var password = Utils.generatePassword();
+			//var salt = Utils.generatePassword(16);
+			//var pwHash = Utils.hashSha512(password + salt);
+			var displayName = unconfirmedEmail.split('@')[0];
+
+			var account = {
+				userId: user.userId,
+				cookieId: user.cookieId,
+				isFullUser: user.isFullUser,
+				createTime: user.createTime,
+				//passwordHash: pwHash,
+				//passwordSalt: salt,
+				missingPassword: 1,
+				unconfirmedEmail: unconfirmedEmail,
+				displayName: displayName,
+				googleToken: user.googleToken || 0,
+				facebookToken: user.facebookToken || 0,
+				lastActivityTime: Utils.getNowIso()
+			};
+
+			USERS.put(account)
+			.then(function(result) {
+				deferred.resolve(account);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.update = function(user) {
+			var deferred = Q.defer();
+
+			USERS.put(user)
+			.then(function(result) {
+				deferred.resolve(user);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		return Users;
+
+	})();
+
+	///////////////////////////////////////////////////////////////////////////
+	// Custom Links
+	///////////////////////////////////////////////////////////////////////////
+	Storage.CustomLinks = (function() {
+
+		var CustomLinks = {};
+
+		CustomLinks.getLink = function(user, linkId) {
+			var deferred = Q.defer();
+
+			CUSTOM_LINKS.get(linkId)
+			.then(function(link) {
+				var needsToBeMarkedUsed = false;
+				if (link.userId && link.userId != user.userId) {
+					deferred.reject(new Error('Link is not for this user.'));
+				}
+				if (link.isSingleUse) {
+					needsToBeMarkedUsed = true;
+					if (link.used) {
+						deferred.reject(new Error('Link was already used.'));
+					}
+				}
+				if (link.expiration) {
+					var now = new Date();
+					var expiration = new Date(link.expiration);
+					if (now > expiration) {
+						deferred.reject(new Error('Link is expired.'));
+					}
+				}
+				if (needsToBeMarkedUsed) {
+link.used = 0;
+//link.used = 1;
+					CUSTOM_LINKS.put(link)
+					.then(function(result) {
+						deferred.resolve(link);
+					})
+					.end();
+				} else {
+					deferred.resolve(link);
+				}
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		CustomLinks.makeEmailConfirmationLink = function(user) {
+			var deferred = Q.defer();
+
+			var expiration = new Date();
+			expiration.setDate(expiration.getDate() + Config.LINK_EXPIRATION_EMAIL_CONFIRMATION);
+			expiration = expiration.toISOString();
+			var link = {
+				linkId: Utils.generateCustomLink(),
+				type: Config.LINK_TYPE_EMAIL_CONFIRMATION,
+				isSingleUse: 1,
+				createTime: Utils.getNowIso(),
+				expiration: expiration,
+				used: 0,
+				userId: user.userId,
+				pendingEmail: user.unconfirmedEmail
+			};
+
+			CUSTOM_LINKS.put(link)
+			.then(function(result) {
+				deferred.resolve(link);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};		
+
+		return CustomLinks;
+	})();
+
+	return Storage;
+
+});
 
 		/*
 		// Users.resetTable ///////////////////////////////////////////////////
@@ -591,223 +811,3 @@ Log.l('CACHE MISS');
 			
 		};
 		*/
-		
-		// Users.createTempUser
-		Users.createTempUser = function() {
-			var deferred = Q.defer();
-
-			var cookieId = Utils.generatePassword(20, 2);
-			var userId = Uuid.v4();
-
-			var putUser = function() {
-				var def1 = Q.defer();
-				// Minimalist version.
-				// Real entry made if user decides to create account.
-				var user = { 
-					userId: userId,
-					cookieId: cookieId,
-					isFullUser: 0,
-					createTime: Utils.getNowIso()
-				};
-				USERS.put(user)
-				.then(function(result) {
-					var result = {
-						cookieId: cookieId,
-						user: user
-					};
-					def1.resolve(result);
-				})
-				.fail(function(err) {
-					def1.reject(err);
-				})
-				.end();
-				return def1.promise;
-			};
-
-			var putCookie = function(putUserResult) {
-				var def2 = Q.defer();
-				var cookie = {
-					cookieId: putUserResult.cookieId,
-					userId: putUserResult.user.userId
-				};
-				USERS_BY_COOKIE.put(cookie)
-				.then(function(result) {
-					def2.resolve(putUserResult);
-				})
-				.fail(function(err) {
-					def2.reject(err);
-				})
-				.end();
-				return def2.promise;
-
-			};
-
-			putUser()
-			.then(putCookie)
-			.then(function(putUserResult) {
-				deferred.resolve(putUserResult);
-			})
-			.fail(function(err) {
-				deferred.reject(err);
-			})
-			.end();
-			
-			return deferred.promise;
-		};
-
-		Users.getUserWithCookieId = function(cookieId) {
-			var deferred = Q.defer();
-
-			USERS_BY_COOKIE.get(cookieId)
-			.then(function(user) {
-				USERS.get(user.userId)
-				.then(function(user) {
-					deferred.resolve(user);
-				})
-				.end();
-			})
-			.end();
-
-			return deferred.promise;
-		};
-
-		Users.createAccount = function(user, post) {
-			var deferred = Q.defer();
-			// Nobody will ever know this password.
-			// It will just get reset once user creates their own via verify email link.
-			var createAccountEmail = post['createAccountEmail'];
-			var password = Utils.generatePassword();
-			var salt = Utils.generatePassword(16);
-			var pwHash = Utils.hashSha512(password + salt);
-			var displayName = createAccountEmail.split('@')[0];
-
-			var account = {
-				userId: user.userId,
-				cookieId: user.cookieId,
-				isFullUser: user.isFullUser,
-				createTime: user.createTime,
-				passwordHash: pwHash,
-				passwordSalt: salt,
-				email: post.createAccountEmail,
-				displayName: displayName,
-				googleToken: user.googleToken || 0,
-				facebookToken: user.facebookToken || 0,
-				lastActivityTime: Utils.getNowIso()
-			};
-
-			USERS.put(account)
-			.then(function(result) {
-				deferred.resolve(account);
-			})
-			.fail(function(err) {
-				deferred.reject(err);
-			})
-			.end();
-
-			return deferred.promise;
-		};
-
-		Users.update = function(user) {
-			var deferred = Q.defer();
-
-			USERS.put(user)
-			.then(function(result) {
-				deferred.resolve(user);
-			})
-			.fail(function(err) {
-				deferred.reject(err);
-			})
-			.end();
-
-			return deferred.promise;
-		};
-
-		return Users;
-
-	})();
-
-	///////////////////////////////////////////////////////////////////////////
-	// Custom Links
-	///////////////////////////////////////////////////////////////////////////
-	Storage.CustomLinks = (function() {
-
-		var CustomLinks = {};
-
-		CustomLinks.getLink = function(user, linkId) {
-			var deferred = Q.defer();
-
-			CUSTOM_LINKS.get(linkId)
-			.then(function(link) {
-				var needsToBeMarkedUsed = false;
-				if (link.userId && link.userId != user.userId) {
-					deferred.reject(new Error('Link is not for this user.'));
-				}
-				if (link.isSingleUse) {
-					needsToBeMarkedUsed = true;
-					if (link.used) {
-						deferred.reject(new Error('Link was already used.'));
-					}
-				}
-				if (link.expiration) {
-					var now = new Date();
-					var expiration = new Date(link.expiration);
-					if (now > expiration) {
-						deferred.reject(new Error('Link is expired.'));
-					}
-				}
-				if (needsToBeMarkedUsed) {
-link.used = 0;
-//link.used = 1;
-					CUSTOM_LINKS.put(link)
-					.then(function(result) {
-						deferred.resolve(link);
-					})
-					.end();
-				} else {
-					deferred.resolve(link);
-				}
-			})
-			.fail(function(err) {
-				deferred.reject(err);
-			})
-			.end();
-
-			return deferred.promise;
-		};
-
-		CustomLinks.makeCreateAccountEmailConfirmationLink = function(user, pendingEmail) {
-			var deferred = Q.defer();
-
-			var expiration = new Date();
-			expiration.setDate(expiration.getDate() + Config.LINK_EXPIRATION_EMAIL_CONFIRMATION);
-			expiration = expiration.toISOString();
-
-			var link = {
-				linkId: Utils.generateCustomLink(),
-				type: Config.LINK_TYPE_EMAIL_CONFIRMATION,
-				isSingleUse: 1,
-				createTime: Utils.getNowIso(),
-				expiration: expiration,
-				used: 0,
-				userId: user.userId,
-				pendingEmail: pendingEmail
-			};
-
-			CUSTOM_LINKS.put(link)
-			.then(function(result) {
-				deferred.resolve(link);
-			})
-			.fail(function(err) {
-				deferred.reject(err);
-			})
-			.end();
-
-			return deferred.promise;
-		};		
-
-		return CustomLinks;
-	})();
-
-	return Storage;
-
-});

@@ -24,7 +24,7 @@ define([
 		'created': {
 			message: 'Account was created successfully.<br/>Please check your email and click the confirmation link to finish registration.'
 		},
-		'emailConfirmed': {
+		'initialPwSet': {
 			message: 'Thanks for confirming your email.<br/>You can set a password now if you want.'
 		},
 		'saved': {
@@ -46,12 +46,13 @@ define([
 			isLoggedIn: false,
 			displayName: 'Anonymous',
 			isFullUser: false,
-			createAccountEmail: null,
+			unconfirmedEmail: null,
 			email: null,
-			message: null,
+			message: '',
 			errors: null,
 			state: null,
-			password: null
+			password: null,
+			missingPassword: null
 		},
 
 		validate: function(attrs) {
@@ -66,7 +67,7 @@ define([
 				userId: that.get('userId'),
 				displayName: that.get('displayName'),
 				isFullUser: that.get('isFullUser'),
-				createAccountEmail: that.get('createAccountEmail'),
+				unconfirmedEmail: that.get('unconfirmedEmail'),
 				googleToken: _googleModel.get('accessToken'),
 				facebookToken: _facebookModel.get('accessToken'),
 				email: that.get('email'),
@@ -74,6 +75,7 @@ define([
 				state: that.get('state'),
 				isLoggedIn: that.get('isLoggedIn'),
 				password: that.get('password'),
+				missingPassword: that.get('missingPassword')
 			};
 		},
 
@@ -104,7 +106,6 @@ define([
 
 			// EVENTS
 			that.bind('change:state', that.onStateChange);
-			//that.set({ displayName: (user && user.displayName) || that.get('displayName') });
 		}
 
 	});

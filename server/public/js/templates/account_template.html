@@ -5,49 +5,63 @@
     <div class="row-fluid">
         <h3><%= message %></h3>
     </div>
+
+<% if (state == 'created') { %>
+
     <form id="account_form" 
-	data-filter="account.edit" 
 	onsubmit="return false;">
 		<div class="row-fluid">
 			<table class="table span10">
-				<tr>
+				<tr class="control-group">
 					<td class="span3"><strong>Profile Picture</strong></td>
 	 				<td class="span4">...coming soon...</td>
-	 				<td class="span1"></td>
 	 			</tr>
-
 				<tr class="control-group">
 					<td class="span3"><strong>Display Name</strong></td>
-	 				<td class="span4">
-	 					<div id="displayName"><%= displayName %></div>
-	 					<span class="help-inline"></span>
-	 				</td>
-	 				<td class="span1">
-	 					<button id="displayNameHot" data-edits="displayName" type="button" class="btn"><i class="icon-pencil"></i></button>
-	 				</td>
+	 				<td class="span4"><%= displayName %></td>
 	 			</tr>
-
-				<tr class="control-group">
+				<tr class="control-group error">
 					<td class="span3"><strong>Email</strong></td>
 	 				<td class="span4">
-	 					<div id="email"><%= email %></div>
-	 					<span class="help-inline"></span>
+	 					<div id="unconfirmedEmail"><%= unconfirmedEmail %></div>
+	 					<div><strong>You must confirm this new address by clicking the link we emailed you.</strong></div>
 	 				</td>
-	 				<td class="span1">
-	 					<button id="emailHot" data-edits="email" type="button" class="btn"><i class="icon-pencil"></i></button>
-	 				</td>
+				</tr>
+	 			<tr class="control-group error">
+	 				<td class="span3"><strong>Email Confirmed?</strong></td>
+	 				<td class="span4">No</td>
 	 			</tr>
+				<tr class="control-group error">
+	 				<td class="span3"><strong>Password</strong></td>
+	 				<td class="span4">You will set this using the link we emailed you.</td>
+	 			</tr>
+			</table>
+		</div>
+	</form>
 
-<%	if (isFullUser) { %>
+<% } else if (state == 'initialPwSet') { %>
 
-				<tr>
+	<form id="account_form" 
+	data-filter="account.initialPwSet" 
+	onsubmit="return false;">
+		<div class="row-fluid">
+			<table class="table span10">
+				<tr class="control-group">
+					<td class="span3"><strong>Profile Picture</strong></td>
+	 				<td class="span4">...coming soon...</td>
+	 			</tr>
+				<tr class="control-group">
+					<td class="span3"><strong>Display Name</strong></td>
+	 				<td class="span4"><%= displayName %></td>
+	 			</tr>
+				<tr class="control-group">
+					<td class="span3"><strong>Email</strong></td>
+	 				<td class="span4"><%= email %></td>
+	 			</tr>
+	 			<tr class="control-group">
 	 				<td class="span3"><strong>Email Confirmed?</strong></td>
 	 				<td class="span4">Yes</td>
-	 				<td class="span1"></td>
 	 			</tr>
-
-<%		if (state == 'emailConfirmed') { %>
-				
 				<tr class="control-group">
 	 				<td class="span3"><strong>Password</strong></td>
 	 				<td class="span6">
@@ -62,11 +76,69 @@
 							<span class="help-inline"></span>
 						</div>
 					</td>
-					<td class="span1"></td>
 	 			</tr>
+			</table>
+		</div>
+	</form>
 
-<%		} else { %>
-				
+<% } else if (isFullUser) { %>
+
+	<form id="account_form" 
+	onsubmit="return false;">
+		<div class="row-fluid">
+			<table class="table span10">
+				<tr class="control-group">
+					<td class="span3"><strong>Profile Picture</strong></td>
+	 				<td class="span4">...coming soon...</td>
+	 				<td class="span1"></td>
+	 			</tr>
+				<tr class="control-group">
+					<td class="span3"><strong>Display Name</strong></td>
+	 				<td class="span4">
+	 					<div id="displayName"><%= displayName %></div>
+	 					<span class="help-inline"></span>
+	 				</td>
+	 				<td class="span1">
+	 					<button data-edits="displayName" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 				</td>
+	 			</tr>
+<%	if (unconfirmedEmail && unconfirmedEmail != email) { %>
+				<tr class="control-group error">
+					<td class="span3"><strong>Email</strong></td>
+	 				<td class="span4">
+	 					<div id="unconfirmedEmail"><%= unconfirmedEmail %></div>
+	 					<span class="help-inline"></span>
+	 					<div><strong>You must confirm this new address by clicking the link we emailed you.</strong></div>
+	 <% if (email) { %>
+	 					<div>Until then your email will remain <%= email %></div>
+	 <% } %>
+	 				</td>
+	 				<td class="span1">
+	 					<button data-edits="unconfirmedEmail" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 				</td>
+	 			</tr>
+	 			<tr class="error">
+	 				<td class="span3"><strong>Email Confirmed?</strong></td>
+	 				<td class="span4">No</td>
+	 				<td class="span1"></td>
+	 			</tr>
+<%	} else { %>
+				<tr class="control-group">
+					<td class="span3"><strong>Email</strong></td>
+	 				<td class="span4">
+	 					<div id="unconfirmedEmail"><%= email %></div>
+	 					<span class="help-inline"></span>
+	 				</td>
+	 				<td class="span1">
+	 					<button id="emailHot" data-edits="unconfirmedEmail" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 				</td>
+	 			</tr>
+				<tr>
+	 				<td class="span3"><strong>Email Confirmed?</strong></td>
+	 				<td class="span4">Yes</td>
+	 				<td class="span1"></td>
+	 			</tr>
+<%	} %>
 				<tr class="control-group">
 					<td class="span3"><strong>Password</strong></td>
 	 				<td class="span4">
@@ -77,32 +149,19 @@
 	 					<button data-edits="password" data-editable-type="password" type="button" class="btn"><i class="icon-pencil"></i></button>
 	 				</td>
 	 			</tr>
-
-<%
-
-		}
-	} else { 
-
-%>
-
-				<tr class="error">
-	 				<td class="span3"><strong>Email Confirmed?</strong></td>
-	 				<td class="span4">No</td>
-	 			</tr>
-	 			<tr class="error">
-	 				<td class="span3"><strong>Password</strong></td>
-	 				<td class="span4">You will set this using the link we emailed you.</td>
-	 			</tr>
-
-<%	} %>
-
 			</table>
 		</div>
 	</form>
+
+<% } %>
+
+
+
 	<div class="row-fluid">
 	  	<a style="float: right; margin: 20px;" id="return_to_cal_button" class="btn btn-inverse" href="/calendar" style="margin: 5px 0px 0px 20px;"><i class="icon-calendar icon-white"></i> Return to Calendar</a>
 	</div>
 </div>
-<%	if (state == 'emailConfirmed') { %>
+<%	if (state == 'initialPwSet') { %>
 <script>$('#password').focus();</script>
 <% } %>
+

@@ -39,15 +39,12 @@ define([
 	Filter.rules = {};
 
 	Filter.rules.monthCode = function(t) {
-Log.l('running monthCode rule', t);
 		var msg = 'monthCode must be a valid YYYY-MM-DD format.';
 		var result = { passed: true, cleanVal: null, error: msg };
 		try {
-Log.l('check');
 			Validator.check(t).is(/^[0-9]{4}|-|(0[123456789]|10|11|12)$/);
 			result.cleanVal = t;
 		} catch(e) {
-Log.l('fail', e);
 			result.passed = false;
 		}
 		return result;
@@ -67,14 +64,15 @@ Log.l('fail', e);
 	};
 
 	Filter.rules.password = function(t) {
+Log.l('pw rule', t);
 		var msg = 'Password must be at least 5 characters long.';
 		var result = { passed: true, cleanVal: null, error: msg };
 		try {
-Log.l('validatepw');
+Log.l('checking');
 			Validator.check(t).len(5, 100);
 			result.cleanVal = t;
 		} catch (e) {
-Log.l('failed');
+Log.l('fail', e);
 			result.passed = false;
 		}
 		return result;
@@ -182,8 +180,8 @@ Log.l('failed');
 			immutable: true,
 			required: false
 		}],
-		'account.create': [{ 
-			name: 'createAccountEmail',
+		'account.createAccount': [{ 
+			name: 'unconfirmedEmail',
 			rules: [ Filter.rules.email	],
 			immutable: true,
 			required: true
@@ -210,30 +208,42 @@ Log.l('failed');
 			immutable: true,
 			required: false
 		}],
-		'account.edit': [{
+		'account.initialPwSet': [{
 			name: 'password',
 			rules: [ Filter.rules.password ],
 			immutable: true,
-			required: false
+			required: true
+		}],
+		'account.patch': [{
+			name: 'password',
+			rules: [ Filter.rules.password ],
+			immutable: true,
+			required: false,
+			serverOnly: true
+		}, {
+			name: 'unconfirmedEmail',
+			rules: [ Filter.rules.email	],
+			immutable: true,
+			required: false,
+			serverOnly: true
 		}, {
 			name: 'displayName',
-			rules: [ Filter.rules.displayName ],
+			rules: [ Filter.rules.displayName	],
 			immutable: true,
-			required: false
-		}, {
-			name: 'email',
-			rules: [ Filter.rules.email ],
-			immutable: true,
-			required: false
+			required: false,
+			serverOnly: true
 		}]
 	};
 
+	// Will require a matching patch filter above.
+	// Probably could be combined.
+	// See how things shake out first.
 	Filter.hotFields = {
 		'displayName': {
 			rules: [ Filter.rules.displayName ],
 			immutable: true
 		},
-		'email': {
+		'unconfirmedEmail': {
 			rules: [ Filter.rules.email ],
 			immutable: true
 		},
@@ -243,7 +253,7 @@ Log.l('failed');
 		}
 	};
 
-	Filter.cleanHotField = function(name, val, $fieldEl) {
+	Filter.cleanHotField = function(name, newVal, $fieldEl) {
 		var passed = true;
 		var error = null;
 		var field = Filter.hotFields[name];
@@ -255,8 +265,8 @@ Log.l('failed');
 		var $helpInline = $fieldEl.siblings('.help-inline');
 		$controlGroup.attr('class', 'control-group'); // Reset class	
 		$helpInline.text('');
-		var dirtyVal = val;
-		var origVal = val;
+		var dirtyVal = newVal;
+		var origVal = newVal;
 		for (var i = 0; i < rules.length; i++) {
 			var rule = rules[i];
 			var ruleResult = rule(dirtyVal);
@@ -360,7 +370,7 @@ Log.l('Field = ', name, 'Dirty = ', dirtyVal);
 				cleaned[name] = null;
 			}
 		}
-Log.l('Clenaed = ', cleaned);
+Log.l('Cleaned = ', cleaned);
 		return { passed: passed, cleaned: cleaned, errors: errors };
 	};
 

@@ -49,7 +49,7 @@ log(response);
 							case 'register':
 								that.set('isLoggedIn', true);
 								that.set('accessToken', response.access_token);
-								_accountModel.set('createAccountEmail', response.email);
+								_accountModel.set('unconfirmedEmail', response.email);
 								_accountModel.save();
 							break;
 

@@ -33,6 +33,8 @@
 // Clean out table job
 // -expired links
 // -temp accounts with lastactivity > 1 month
+//
+// Do we really care about model validation?
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -134,60 +136,6 @@ requirejs([
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
-	// LINK REST
-	///////////////////////////////////////////////////////////////////////////////
-	var LinkRestApi = function(app) {
-		var LinkRestApi = {};
-		var path = Config.REST_PREFIX + 'link';
-
-		LinkRestApi.read = function(req, res) {
-			Log.l();
-			Log.l('LINK READ ////////////////////');
-			Log.l();
-			frontDoor(req, res)
-			.then(function(user) {
-
-				return filterAction(req, res, 'link.read')
-				.then(function(clean) {
-
-					var linkId = clean.linkId;
-					return Storage.CustomLinks.getLink(user, linkId);
-
-				})
-				.then(function(link) {
-					
-					if (link.type === 'email_confirmation') {
-						user.isFullUser = 1;
-						user.email = link.pendingEmail;
-
-						return Storage.Users.update(user)
-						.then(function(result) {
-							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
-							return;
-						})
-						.end();
-
-					} else {
-						res.send({ errors: 'Link was invalid.'});
-						return;
-					}
-				})
-				.end();
-
-			})			
-			.fail(function(err) {
-				Log.e('Error in LINK READ', err, err.stack);
-				res.send({ errors: err.message });
-			})
-			.end();
-		};
-
-		app.get('/' + path + '/:linkId', LinkRestApi.read);
-		return LinkRestApi;
-	};
-
-
-	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
 	///////////////////////////////////////////////////////////////////////////////
 	var EventRestApi = function(app) {
@@ -222,11 +170,14 @@ requirejs([
 			})	
 			.fail(function(err) {
 				Log.e('Error in EVENT LIST', err, err.stack);
-				res.send({ errors: err.message });
+				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				return;
 			})
 			.end();
 		};
 
+
+		// REDO THIS!
 		EventRestApi.create = function(req, res) {
 			Log.l();
 			Log.l('EVENT CREATE ////////////////////');
@@ -284,7 +235,6 @@ requirejs([
 
 	};
 
-
 	///////////////////////////////////////////////////////////////////////////////
 	// ACCOUNT REST
 	///////////////////////////////////////////////////////////////////////////////
@@ -334,7 +284,8 @@ requirejs([
 			})			
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT LIST', err, err.stack);
-				res.send({ errors: err.message });
+				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				return;
 			})
 			.end();
 		};
@@ -343,76 +294,115 @@ requirejs([
 		// Either way you can only read 1 account - yours.
 		AccountRestApi.read = AccountRestApi.list;
 
+		AccountRestApi.patch = function(req, res) {
+			Log.l();
+			Log.l('ACCOUNT PATCH ////////////////////');
+			Log.l();
+			frontDoor(req, res)
+			.then(function(user) {
+
+				return filterAction(req, res, 'account.patch')
+				.then(function(clean) {
+
+					var anyChange = false;
+					if (clean['password']) {
+						anyChange = true;
+						var pw = clean['password'];
+						var salt = Utils.generatePassword(16);
+						var pwHash = Utils.hashSha512(pw + salt);
+						user.passwordHash = pwHash;
+						user.passwordSalt = salt;
+						user.missingPassword = 0;
+					}
+					if (clean['displayName']) {
+						anyChange = true;
+						user.displayName = clean.displayName;
+					}
+					if (clean['unconfirmedEmail']) {
+						anyChange = true;
+						user.unconfirmedEmail = clean.unconfirmedEmail;							
+
+						// Do not return this Q chain.  Should run in parallel and let below code run.
+						Storage.CustomLinks.makeEmailConfirmationLink(user)
+						.then(function(link) {
+							return Email.sendEmailConfirmation(user, link);
+						})
+						.end();
+
+					}
+					if (anyChange) {
+						return Storage.Users.update(user);	
+					} else {
+						return;
+					}						
+					
+				})
+				.then(function(user) {
+					if (user) {
+						//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						res.send();
+						return;
+					}
+					return false;
+				})
+				.end();
+
+			})
+			.fail(function(err) {
+				Log.e('Error in ACCOUNT PATCH', err, err.stack);
+				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				return;
+			})
+			.end();
+		};
+
 		AccountRestApi.update = function(req, res) {
 			Log.l();
 			Log.l('ACCOUNT UPDATE ////////////////////');
 			Log.l();
 			frontDoor(req, res)
 			.then(function(user) {
-
+Log.l(req.body);
 				var state = req.body['state'];
-Log.l('state', state);
 				if (state == 'createAccount') {
 					
-					return filterAction(req, res, 'account.create')
+					return filterAction(req, res, 'account.createAccount')
 					.then(function(clean) {
 						return Storage.Users.createAccount(user, clean);
 					})
-					.then(function(user) {
-						return Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user, user.email);
-					})
-					.then(function(link) {
-						return Email.sendCreateAccountEmailConfirmation(user, link);
-					})
-					.then(function(data) {
-						//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-						res.send();
-						return;
+					.then(function(newUser) {
+
+						return Storage.CustomLinks.makeEmailConfirmationLink(newUser)
+						.then(function(link) {
+							return Email.sendEmailConfirmation(newUser, link);
+						})
+						.then(function(data) {
+							//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+							res.send();
+							return;
+						})
+						.end();
+
 					})
 					.end();
 
-				} else if (!state || state =='emailConfirmed') {
-					
-		Log.l('correct path');			
-					return filterAction(req, res, 'account.edit')
+				} else if (state =='initialPwSet') {
+								
+					return filterAction(req, res, 'account.initialPwSet')
 					.then(function(clean) {
 
-						var anyChange;
-						if (clean['password']) {
-							anyChange = true;
-							var pw = clean['password'];
-							var salt = Utils.generatePassword(16);
-							var pwHash = Utils.hashSha512(pw + salt);
-							user.passwordHash = pwHash;
-							user.passwordSalt = salt;
-						}
-						if (clean['displayName']) {
-							anyChange = true;
-							user.displayName = clean.displayName;
-						}
-						if (clean['email']) {
-							
-							// Do not return this Q chain.  Should run in parallel and let below code run.
-							Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user, clean.email)
-							.then(function(link) {
-								return Email.sendCreateAccountEmailConfirmation(user, link);
-							})
-							.end();
-
-						}
-						if (anyChange) {
-							return Storage.Users.update(user);	
-						} else {
-							return;
-						}						
-					
+						var pw = clean['password'];
+						var salt = Utils.generatePassword(16);
+						var pwHash = Utils.hashSha512(pw + salt);
+						user.passwordHash = pwHash;
+						user.passwordSalt = salt;
+						user.missingPassword = 0;
+						return Storage.Users.update(user);	
+						
 					})
 					.then(function(user) {
-						if (user) {
-							//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-							res.send();
-						}
-						return false;
+						res.send();
+						return;
 					})
 					.end();
 
@@ -421,6 +411,7 @@ Log.l('state', state);
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT UPDATE', err, err.stack);
 				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				return;
 			})
 			.end();
 		};
@@ -428,9 +419,65 @@ Log.l('state', state);
 		app.get('/' + path, AccountRestApi.list);
 		app.get('/' + path + '/:id', AccountRestApi.read);
 		app.put('/' + path + '/:id', AccountRestApi.update);
+		app.patch('/' + path + '/:id', AccountRestApi.patch);
 
 		return AccountRestApi;
 
+	};
+
+	///////////////////////////////////////////////////////////////////////////////
+	// LINK REST
+	///////////////////////////////////////////////////////////////////////////////
+	var LinkRestApi = function(app) {
+		var LinkRestApi = {};
+		var path = Config.REST_PREFIX + 'link';
+
+		LinkRestApi.read = function(req, res) {
+			Log.l();
+			Log.l('LINK READ ////////////////////');
+			Log.l();
+			frontDoor(req, res)
+			.then(function(user) {
+
+				return filterAction(req, res, 'link.read')
+				.then(function(clean) {
+
+					var linkId = clean.linkId;
+					return Storage.CustomLinks.getLink(user, linkId);
+
+				})
+				.then(function(link) {
+					
+					if (link.type === 'email_confirmation') {
+						user.isFullUser = 1;
+						user.email = link.pendingEmail;
+						user.unconfirmedEmail = null;
+
+						return Storage.Users.update(user)
+						.then(function(result) {
+							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
+							return;
+						})
+						.end();
+
+					} else {
+						res.send({ errors: 'Link was invalid.'});
+						return;
+					}
+				})
+				.end();
+
+			})			
+			.fail(function(err) {
+				Log.e('Error in LINK READ', err, err.stack);
+				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				return;
+			})
+			.end();
+		};
+
+		app.get('/' + path + '/:linkId', LinkRestApi.read);
+		return LinkRestApi;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -459,7 +506,7 @@ Log.l('state', state);
 			var req = new FakeRequest(),
 				res = new FakeResponse();
 
-			req.body.createAccountEmail = 'test@test.com';
+			req.body.unconfirmedEmail = 'test@test.com';
 
 			accountRestApi.create(req, res);
 		

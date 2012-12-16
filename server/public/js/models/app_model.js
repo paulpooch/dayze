@@ -178,7 +178,6 @@ define([
 
 		buildThinkingModel: function() {
 			if (!_thinkingModel) {
-log('buildThinkingModel');
 				_thinkingModel = new ThinkingModel({ appModel: that });
 				that.set('thinkingModel', _thinkingModel);
 				_thinkingView = new ThinkingView({ model: that.get('thinkingModel'), appModel: that, el: $('#blank_holder') });
@@ -227,9 +226,14 @@ log('Pulled account from server', _accountModel, route);
 							if (linkModel.get('type') == 'email_confirmation') {
 								_accountModel.fetch({
 									success: function() {
-										_accountModel.set('state', 'emailConfirmed');
-										_accountControlsView.render();
-										that.showView(C.ActiveViews.Account);
+										if (_accountModel.get('missingPassword')) {
+											_accountModel.set('state', 'initialPwSet');
+											_accountControlsView.render();
+											that.showView(C.ActiveViews.Account);
+										} else {
+											_accountModel.set('state', 'saved');
+											that.showView(C.ActiveViews.Account);
+										}
 									}
 								});
 							}
@@ -385,18 +389,22 @@ log('event saved', model, response);
 		// FROM ACCOUNT CONTROLS VIEW /////////////////////////////////////////
 		createAccount: function() {
 			_accountModel.set('state', 'createAccount');
-			_accountModel.save({}, {
+			_accountModel.save([], {
 				wait: true,
 				success: function() {
 					_router.navigate('account/created', { trigger: true });
 				},
-				error: function(){
+				error: function() {
 				}
 			});
 		},
 
 		login: function() {
-			alert('login');
+			_accountModel.set('state', 'login');
+			_accountModel.save({}, {
+				wait: true,
+				
+			})
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -409,8 +417,9 @@ log('event saved', model, response);
 
 
 		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
-		editAccount: function() {
-			_accountModel.save({}, {
+		setInitialPassword: function() {
+			_accountModel.set('state', 'initialPwSet')
+			_accountModel.save([], {
 				wait: true,
 				success: function() {
 					_router.navigate('account/saved', { trigger: true });
@@ -483,7 +492,7 @@ log('event saved', model, response);
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			//_accountModel.set('state', 'emailConfirmed')
+			//_accountModel.set('state', 'initialPwSet')
 			//that.showView(C.ActiveViews.Account);			
 		},
 

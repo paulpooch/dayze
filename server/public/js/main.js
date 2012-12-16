@@ -38,8 +38,8 @@ require.config({
 	paths: {
 		jquery: 'vendor/jquery/jquery.min',
 		jqueryui: 'vendor/jquery/jquery-ui.min',
-		underscore: 'vendor/underscore/underscore',
-		backbone: 'vendor/backbone/backbone',
+		underscore: 'vendor/underscore/underscore.min',
+		backbone: 'vendor/backbone/backbone.min',
 		text: 'vendor/require/text',
 		modernizr: 'vendor/modernizr/modernizr',
 		bootstrap: 'vendor/bootstrap/bootstrap',
@@ -48,7 +48,7 @@ require.config({
 		google: 'google',
 		validator: 'vendor/validator/validator.min',
 		logg: 'logg_shim',
-		editable: 'vendor/editable/bootstrap-editable-inline'
+		editable: 'vendor/editable/bootstrap-editable-inline.min'
 	}
 });
 

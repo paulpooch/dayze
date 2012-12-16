@@ -90,21 +90,36 @@ define([
 					$trigger.show();
 				});
 				$fieldEl.on('save', function(e, params) {
-					var oldVal = $fieldEl.data('editable').value;
-					var val = params.newValue;
-					var result = Filter.cleanHotField(fieldName, val, $fieldEl);
+					//var prevVal = $fieldEl.data('editable').value;
+					var newVal = params.newValue;
+					//var oldVal = model.get(fieldName);
+					
+					// SPECIAL CASES.
+					if (fieldName == 'unconfirmedEmail') {
+						oldVal = model.get('email');
+					}
+
+log(fieldName, oldVal, newVal);
+	
+					var result = Filter.cleanHotField(fieldName, newVal, $fieldEl);					
+					//if ((ignoreOldVal || oldVal != newVal) && result.passed) {					
 					if (result.passed) {
-						model.set(fieldName, val);
-						model.save({}, {
+						model.set(fieldName, newVal);
+						var attr = {};
+						attr[fieldName] = newVal;
+log(attr);
+						model.save(attr, {
 							wait: true,
+							patch: true,
 							success: function(updatedModel) {
 								log('updatedModel', updatedModel);
 								log('clientModel', model);
-								// is server val == val ?  if no revert to oldVal?
+								// is server newVal == newVal ?  if no revert to oldVal?
 
 							},
 							error: function() {
-
+								// Revert to oldVal, show Error message.
+								// re-open input?
 							}
 						});
 					} else {
@@ -132,6 +147,8 @@ define([
 		});
 
 	};
+
+	
 
 	return SmartForm;
 

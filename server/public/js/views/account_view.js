@@ -40,7 +40,7 @@ define([
 			var data = that.model.toJSON();
 			that.$el.html(that.template(data));
 			_$accountForm = that.$el.find('#account_form');
-			_accountForm = new SmartForm(that.model, _$accountForm, _appModel.editAccount);
+			_accountForm = new SmartForm(that.model, _$accountForm, _appModel.setInitialPassword);
 			that.model.set('state', null);
 		},
 
@@ -84,6 +84,7 @@ define([
 	        // BINDINGS
 	        _appModel.bind('change:activeView', that.onActiveViewChange);
 	        that.model.bind('change:displayName', that.render);
+			that.model.bind('change:unconfirmedEmail', that.render);
 
 	        // Useless on initialize.
 	   		//that.render();
