@@ -48,7 +48,7 @@ require.config({
 		google: 'google',
 		validator: 'vendor/validator/validator.min',
 		logg: 'logg_shim',
-		editable: 'vendor/editable/bootstrap-editable-inline.min'
+		editable: 'vendor/editable/bootstrap-editable-inline'
 	}
 });
 

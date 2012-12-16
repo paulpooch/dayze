@@ -39,12 +39,15 @@ define([
 	Filter.rules = {};
 
 	Filter.rules.monthCode = function(t) {
+Log.l('running monthCode rule', t);
 		var msg = 'monthCode must be a valid YYYY-MM-DD format.';
 		var result = { passed: true, cleanVal: null, error: msg };
 		try {
+Log.l('check');
 			Validator.check(t).is(/^[0-9]{4}|-|(0[123456789]|10|11|12)$/);
 			result.cleanVal = t;
 		} catch(e) {
+Log.l('fail', e);
 			result.passed = false;
 		}
 		return result;
@@ -128,9 +131,38 @@ Log.l('failed');
 		}
 		return result;
 	};
+
+	Filter.rules.alpha = function(t) {
+		var msg = 'Value must be 1 to 100 alphabetic characters.';
+		var result = { passed: true, cleanVal: null, error: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			Validator.check(t).isAlpha().len(1, 100);
+			result.cleanVal = t;
+		} catch (e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
+	// http://www.regular-expressions.info/posixbrackets.html
+	// Allows hex 20 -> hex 7E of http://www.asciitable.com/
+	Filter.rules.displayName = function(t) {
+		var msg = 'Display name must be 3 or more printable characters.';
+		var result = { passed: true, cleanVal: null, error: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			Validator.check(t).is(/^[\x20-\x7E]{3,}$/); // 3 or more printable chars.
+			result.cleanVal = t;
+		} catch(e) {
+			result.passed = false;
+		}
+		return result;
+	};
 	
 	// FILTER FIELDS //////////////////////////////////////////////////////////
 
+	// Regular forms.
 	Filter.fields = {
 		'link.read': [{
 			name: 'linkId',
@@ -156,19 +188,96 @@ Log.l('failed');
 			immutable: true,
 			required: true
 		}, {
-			name: 'isBeingCreated',
-			rules: [ Filter.rules.boolean],
+			name: 'state',
+			rules: [ Filter.rules.alpha ],
 			immutable: true,
 			required: false,
 			serverOnly: true
 		}],
-		'account.edit': [{
-			name: 'createPassword',
+		'account.login': [{
+			name: 'loginPassword',
 			rules: [ Filter.rules.password ],
+			immutable: true,
+			required: true
+		}, {
+			name: 'loginEmail',
+			rules: [ Filter.rules.email	],
+			immutable: true,
+			required: true
+		}, {
+			name: 'loginRemember',
+			rules: [ Filter.rules.boolean ],
+			immutable: true,
+			required: false
+		}],
+		'account.edit': [{
+			name: 'password',
+			rules: [ Filter.rules.password ],
+			immutable: true,
+			required: false
+		}, {
+			name: 'displayName',
+			rules: [ Filter.rules.displayName ],
+			immutable: true,
+			required: false
+		}, {
+			name: 'email',
+			rules: [ Filter.rules.email ],
 			immutable: true,
 			required: false
 		}]
 	};
+
+	Filter.hotFields = {
+		'displayName': {
+			rules: [ Filter.rules.displayName ],
+			immutable: true
+		},
+		'email': {
+			rules: [ Filter.rules.email ],
+			immutable: true
+		},
+		'password': {
+			rules: [ Filter.rules.password ],
+			immutable: true
+		}
+	};
+
+	Filter.cleanHotField = function(name, val, $fieldEl) {
+		var passed = true;
+		var error = null;
+		var field = Filter.hotFields[name];
+		if (!field) {
+			return { passed: false, cleaned: null, errors: { Filter: 'Filter.hotFields had no entry for fieldName: ' + name } };
+		}
+		var rules = field.rules;
+		var $controlGroup = $fieldEl.closest('.control-group');
+		var $helpInline = $fieldEl.siblings('.help-inline');
+		$controlGroup.attr('class', 'control-group'); // Reset class	
+		$helpInline.text('');
+		var dirtyVal = val;
+		var origVal = val;
+		for (var i = 0; i < rules.length; i++) {
+			var rule = rules[i];
+			var ruleResult = rule(dirtyVal);
+			if (!ruleResult.passed) {
+				passed = false;
+			 	error = ruleResult.error;
+				$controlGroup.addClass('error');
+			 	$helpInline.text(ruleResult.error);
+			 	break;
+			 } else {
+			 	$controlGroup.addClass('success');
+			 }
+			 dirtyVal = ruleResult.cleanVal;
+		}
+		var cleanVal = ruleResult.cleanVal;
+		if (field.immutable && cleanVal != origVal) {
+			passed = false;
+			cleanVal = null;
+		}
+		return { passed: passed, cleaned: cleanVal, errors: error };
+	};	
 
 	// For client, req is actually a jquery el containing all fields.
 	Filter.clean = function(req, action, isClient) {
@@ -195,7 +304,14 @@ Log.l('WARNING: field element ', name, ' not found in during client filter.');
 					var $helpInline = $fieldEl.siblings('.help-inline');
 					$controlGroup.attr('class', 'control-group'); // Reset class	
 					$helpInline.text('');
-					var dirtyVal = $fieldEl.val();
+					var dirtyVal;
+					if ($fieldEl.attr('type') == 'checkbox') {
+						dirtyVal = $fieldEl.is(':checked');
+					} else {
+						dirtyVal = $fieldEl.val();
+					}
+Log.l('Field = ', name, 'Dirty = ', dirtyVal);
+					var origVal = dirtyVal;
 					for (var j = 0; j < rules.length; j++) {
 						var rule = rules[j];
 						var ruleResult = rule(dirtyVal);
@@ -218,7 +334,8 @@ Log.l('WARNING: field element ', name, ' not found in during client filter.');
 				//(req.query) Checks query string params, ex: ?id=12 Checks urlencoded body params
 				//(req.body), ex: id=12 To utilize urlencoded request bodies, req.body should be an object. This can be done by using the _express.bodyParser middleware.
 				var dirtyVal = (req.query && req.query[name]) || (req.body && req.body[name]) || (req.params && req.params[name]);
-Log.l('dirtyVal = ', dirtyVal);
+Log.l('Field = ', name, 'Dirty = ', dirtyVal);
+				var origVal = dirtyVal;
 				for (var j = 0; j < rules.length; j++) {
 					var rule = rules[j];
 					var ruleResult = rule(dirtyVal);
@@ -238,12 +355,12 @@ Log.l('dirtyVal = ', dirtyVal);
 				passed = false;
 				cleaned[name] = null;
 			}
-			if (field.immutable && cleanVal != dirtyVal) {
+			if (field.immutable && cleanVal != origVal) {
 				passed = false;
 				cleaned[name] = null;
 			}
 		}
-Log.l('cleaned', cleaned);
+Log.l('Clenaed = ', cleaned);
 		return { passed: passed, cleaned: cleaned, errors: errors };
 	};
 

@@ -12,34 +12,47 @@
 			<table class="table span10">
 				<tr>
 					<td class="span3"><strong>Profile Picture</strong></td>
-	 				<td class="span3">...coming soon...</td>
+	 				<td class="span4">...coming soon...</td>
+	 				<td class="span1"></td>
 	 			</tr>
 
 				<tr class="control-group">
 					<td class="span3"><strong>Display Name</strong></td>
-	 				<td class="span3">
+	 				<td class="span4">
 	 					<div id="displayName"><%= displayName %></div>
+	 					<span class="help-inline"></span>
 	 				</td>
 	 				<td class="span1">
-	 					<button id="shit" data-edits="displayName" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 					<button id="displayNameHot" data-edits="displayName" type="button" class="btn"><i class="icon-pencil"></i></button>
 	 				</td>
 	 			</tr>
 
-				<tr>
+				<tr class="control-group">
 					<td class="span3"><strong>Email</strong></td>
-	 				<td class="span3"><%= email %></td>
+	 				<td class="span4">
+	 					<div id="email"><%= email %></div>
+	 					<span class="help-inline"></span>
+	 				</td>
+	 				<td class="span1">
+	 					<button id="emailHot" data-edits="email" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 				</td>
 	 			</tr>
+
 <%	if (isFullUser) { %>
+
 				<tr>
 	 				<td class="span3"><strong>Email Confirmed?</strong></td>
-	 				<td class="span3">Yes</td>
+	 				<td class="span4">Yes</td>
+	 				<td class="span1"></td>
 	 			</tr>
+
 <%		if (state == 'emailConfirmed') { %>
+				
 				<tr class="control-group">
 	 				<td class="span3"><strong>Password</strong></td>
-	 				<td class="span3">
+	 				<td class="span6">
 						<div class="form-inline">
-							<input tabindex="1" type="password" id="createPassword" placeholder="Password">
+							<input tabindex="1" type="password" id="password" placeholder="Password">
 							<button tabindex="2" 
 							id="create_password_button" 
 							type="button" 
@@ -49,25 +62,40 @@
 							<span class="help-inline"></span>
 						</div>
 					</td>
+					<td class="span1"></td>
 	 			</tr>
+
 <%		} else { %>
-				<tr>
-		 			<td class="span3"><strong>Password</strong></td>
-		 			<td class="span3">*****</td>
-		 		</tr>
+				
+				<tr class="control-group">
+					<td class="span3"><strong>Password</strong></td>
+	 				<td class="span4">
+	 					<div id="password">*****</div>
+	 					<span class="help-inline"></span>
+	 				</td>
+	 				<td class="span1">
+	 					<button data-edits="password" data-editable-type="password" type="button" class="btn"><i class="icon-pencil"></i></button>
+	 				</td>
+	 			</tr>
+
 <%
+
 		}
 	} else { 
+
 %>
+
 				<tr class="error">
 	 				<td class="span3"><strong>Email Confirmed?</strong></td>
-	 				<td class="span3">No</td>
+	 				<td class="span4">No</td>
 	 			</tr>
 	 			<tr class="error">
 	 				<td class="span3"><strong>Password</strong></td>
-	 				<td class="span3">You will set this using the link we emailed you.</td>
+	 				<td class="span4">You will set this using the link we emailed you.</td>
 	 			</tr>
+
 <%	} %>
+
 			</table>
 		</div>
 	</form>
@@ -76,5 +104,5 @@
 	</div>
 </div>
 <%	if (state == 'emailConfirmed') { %>
-<script>$('#createPassword').focus();</script>
+<script>$('#password').focus();</script>
 <% } %>

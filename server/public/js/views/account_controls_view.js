@@ -31,7 +31,8 @@ define([
 		_$loginForm,
 		_$createForm,
 		_$userButton,
-		_createAccountForm;
+		_createAccountForm,
+		_loginForm;
 
 		/*
 		_accountModel,
@@ -58,14 +59,18 @@ define([
 			_$createForm = that.$el.find('#create_form');
 	        _$loginForm = that.$el.find('#login_form');
 			_$userButton = that.$el.find('#user_button');
+			_$userEmail = that.$el.find('#user_email');
 
 			_createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
+			_loginForm = new SmartForm(that.model, _$loginForm, _appModel.login);
 			_$userModal.bind('show', that.onUserModalShow);
 			_$userModal.bind('hide', that.onUserModalHide);
 		},
 
 		hideUserModal: function() {
-			_$userModal.modal('hide');
+			if (_$userModal) {
+				_$userModal.modal('hide');
+			}
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -99,9 +104,9 @@ define([
 		},
 
 		onLoginButtonClick: function() {
+		log(_$loginForm.data('filter-passed'));
 			if (_$loginForm.data('filter-passed')) {
-				that.makeButtonStateLoading(_$loginButton);
-				_appModel.createAccount();
+				_appModel.login();
 			}
 		},
 
@@ -159,7 +164,6 @@ define([
 	        _accountModel = that.model;
 	        _googleModel = that.model.get('googleModel');
 	        _facebookModel = that.model.get('facebookModel');
-	        _$userEmail = that.$el.find('#user_email');
 	        _$userPassword = that.$el.find('#user_password');
 	        _$loginButton = that.$el.find('#login_button');
    	        _$googleButton = that.$el.find('#google_button');

@@ -775,7 +775,7 @@ link.used = 0;
 			return deferred.promise;
 		};
 
-		CustomLinks.makeCreateAccountEmailConfirmationLink = function(user) {
+		CustomLinks.makeCreateAccountEmailConfirmationLink = function(user, pendingEmail) {
 			var deferred = Q.defer();
 
 			var expiration = new Date();
@@ -790,6 +790,7 @@ link.used = 0;
 				expiration: expiration,
 				used: 0,
 				userId: user.userId,
+				pendingEmail: pendingEmail
 			};
 
 			CUSTOM_LINKS.put(link)

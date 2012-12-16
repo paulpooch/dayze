@@ -256,6 +256,17 @@ header {
   height: 400px;
 }
 
+/* ACCOUNT ------------------------------------------------------------------*/
+
+form#account_form table td strong { 
+  margin-top: 5px;
+  display: block;
+}
+form#account_form td .editable {
+  margin-top: 5px;
+}
+
+
 /* THINKING SPINNER ---------------------------------------------------------*/
 /* http://37signals.com/svn/posts/2577-loading-spinner-animation-using-css-and-webkit */
 div.spinner {
@@ -316,6 +327,11 @@ a [class^="icon-"], a [class*=" icon-"] {
 /* Remove shadows from editable buttons. */
 button.btn i {
   background-image: none;
+}
+
+/* Don't underline editables */
+.editable-click {
+  border-bottom: none;
 }
 
 /*///////////////////////////////////////////////////////////////////////////*/

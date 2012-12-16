@@ -46,12 +46,12 @@ define([
 			isLoggedIn: false,
 			displayName: 'Anonymous',
 			isFullUser: false,
-			createAccountEmail: '',
-			email: '',
-			message: '',
+			createAccountEmail: null,
+			email: null,
+			message: null,
 			errors: null,
 			state: null,
-			createPassword: null
+			password: null
 		},
 
 		validate: function(attrs) {
@@ -73,7 +73,7 @@ define([
 				message: that.get('message'),
 				state: that.get('state'),
 				isLoggedIn: that.get('isLoggedIn'),
-				createPassword: that.get('createPassword'),
+				password: that.get('password'),
 			};
 		},
 

@@ -80,6 +80,9 @@ requirejs([
 
 // http://stackoverflow.com/questions/7042340/node-js-error-cant-set-headers-after-they-are-sent
 
+	var ERROR_BAD_REQUEST = 400;
+	var ERROR_RETRYABLE = 500;
+
 	///////////////////////////////////////////////////////////////////////////////
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
@@ -155,7 +158,8 @@ requirejs([
 					
 					if (link.type === 'email_confirmation') {
 						user.isFullUser = 1;
-	
+						user.email = link.pendingEmail;
+
 						return Storage.Users.update(user)
 						.then(function(result) {
 							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
@@ -345,8 +349,9 @@ requirejs([
 			Log.l();
 			frontDoor(req, res)
 			.then(function(user) {
-				var state = req.body['state'];
 
+				var state = req.body['state'];
+Log.l('state', state);
 				if (state == 'createAccount') {
 					
 					return filterAction(req, res, 'account.create')
@@ -354,30 +359,46 @@ requirejs([
 						return Storage.Users.createAccount(user, clean);
 					})
 					.then(function(user) {
-						return Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user);
+						return Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user, user.email);
 					})
 					.then(function(link) {
 						return Email.sendCreateAccountEmailConfirmation(user, link);
 					})
 					.then(function(data) {
-						res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						res.send();
 						return;
 					})
 					.end();
 
-				} else if (state =='emailConfirmed') {
+				} else if (!state || state =='emailConfirmed') {
 					
+		Log.l('correct path');			
 					return filterAction(req, res, 'account.edit')
 					.then(function(clean) {
 
 						var anyChange;
-						if (clean['createPassword']) {
+						if (clean['password']) {
 							anyChange = true;
-							var pw = clean['createPassword'];
+							var pw = clean['password'];
 							var salt = Utils.generatePassword(16);
 							var pwHash = Utils.hashSha512(pw + salt);
 							user.passwordHash = pwHash;
 							user.passwordSalt = salt;
+						}
+						if (clean['displayName']) {
+							anyChange = true;
+							user.displayName = clean.displayName;
+						}
+						if (clean['email']) {
+							
+							// Do not return this Q chain.  Should run in parallel and let below code run.
+							Storage.CustomLinks.makeCreateAccountEmailConfirmationLink(user, clean.email)
+							.then(function(link) {
+								return Email.sendCreateAccountEmailConfirmation(user, link);
+							})
+							.end();
+
 						}
 						if (anyChange) {
 							return Storage.Users.update(user);	
@@ -388,7 +409,8 @@ requirejs([
 					})
 					.then(function(user) {
 						if (user) {
-							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+							//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+							res.send();
 						}
 						return false;
 					})
@@ -398,7 +420,7 @@ requirejs([
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT UPDATE', err, err.stack);
-				res.send({ errors: err.message });
+				res.send(ERROR_BAD_REQUEST, { errors: err.message });
 			})
 			.end();
 		};
