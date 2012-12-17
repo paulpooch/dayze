@@ -56,7 +56,6 @@ define([
 				html: bodyHtml
 			}
 		};
-Log.l('Gonna attempt to send mail: ', mail);
 		return Q.ncall(
 			ses.send,
 			this,
@@ -65,7 +64,6 @@ Log.l('Gonna attempt to send mail: ', mail);
 	};
 
 	Email.sendEmailConfirmation = function(user, link) {
-Log.l('Email.sendEmailConfirmation', user, link);
 		var subject = 'Welcome to DayPaint! Please confirm your email address.';
 		var bodyText = [
 			'Thanks for joining DayPaint!\r\n',

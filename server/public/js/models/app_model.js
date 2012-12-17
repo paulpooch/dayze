@@ -121,6 +121,7 @@ define([
 					that.buildDayModel();
 					break;
 				case C.ActiveViews.Basic:
+					_accountControlsView.hideUserModal();
 					that.buildBasicModel();
 					_basicView.render();
 					break;
@@ -133,6 +134,10 @@ define([
 
 		showError: function(error) {
 			that.showView(C.ActiveViews.Basic);
+log(error);
+			if (typeof(error) != 'string') {
+				error = JSON.stringify(error);
+			}
 			_basicModel.set('error', error);
 			_router.navigate('error', { trigger: true });
 		},
@@ -362,13 +367,13 @@ log('Pulled account from server', _accountModel, route);
 			if (_accountModel.get('isFullUser')) {
 				var eventCid = that.getDayModel().get('selectedEventId');
 				var eventModel = _eventCollection.getByCid(eventCid);
-				eventModel.save({}, {
+				eventModel.save([], {
 					wait: true,
 					success: function(model, response) {
 log('event saved', model, response);
 					},
 					error: function(model, error) {
-
+						that.showError(error);
 					}
 				});
 			} else {
@@ -391,19 +396,25 @@ log('event saved', model, response);
 			_accountModel.set('state', 'createAccount');
 			_accountModel.save([], {
 				wait: true,
-				success: function() {
+				success: function(model, response) {
 					_router.navigate('account/created', { trigger: true });
 				},
-				error: function() {
+				error: function(model, error) {
+					that.showError(error);
 				}
 			});
 		},
 
 		login: function() {
 			_accountModel.set('state', 'login');
-			_accountModel.save({}, {
+			_accountModel.save([], {
 				wait: true,
-				
+				success: function(model, response) {
+					_router.navigate('loggedinsomething', { trigger: true });
+				},
+				error: function(model, error) {
+					that.showError(error);
+				}
 			})
 		},
 		///////////////////////////////////////////////////////////////////////

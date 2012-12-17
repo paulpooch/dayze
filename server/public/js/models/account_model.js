@@ -52,7 +52,10 @@ define([
 			errors: null,
 			state: null,
 			password: null,
-			missingPassword: null
+			missingPassword: null,
+			loginEmail: null,
+			loginPassword: null,
+			loginRemember: false
 		},
 
 		validate: function(attrs) {
@@ -75,7 +78,10 @@ define([
 				state: that.get('state'),
 				isLoggedIn: that.get('isLoggedIn'),
 				password: that.get('password'),
-				missingPassword: that.get('missingPassword')
+				missingPassword: that.get('missingPassword'),
+				loginEmail: that.get('loginEmail'),
+				loginPassword: that.get('loginPassword'),
+				loginRemember: that.get('loginRemember')
 			};
 		},
 

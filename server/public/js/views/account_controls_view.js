@@ -104,7 +104,6 @@ define([
 		},
 
 		onLoginButtonClick: function() {
-		log(_$loginForm.data('filter-passed'));
 			if (_$loginForm.data('filter-passed')) {
 				_appModel.login();
 			}

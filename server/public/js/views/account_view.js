@@ -83,8 +83,9 @@ define([
 
 	        // BINDINGS
 	        _appModel.bind('change:activeView', that.onActiveViewChange);
-	        that.model.bind('change:displayName', that.render);
-			that.model.bind('change:unconfirmedEmail', that.render);
+	        //that.model.bind('change:displayName', that.render);
+			//that.model.bind('change:unconfirmedEmail', that.render);
+			//that.model.bind('change:password', that.render);
 
 	        // Useless on initialize.
 	   		//that.render();

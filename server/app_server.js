@@ -89,7 +89,6 @@ requirejs([
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
 	var frontDoor = function(req, res, restAction) {
-		Log.l('FRONT DOOR [cookie = ', req.signedCookies.cookieId, ' ]');
 		var deferred = 	Q.defer();
 		if (req.signedCookies.cookieId) {
 			var cookieId = req.signedCookies.cookieId;	
@@ -118,6 +117,7 @@ requirejs([
 		req.body = null;
 		req.query = null;
 		req.params = null;
+
 		if (filterResult.passed) { 
 			deferred.resolve(filterResult.cleaned);
 		} else {
@@ -362,7 +362,6 @@ requirejs([
 			Log.l();
 			frontDoor(req, res)
 			.then(function(user) {
-Log.l(req.body);
 				var state = req.body['state'];
 				if (state == 'createAccount') {
 					
@@ -401,6 +400,16 @@ Log.l(req.body);
 						
 					})
 					.then(function(user) {
+						res.send();
+						return;
+					})
+					.end();
+
+				} else if (state == 'login') {
+
+					return filterAction(req, res, 'account.login')
+					.then(function(clean) {
+Log.l('login', clean);	
 						res.send();
 						return;
 					})

@@ -14,26 +14,26 @@
 			<table class="table span10">
 				<tr class="control-group">
 					<td class="span3"><strong>Profile Picture</strong></td>
-	 				<td class="span4">...coming soon...</td>
+	 				<td class="span5">...coming soon...</td>
 	 			</tr>
 				<tr class="control-group">
 					<td class="span3"><strong>Display Name</strong></td>
-	 				<td class="span4"><%= displayName %></td>
+	 				<td class="span5"><%= displayName %></td>
 	 			</tr>
 				<tr class="control-group error">
 					<td class="span3"><strong>Email</strong></td>
-	 				<td class="span4">
+	 				<td class="span5">
 	 					<div id="unconfirmedEmail"><%= unconfirmedEmail %></div>
 	 					<div><strong>You must confirm this new address by clicking the link we emailed you.</strong></div>
 	 				</td>
 				</tr>
 	 			<tr class="control-group error">
 	 				<td class="span3"><strong>Email Confirmed?</strong></td>
-	 				<td class="span4">No</td>
+	 				<td class="span5">No</td>
 	 			</tr>
 				<tr class="control-group error">
 	 				<td class="span3"><strong>Password</strong></td>
-	 				<td class="span4">You will set this using the link we emailed you.</td>
+	 				<td class="span5">You will set this using the link we emailed you.</td>
 	 			</tr>
 			</table>
 		</div>
@@ -102,16 +102,17 @@
 	 					<button data-edits="displayName" type="button" class="btn"><i class="icon-pencil"></i></button>
 	 				</td>
 	 			</tr>
+
 <%	if (unconfirmedEmail && unconfirmedEmail != email) { %>
+
 				<tr class="control-group error">
 					<td class="span3"><strong>Email</strong></td>
 	 				<td class="span4">
 	 					<div id="unconfirmedEmail"><%= unconfirmedEmail %></div>
-	 					<span class="help-inline"></span>
-	 					<div><strong>You must confirm this new address by clicking the link we emailed you.</strong></div>
-	 <% if (email) { %>
-	 					<div>Until then your email will remain <%= email %></div>
-	 <% } %>
+	 					<span class="help-inline">
+							<strong>You must confirm this new address by clicking the link we emailed you.</strong><br/>
+	 						Until then your email will remain <%= email %>
+	 					</span>
 	 				</td>
 	 				<td class="span1">
 	 					<button data-edits="unconfirmedEmail" type="button" class="btn"><i class="icon-pencil"></i></button>
@@ -122,7 +123,9 @@
 	 				<td class="span4">No</td>
 	 				<td class="span1"></td>
 	 			</tr>
+
 <%	} else { %>
+
 				<tr class="control-group">
 					<td class="span3"><strong>Email</strong></td>
 	 				<td class="span4">
@@ -138,11 +141,13 @@
 	 				<td class="span4">Yes</td>
 	 				<td class="span1"></td>
 	 			</tr>
+
 <%	} %>
+
 				<tr class="control-group">
 					<td class="span3"><strong>Password</strong></td>
 	 				<td class="span4">
-	 					<div id="password">*****</div>
+	 					<div id="password">[hidden]</div>
 	 					<span class="help-inline"></span>
 	 				</td>
 	 				<td class="span1">

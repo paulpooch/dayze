@@ -64,15 +64,12 @@ define([
 	};
 
 	Filter.rules.password = function(t) {
-Log.l('pw rule', t);
 		var msg = 'Password must be at least 5 characters long.';
 		var result = { passed: true, cleanVal: null, error: msg };
 		try {
-Log.l('checking');
 			Validator.check(t).len(5, 100);
 			result.cleanVal = t;
 		} catch (e) {
-Log.l('fail', e);
 			result.passed = false;
 		}
 		return result;
@@ -189,10 +186,16 @@ Log.l('fail', e);
 			name: 'state',
 			rules: [ Filter.rules.alpha ],
 			immutable: true,
-			required: false,
+			required: true,
 			serverOnly: true
 		}],
 		'account.login': [{
+			name: 'state',
+			rules: [ Filter.rules.alpha ],
+			immutable: true,
+			required: true,
+			serverOnly: true
+		}, {
 			name: 'loginPassword',
 			rules: [ Filter.rules.password ],
 			immutable: true,
@@ -293,85 +296,130 @@ Log.l('fail', e);
 	Filter.clean = function(req, action, isClient) {
 		Log.l('CLEAN ////////////////////////////');
 		Log.l('action', action);
-		var cleaned = {};
-		var passed = true;
-		var fields = Filter.fields[action];
-		if (!fields) {
-			return { passed: false, cleaned: null, errors: { Filter: 'Filter.fields had no entry for action: ' + action } };
+
+		var allCleaned = {};
+		var allErrors = {};
+		var allPassed = true;
+		var filterFields = Filter.fields[action];
+
+		if (!filterFields) {
+			return { 
+				passed: false,
+				cleaned: null,
+				errors: { Filter: 'Filter.fields had no entry for action: ' + action } 
+			};
 		}
-		var errors = {};
-		for (var i = 0; i < fields.length; i++) {
-			var field = fields[i];
-			var name = field.name;
-			var rules = field.rules;
+
+		for (var i = 0; i < filterFields.length; i++) {
+			var filterField = filterFields[i];
+			var fieldName = filterField.name;
+			var fieldRules = filterField.rules;
+			
 			if (isClient) {
-				if (!field.serverOnly) {
-					var $fieldEl = req.find('#' + name);
+				if (!filterField.serverOnly) {
+
+					// CLIENTSIDE FILTER //////////////////////////////////////
+					var dirtyVal = null;
+					var fieldFailed = false;
+					var $fieldEl = req.find('#' + fieldName);
 					if (!$fieldEl) {
-Log.l('WARNING: field element ', name, ' not found in during client filter.');
+Log.l('WARNING: filterField element ', fieldName, ' not found in during client filter.');
+						allPassed = false;
+						allErrors[fieldName] = fieldName + ' had no corresponding form element.';
 					}
+
 					var $controlGroup = $fieldEl.closest('.control-group');
 					var $helpInline = $fieldEl.siblings('.help-inline');
-					$controlGroup.attr('class', 'control-group'); // Reset class	
+					// Reset error/success messages.
+					$controlGroup.attr('class', 'control-group');
 					$helpInline.text('');
-					var dirtyVal;
+					
 					if ($fieldEl.attr('type') == 'checkbox') {
 						dirtyVal = $fieldEl.is(':checked');
 					} else {
 						dirtyVal = $fieldEl.val();
 					}
-Log.l('Field = ', name, 'Dirty = ', dirtyVal);
-					var origVal = dirtyVal;
-					for (var j = 0; j < rules.length; j++) {
-						var rule = rules[j];
-						var ruleResult = rule(dirtyVal);
-						if (!ruleResult.passed) {
-			 				passed = false;
-			 				errors[name] = ruleResult.error;
-							$controlGroup.addClass('error');
-			 				$helpInline.text(ruleResult.error);
+					var originalVal = dirtyVal;
+					
+					for (var j = 0; j < fieldRules.length; j++) {
+						var fieldRule = fieldRules[j];
+						var ruleResult = fieldRule(dirtyVal);
+						if (!ruleResult.passed && filterField.required) {
+							fieldFailed = true;
+			 				allErrors[fieldName] = ruleResult.error;
 			 				break;
-			 			} else {
-			 				$controlGroup.addClass('success');
 			 			}
 			 			dirtyVal = ruleResult.cleanVal;
 			 		}
 			 		var cleanVal = ruleResult.cleanVal;
-					cleaned[name] = cleanVal;
+					allCleaned[fieldName] = cleanVal;
+
+					if (filterField.required && (typeof cleanVal == 'undefined' || cleanVal == undefined)) {
+						fieldFailed = true;
+						allErrors[fieldName] = fieldName + ' was required but not defined.';
+					}
+					if (filterField.immutable && cleanVal != originalVal) {
+						fieldFailed = true;
+						allErrors[fieldName] = fieldName + ' was immutable and could only pass the filter with modification.';
+					}
+			 		if (fieldFailed) {
+			 			allPassed = false;
+			 			allCleaned[fieldName] = null;
+			 			$helpInline.text(errors[fieldName]);
+			 			$controlGroup.addClass('error');
+			 		} else {
+			 			$controlGroup.addClass('success');
+			 		}
+
 			 	}
 			} else {
 				//(req.params) Checks route params, ex: /user/:id
 				//(req.query) Checks query string params, ex: ?id=12 Checks urlencoded body params
 				//(req.body), ex: id=12 To utilize urlencoded request bodies, req.body should be an object. This can be done by using the _express.bodyParser middleware.
-				var dirtyVal = (req.query && req.query[name]) || (req.body && req.body[name]) || (req.params && req.params[name]);
-Log.l('Field = ', name, 'Dirty = ', dirtyVal);
-				var origVal = dirtyVal;
-				for (var j = 0; j < rules.length; j++) {
-					var rule = rules[j];
-					var ruleResult = rule(dirtyVal);
-					if (!ruleResult.passed) {
-						if (field.required || dirtyVal !== undefined) {
-		 					passed = false;
-		 					errors[name] = ruleResult.error;
-		 					break;
-		 				}
-					}
-					dirtyVal = ruleResult.cleanVal;
-		 		}
-		 		var cleanVal = ruleResult.cleanVal;
-				cleaned[name] = cleanVal;
-			}
-			if (field.required && !cleanVal) {
-				passed = false;
-				cleaned[name] = null;
-			}
-			if (field.immutable && cleanVal != origVal) {
-				passed = false;
-				cleaned[name] = null;
+
+				// SERVERSIDE FILTER //////////////////////////////////////////
+				var fieldFailed = false;
+				var dirtyVal = null;
+				if (req.body && req.body.hasOwnProperty(fieldName)) {
+					dirtyVal = req.body[fieldName];
+				}
+				if (req.params && req.params.hasOwnProperty(fieldName)) {
+					dirtyVal = req.params[fieldName];
+				}
+				if (req.query && req.query.hasOwnProperty(fieldName)) {
+					dirtyVal = req.query[fieldName];
+				}
+			
+				var originalVal = dirtyVal;
+				for (var j = 0; j < fieldRules.length; j++) {
+					var fieldRule = fieldRules[j];
+					var ruleResult = fieldRule(dirtyVal);
+					if (!ruleResult.passed && filterField.required) {
+						fieldFailed = true;
+						allErrors[fieldName] = ruleResult.error;
+						break;
+			 		}
+			 		dirtyVal = ruleResult.cleanVal;
+			 	}
+			 	var cleanVal = ruleResult.cleanVal;
+				allCleaned[fieldName] = cleanVal;
+
+				if (filterField.required && (typeof cleanVal == 'undefined' || cleanVal == undefined)) {
+					fieldFailed = true;
+					allErrors[fieldName] = fieldName + ' was required but not defined.';
+				}
+				if (filterField.immutable && cleanVal != originalVal) {
+					fieldFailed = true;
+					allErrors[fieldName] = fieldName + ' was immutable and could only pass the filter with modification.';
+				}
+			 	if (fieldFailed) {
+			 		allPassed = false;
+			 		allCleaned[fieldName] = null;
+				}
 			}
 		}
-Log.l('Cleaned = ', cleaned);
-		return { passed: passed, cleaned: cleaned, errors: errors };
+Log.l('Cleaned = ', allCleaned);
+		return { passed: allPassed, cleaned: allCleaned, errors: allErrors };
 	};
 
 	Filter.clientBlacklist = {};
@@ -395,7 +443,7 @@ Log.l('Cleaned = ', cleaned);
 	Filter.forClient = function(item, blacklist) {
 		for (var i = 0; i < blacklist.length; i++) {
 			var field = blacklist[i];
-			if (item[field]) {
+			if (item.hasOwnProperty(field)) {
 				delete item[field];
 			}
 		}

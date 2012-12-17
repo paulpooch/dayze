@@ -50,10 +50,13 @@ define([
 				$inputs.each(function(index, el) {
 					var $el = $(el);
 					var id = $el.attr('id');
-					data[id] = $el.val();
+					var val = $el.val();
+					if ($el.attr('type') == 'checkbox') {
+ 						val = $el.is(':checked');
+					}
+					data[id] = val;
 				});
 				model.set(data);
-	  			
 	  			var loadingText = $triggerEl.data('loading-text');
 	  			if (loadingText) {
 	  				$triggerEl.text(loadingText);
@@ -92,36 +95,52 @@ define([
 				$fieldEl.on('save', function(e, params) {
 					//var prevVal = $fieldEl.data('editable').value;
 					var newVal = params.newValue;
-					//var oldVal = model.get(fieldName);
-					
+					var oldVal = model.get(fieldName);
+					var ignoreOldVal = false;
+
 					// SPECIAL CASES.
 					if (fieldName == 'unconfirmedEmail') {
 						oldVal = model.get('email');
 					}
+					if (fieldName == 'password') {
+						ignoreOldVal = true;
+					}
 
-log(fieldName, oldVal, newVal);
-	
 					var result = Filter.cleanHotField(fieldName, newVal, $fieldEl);					
-					//if ((ignoreOldVal || oldVal != newVal) && result.passed) {					
-					if (result.passed) {
+					if (result.passed) {					
 						model.set(fieldName, newVal);
-						var attr = {};
-						attr[fieldName] = newVal;
-log(attr);
-						model.save(attr, {
-							wait: true,
-							patch: true,
-							success: function(updatedModel) {
-								log('updatedModel', updatedModel);
-								log('clientModel', model);
-								// is server newVal == newVal ?  if no revert to oldVal?
+						if (ignoreOldVal || oldVal != newVal) {
+							var attr = {};
+							attr[fieldName] = newVal;
+log(attr);				
+							model.save(attr, {
+								wait: true,
+								patch: true,
+								success: function(updatedModel) {
+									log('updatedModel', updatedModel);
+									log('clientModel', model);
 
-							},
-							error: function() {
-								// Revert to oldVal, show Error message.
-								// re-open input?
-							}
-						});
+									// SPECIAL CASES.
+									if (fieldName == 'unconfirmedEmail') {
+										var $helpInline = $fieldEl.siblings('.help-inline');
+										var $controlGroup = $fieldEl.closest('.control-group');
+										$controlGroup.attr('class', 'control-group error')
+										$helpInline.html([
+											'<strong>You must confirm this new address by clicking the link we emailed you.</strong><br/>',
+											'Until then your email will remain ', model.get('email')
+										].join(''));
+									}
+									if (fieldName == 'password') {
+										model.set('password', null);
+									}
+
+								},
+								error: function() {
+									// Revert to oldVal, show Error message.
+									// re-open input?
+								}
+							});
+						}
 					} else {
 
 					}
