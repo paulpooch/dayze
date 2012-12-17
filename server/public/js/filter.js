@@ -354,18 +354,19 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 			 		var cleanVal = ruleResult.cleanVal;
 					allCleaned[fieldName] = cleanVal;
 
-					if (filterField.required && (typeof cleanVal == 'undefined' || cleanVal == undefined)) {
+					if (!fieldFailed && filterField.required && (typeof cleanVal == 'undefined' || cleanVal == undefined)) {
 						fieldFailed = true;
 						allErrors[fieldName] = fieldName + ' was required but not defined.';
 					}
-					if (filterField.immutable && cleanVal != originalVal) {
+Log.l('immutalbe?', cleanVal, originalVal);
+					if (!fieldFailed && filterField.immutable && cleanVal != originalVal) {
 						fieldFailed = true;
 						allErrors[fieldName] = fieldName + ' was immutable and could only pass the filter with modification.';
 					}
 			 		if (fieldFailed) {
 			 			allPassed = false;
 			 			allCleaned[fieldName] = null;
-			 			$helpInline.text(errors[fieldName]);
+			 			$helpInline.text(allErrors[fieldName]);
 			 			$controlGroup.addClass('error');
 			 		} else {
 			 			$controlGroup.addClass('success');
@@ -404,11 +405,11 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 			 	var cleanVal = ruleResult.cleanVal;
 				allCleaned[fieldName] = cleanVal;
 
-				if (filterField.required && (typeof cleanVal == 'undefined' || cleanVal == undefined)) {
+				if (!fieldFailed && filterField.required && (typeof cleanVal == 'undefined' || cleanVal == undefined)) {
 					fieldFailed = true;
 					allErrors[fieldName] = fieldName + ' was required but not defined.';
 				}
-				if (filterField.immutable && cleanVal != originalVal) {
+				if (!fieldFailed && filterField.immutable && cleanVal != originalVal) {
 					fieldFailed = true;
 					allErrors[fieldName] = fieldName + ' was immutable and could only pass the filter with modification.';
 				}
