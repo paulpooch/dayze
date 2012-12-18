@@ -45,26 +45,47 @@ require.config({
 	}
 });
 
-require(['app_client'], function(App) {
-	window.Dayze = new App();
+require(['app_client', 'test_registry'], function(App, TestRegistry) {
+	window.Dayze = new App(true);
 
 	// http://addyosmani.com/blog/unit-testing-backbone-js-apps-with-qunit-and-sinonjs/
 	function runTests() {
 
+// Note: Your test code is allowed to suck.
+// By all means put minimal effort in.
 ///////////////////////////////////////////////////////////////////////////////
+
+module('Login');
+var $form = $('#login_form');
+test('login success', function() {
+
+	$('#controls_login_button').click();
+	$form.find('#loginEmail').val('paul.pucciarelli@gmail.com');
+	$form.find('#loginPassword').val('654654');
+	$form.find('#login_button').click();
+	var $groups = $form.find('.control-group');
+	for (var i = 0; i < 3; i++) {
+		var grp = $groups.eq(i);
+		equal(grp.attr('class'), 'control-group success');
+	}
+	TestRegistry['AccountControlsView'].hideUserModal();
+
+});
+
+// This sends out email and fills up DB so maybe don't run all the time.
+/*
 module('Create Account');
 var $form = $('#create_form');	
 test('create account filter', function() {
 
 
-	$form.find('#controls_create_account_button').click();
+	$('#controls_create_account_button').click();
 	$form.find('#unconfirmedEmail').val('abc');
 	$form.find('#create_account_button').click();
 	var err = $form.find('.help-inline').text();
 	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
 	equal(grp.attr('class'), 'control-group error');
 	equal(err, 'Email must be a valid email between 1 and 100 characters long.');
-
 
 });
 test('create account success', function() {
@@ -75,10 +96,12 @@ test('create account success', function() {
 	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
 	equal(grp.attr('class'), 'control-group success');
 	equal(err, '');
+	TestRegistry['AccountControlsView'].hideUserModal();
 
 });
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 	}
-	setTimeout(runTests, 3000);
+	setTimeout(runTests, 2000);
 });

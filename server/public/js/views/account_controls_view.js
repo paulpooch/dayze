@@ -10,7 +10,8 @@ define([
 	'text!templates/account_controls_template.html',
 	'filter',
 	'logg',
-	'smart_form'
+	'smart_form',
+	'test_registry'
 ], function(
 	jQuery,
 	_,
@@ -20,7 +21,8 @@ define([
 	AccountControlsTemplate,
 	Filter,
 	Log,
-	SmartForm
+	SmartForm,
+	TestRegistry
 ) {
 
 	var that,
@@ -149,6 +151,7 @@ define([
 	    initialize: function (options) {
 			that = this;
 			_.bindAll(that);
+			TestRegistry['AccountControlsView'] = that;
 
 	        _appModel = options.appModel;
 	        _$headerEls = $('.account_view_header');
