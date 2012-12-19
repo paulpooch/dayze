@@ -33,6 +33,7 @@ define([
 		_$loginForm,
 		_$createForm,
 		_$userButton,
+		_$feedback,
 		_createAccountForm,
 		_loginForm;
 
@@ -62,6 +63,7 @@ define([
 	        _$loginForm = that.$el.find('#login_form');
 			_$userButton = that.$el.find('#user_button');
 			_$userEmail = that.$el.find('#user_email');
+			_$feedback = that.$el.find('#feedback_message');
 
 			_createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
 			_loginForm = new SmartForm(that.model, _$loginForm, _appModel.login);
@@ -125,7 +127,6 @@ define([
 				_$createForm.find('[data-focus=1]').focus();
 			}, 500);
 		},
-
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////

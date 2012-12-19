@@ -55,6 +55,7 @@ require(['app_client', 'test_registry'], function(App, TestRegistry) {
 // By all means put minimal effort in.
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
 module('Login');
 var $form = $('#login_form');
 test('login success', function() {
@@ -71,9 +72,10 @@ test('login success', function() {
 	TestRegistry['AccountControlsView'].hideUserModal();
 
 });
+*/
 
 // This sends out email and fills up DB so maybe don't run all the time.
-/*
+
 module('Create Account');
 var $form = $('#create_form');	
 test('create account filter', function() {
@@ -99,7 +101,7 @@ test('create account success', function() {
 	TestRegistry['AccountControlsView'].hideUserModal();
 
 });
-*/
+
 
 ///////////////////////////////////////////////////////////////////////////////
 	}

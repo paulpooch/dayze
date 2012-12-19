@@ -112,6 +112,7 @@ define([
 
 			// EVENTS
 			that.bind('change:state', that.onStateChange);
+
 		}
 
 	});

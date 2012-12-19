@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////////////////
-// CONSTANTS
+// CLIENT CONSTANTS (& SHARED)
 /////////////////////////////////////////////////////////////////////////////////////////
 define([], function() {
 
@@ -18,6 +18,10 @@ define([], function() {
 	C.ActiveViews.Account = 3;
 	C.ActiveViews.Basic = 4;
 	C.ActiveViews.Thinking = 5;
+
+	C.Errors = {};
+	C.Errors.LoginPassword = 1;
+	C.Errors.LoginEmail = 2;
 
 	return C;
 

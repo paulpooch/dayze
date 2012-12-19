@@ -16,7 +16,8 @@ define([
 
 	'config',
 	'utils',
-	'logg'
+	'logg',
+	'email'
 ], function(
 	_,
 
@@ -28,7 +29,8 @@ define([
 
 	Config,
 	Utils,
-	Log
+	Log,
+	Email
 ) {
 
 	var Storage = {};
@@ -373,10 +375,21 @@ Log.l('CACHE MISS');
 		put: _put,
 		get: _get
 	};
+
+	USERS_BY_EMAIL = {
+		tableName: 'DAYZE_USERS_BY_EMAIL',
+		cachePrefix: '05_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.email;
+		},
+		put: _put,
+		get: _get
+	}
 		
 	CUSTOM_LINKS = {
 		tableName: 'DAYZE_CUSTOM_LINKS',
-		cachePrefix: '05_',
+		cachePrefix: '06_',
 		cacheTimeout: 3600,
 		cacheKey: function(item) {
 			return this.cachePrefix + item.linkId;
@@ -501,66 +514,80 @@ Log.l('CACHE MISS');
 	
 		var Users = {};
 		
-		// Users.createTempUser
+		Users.updateWithEmail = function(user) {
+			var deferred = Q.defer();
+
+			var emailIndex = { 
+				email: user.email, 
+				userId: user.userId 
+			};
+
+			USERS.put(user)
+			.then(function(userPutResult) {
+				return USERS_BY_EMAIL.put(emailIndex);
+			})
+			.then(function(userByEmailPutResult) {
+				deferred.resolve(userByEmailPutResult);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.setNewEmail = function(user) {
+			var deferred = Q.defer();
+
+			Storage.CustomLinks.makeEmailConfirmationLink(user)
+			.then(function(link) {
+				return Email.sendEmailConfirmation(user, link);
+			})
+			.then(function(result) {
+				deferred.resolve(result);
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		// Returns new tempUser
 		Users.createTempUser = function() {
 			var deferred = Q.defer();
 
 			var cookieId = Utils.generatePassword(20, 2);
 			var userId = Uuid.v4();
 
-			var putUser = function() {
-				var def1 = Q.defer();
-				// Minimalist version.
-				// Real entry made if user decides to create account.
-				var user = { 
-					userId: userId,
-					cookieId: cookieId,
-					isFullUser: 0,
-					createTime: Utils.getNowIso()
-				};
-				USERS.put(user)
-				.then(function(result) {
-					var result = {
-						cookieId: cookieId,
-						user: user
-					};
-					def1.resolve(result);
-				})
-				.fail(function(err) {
-					def1.reject(err);
-				})
-				.end();
-				return def1.promise;
+			// Minimalist version.
+			// Real entry made if user decides to create account.
+			var user = { 
+				userId: userId,
+				cookieId: cookieId,
+				isFullUser: 0,
+				createTime: Utils.getNowIso()
 			};
 
-			var putCookie = function(putUserResult) {
-				var def2 = Q.defer();
-				var cookie = {
-					cookieId: putUserResult.cookieId,
-					userId: putUserResult.user.userId
-				};
-				USERS_BY_COOKIE.put(cookie)
-				.then(function(result) {
-					def2.resolve(putUserResult);
-				})
-				.fail(function(err) {
-					def2.reject(err);
-				})
-				.end();
-				return def2.promise;
-
+			var cookieIndex = {
+				cookieId: cookieId,
+				userId: userId
 			};
 
-			putUser()
-			.then(putCookie)
-			.then(function(putUserResult) {
-				deferred.resolve(putUserResult);
+			USERS.put(user)
+			.then(function(userPutResult) {
+				return USERS_BY_COOKIE.put(cookieIndex);
+			})
+			.then(function(userByCookiePutResult) {
+				deferred.resolve(user);
 			})
 			.fail(function(err) {
 				deferred.reject(err);
 			})
 			.end();
-			
+
 			return deferred.promise;
 		};
 
@@ -568,12 +595,35 @@ Log.l('CACHE MISS');
 			var deferred = Q.defer();
 
 			USERS_BY_COOKIE.get(cookieId)
-			.then(function(user) {
-				USERS.get(user.userId)
+			.then(function(cookieIndex) {
+				USERS.get(cookieIndex.userId)
 				.then(function(user) {
 					deferred.resolve(user);
 				})
 				.end();
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.getUserWithEmail = function(email) {
+			var deferred = Q.defer();
+
+			USERS_BY_EMAIL.get(email)
+			.then(function(emailIndex) {
+				USERS.get(emailIndex.userId)
+				.then(function(user) {
+					deferred.resolve(user);
+				})
+				.fail(function(err) {
+					deferred.reject(err);
+				})
+				.end();
+			})
+			.fail(function(err) {
+				// No account with that email.
+				deferred.resolve(null);
 			})
 			.end();
 
@@ -605,7 +655,17 @@ Log.l('CACHE MISS');
 				lastActivityTime: Utils.getNowIso()
 			};
 
+			var emailIndex = {
+				email: account.unconfirmedEmail,
+				userId: account.userId
+			};
+
 			USERS.put(account)
+			.then(function(result) {
+
+				return USERS_BY_EMAIL.put(emailIndex);
+
+			})
 			.then(function(result) {
 				deferred.resolve(account);
 			})
@@ -673,6 +733,7 @@ link.used = 0;
 						deferred.resolve(link);
 					})
 					.end();
+
 				} else {
 					deferred.resolve(link);
 				}

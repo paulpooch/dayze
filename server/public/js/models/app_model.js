@@ -410,7 +410,9 @@ log('event saved', model, response);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
-					_router.navigate('loggedinsomething', { trigger: true });
+log(model);
+log(resonse);
+log(_accountModel);
 				},
 				error: function(model, error) {
 					that.showError(error);

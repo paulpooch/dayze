@@ -61,7 +61,7 @@ requirejs([
 	'q',
 	'logg',
 	'public/js/filter', // Sharing client code.
-	'email'
+	'public/js/c'
 ], function(
 	express, 
 	consolidate,
@@ -73,7 +73,7 @@ requirejs([
 	Q,
 	Log,
 	Filter,
-	Email
+	C
 ) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -88,7 +88,7 @@ requirejs([
 	///////////////////////////////////////////////////////////////////////////////
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
-	var frontDoor = function(req, res, restAction) {
+	var frontDoor = function(req, res, specialCase) {
 		var deferred = 	Q.defer();
 		if (req.signedCookies.cookieId) {
 			var cookieId = req.signedCookies.cookieId;	
@@ -101,11 +101,11 @@ requirejs([
 			})
 			.end();
 		} else {
-			if (restAction == 'account.list') {
+			if (specialCase == 'accountList' || specialCase == 'login') {
 				deferred.resolve(null);
 			} else {
 				deferred.reject(new Error('User has no cookieId.'));
-			}
+			}		
 		}
 		return deferred.promise;
 	};
@@ -138,6 +138,8 @@ requirejs([
 	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
 	///////////////////////////////////////////////////////////////////////////////
+	
+	// CLEANUP THIS SECTION!
 	var EventRestApi = function(app) {
 
 		var EventRestApi = {};
@@ -250,7 +252,7 @@ requirejs([
 			Log.l();
 			Log.l('ACCOUNT LIST ////////////////////');
 			Log.l();
-			frontDoor(req, res, 'account.list')
+			frontDoor(req, res, 'accountList')
 			.then(function(user) {
 				
 				return filterAction(req, res, 'account.list')
@@ -263,12 +265,11 @@ requirejs([
 					if (!user) {
 
 						return Storage.Users.createTempUser()
-						.then(function(tempUserObj) {
-							var cookieId = tempUserObj.cookieId;
-							var user = tempUserObj.user;
+						.then(function(tempUser) {
+							var cookieId = tempUser.cookieId;
 							// Set cookie.
 							res.cookie('cookieId', cookieId, { signed: true });
-							res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+							res.send(Filter.forClient(tempUser, Filter.clientBlacklist.user));
 							return;
 						})
 						.end();
@@ -321,21 +322,19 @@ requirejs([
 					if (clean['unconfirmedEmail']) {
 						anyChange = true;
 						user.unconfirmedEmail = clean.unconfirmedEmail;							
-
-						// Do not return this Q chain.  Should run in parallel and let below code run.
-						Storage.CustomLinks.makeEmailConfirmationLink(user)
-						.then(function(link) {
-							return Email.sendEmailConfirmation(user, link);
-						})
-						.end();
-
+					
+						// Don't return. Run in parallel.
+						Storage.Users.setNewEmail(user);
+					
 					}
 					if (anyChange) {
+					
 						return Storage.Users.update(user);	
+					
 					} else {
 						return;
-					}						
-					
+					}
+
 				})
 				.then(function(user) {
 					if (user) {
@@ -360,9 +359,11 @@ requirejs([
 			Log.l();
 			Log.l('ACCOUNT UPDATE ////////////////////');
 			Log.l();
-			frontDoor(req, res)
+
+			var state = req.body['state'];
+			frontDoor(req, res, state)
 			.then(function(user) {
-				var state = req.body['state'];
+
 				if (state == 'createAccount') {
 					
 					return filterAction(req, res, 'account.createAccount')
@@ -371,10 +372,7 @@ requirejs([
 					})
 					.then(function(newUser) {
 
-						return Storage.CustomLinks.makeEmailConfirmationLink(newUser)
-						.then(function(link) {
-							return Email.sendEmailConfirmation(newUser, link);
-						})
+						Storage.Users.setNewEmail(newUser)
 						.then(function(data) {
 							//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
 							res.send();
@@ -409,7 +407,45 @@ requirejs([
 
 					return filterAction(req, res, 'account.login')
 					.then(function(clean) {
-Log.l('login', clean);	
+
+						var email = clean['loginEmail']
+						var pw = clean['loginPassword'];
+
+						return Storage.Users.getUserWithEmail(email)
+						.then(function(user) {
+
+							if (user) {
+
+	Log.l('getUserWithEmail', email, user);
+								var salt = user.passwordSalt;
+								var attemptedPwHash = Utils.hashSha512(pw + salt);
+								if (attemptedPwHash === user.passwordHash) {
+	Log.l('success');
+									user.isLoggedIn = 1;
+									return Storage.Users.update(user);
+
+									res.send();
+								} else {
+									res.send({ errors: 
+										[{
+											code: C.Errors.LoginPassword,
+											message: 'Incorrect password.  Looks like your memory is going.'
+										}]
+									});
+								}
+							} else {
+								res.send({ errors: 
+									[{
+										code: C.Errors.LoginEmail,
+										message: 'No account with that email exists so good luck with that.'
+									}]
+								});
+							}
+
+						})
+						.end();
+
+						Log.l('login', clean);	
 						res.send();
 						return;
 					})
@@ -462,10 +498,12 @@ Log.l('login', clean);
 						user.email = link.pendingEmail;
 						user.unconfirmedEmail = null;
 
-						return Storage.Users.update(user)
+						return Storage.Users.updateWithEmail(user)
 						.then(function(result) {
+
 							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
 							return;
+
 						})
 						.end();
 

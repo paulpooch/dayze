@@ -32,7 +32,7 @@ define([
 	/*
 	Returns an object of {
 		passed: true or false
-		error: error message
+		message: error message
 		clean: sanitized field
 	}
 	*/
@@ -40,7 +40,7 @@ define([
 
 	Filter.rules.monthCode = function(t) {
 		var msg = 'monthCode must be a valid YYYY-MM-DD format.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			Validator.check(t).is(/^[0-9]{4}|-|(0[123456789]|10|11|12)$/);
 			result.cleanVal = t;
@@ -52,7 +52,7 @@ define([
 
 	Filter.rules.email = function(t) {
 		var msg = 'Email must be a valid email between 1 and 100 characters long.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).isEmail().len(1, 100);
@@ -65,7 +65,7 @@ define([
 
 	Filter.rules.password = function(t) {
 		var msg = 'Password must be at least 5 characters long.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			Validator.check(t).len(5, 100);
 			result.cleanVal = t;
@@ -77,7 +77,7 @@ define([
 
 	Filter.rules.boolean = function(t) {
 		var msg = 'Invalid boolean value.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).toBooleanStrict();
 			result.cleanVal = t;
@@ -90,7 +90,7 @@ define([
 	// Keep this in sync with Utils.generateCustomLink
 	Filter.rules.linkId = function(t) {
 		var msg = 'Invalid linkId.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).is(/^[abcdefghjkmnpqrstuvwxyz0123456789]{30}$/);
@@ -103,7 +103,7 @@ define([
 
 	Filter.rules.uuid = function(t) {
 		var msg = 'Invalid UUID.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).isUUID();
@@ -116,7 +116,7 @@ define([
 
 	Filter.rules.action = function(t) {
 		var msg = 'Invalid action.';
-		var result = { passed: false, cleanVal: null, error: msg };
+		var result = { passed: false, cleanVal: null, errorMessage: msg };
 		var validActions = {
 			create_account: 1
 		};
@@ -129,7 +129,7 @@ define([
 
 	Filter.rules.alpha = function(t) {
 		var msg = 'Value must be 1 to 100 alphabetic characters.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).isAlpha().len(1, 100);
@@ -144,7 +144,7 @@ define([
 	// Allows hex 20 -> hex 7E of http://www.asciitable.com/
 	Filter.rules.displayName = function(t) {
 		var msg = 'Display name must be 3 or more printable characters.';
-		var result = { passed: true, cleanVal: null, error: msg };
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
 			Validator.check(t).is(/^[\x20-\x7E]{3,}$/); // 3 or more printable chars.
@@ -275,9 +275,9 @@ define([
 			var ruleResult = rule(dirtyVal);
 			if (!ruleResult.passed) {
 				passed = false;
-			 	error = ruleResult.error;
+			 	error = ruleResult.errorMessage;
 				$controlGroup.addClass('error');
-			 	$helpInline.text(ruleResult.error);
+			 	$helpInline.text(ruleResult.errorMessage);
 			 	break;
 			 } else {
 			 	$controlGroup.addClass('success');
@@ -346,7 +346,7 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 						var ruleResult = fieldRule(dirtyVal);
 						if (!ruleResult.passed && filterField.required) {
 							fieldFailed = true;
-			 				allErrors[fieldName] = ruleResult.error;
+			 				allErrors[fieldName] = ruleResult.errorMessage;
 			 				break;
 			 			}
 			 			dirtyVal = ruleResult.cleanVal;
@@ -397,7 +397,7 @@ Log.l('immutalbe?', cleanVal, originalVal);
 					var ruleResult = fieldRule(dirtyVal);
 					if (!ruleResult.passed && filterField.required) {
 						fieldFailed = true;
-						allErrors[fieldName] = ruleResult.error;
+						allErrors[fieldName] = ruleResult.errorMessage;
 						break;
 			 		}
 			 		dirtyVal = ruleResult.cleanVal;
