@@ -132,13 +132,35 @@ define([
 			}
 		},
 
+		handleError: function(model, response) {
+			var error = response;
+			if (error.status) {
+				error = JSON.parse(error.responseText);
+			}
+			if (error && error.code) {
+				// Error from C.Errors
+				error = C.Errors[error.code];
+			}
+
+			that.showError(error);
+		},
+
 		showError: function(error) {
 			that.showView(C.ActiveViews.Basic);
 log(error);
-			if (typeof(error) != 'string') {
-				error = JSON.stringify(error);
+			var errorMessage = '';
+			if (error.message) {
+				// Error from C.Errors
+				errorMessage = error.message;
+			} else if (typeof error == 'string') {
+				// Simple string error.
+				errorMessage = error;
+			} else {
+				// Some error object from any number of libraries.
+				errorMessage = JSON.stringify(error);
 			}
-			_basicModel.set('error', error);
+			_basicModel.set('header', 'Error');
+			_basicModel.set('body', errorMessage);
 			_router.navigate('error', { trigger: true });
 		},
 
@@ -208,9 +230,7 @@ log('Pulled account from server', _accountModel, route);
 						_accountControlsView.render();
 						dest();
 					},
-					error: function() {
-						that.showError('Could not get account info.');
-					}
+					error: that.handleError
 				});
 			} else {
 				dest();
@@ -239,10 +259,12 @@ log('Pulled account from server', _accountModel, route);
 											_accountModel.set('state', 'saved');
 											that.showView(C.ActiveViews.Account);
 										}
-									}
+									},
+									error: that.handleError
 								});
 							}
-						}				
+						},
+						error: that.handleError				
 					});
 					break;
 				case 'created':
@@ -252,7 +274,8 @@ log('Pulled account from server', _accountModel, route);
 							_accountControlsView.hideUserModal();
 							_accountControlsView.render();
 							that.showView(C.ActiveViews.Account);
-						}
+						},
+						error: that.handleError
 					});
 					break;
 				case 'saved':
@@ -287,6 +310,7 @@ log('Pulled account from server', _accountModel, route);
 
 		routeLink: function(linkId) {
 			var linkModel = new LinkModel({ appModel: that, id: linkId });
+			log('fetch link');
 			linkModel.fetch({
 				success: function() {
 					switch (linkModel.get('type')) {
@@ -294,7 +318,8 @@ log('Pulled account from server', _accountModel, route);
 							alert('Done fetching link.  Build this out.');
 							break;
 					}
-				}				
+				},
+				error: that.handleError
 			});
 		},
 
@@ -372,9 +397,7 @@ log('Pulled account from server', _accountModel, route);
 					success: function(model, response) {
 log('event saved', model, response);
 					},
-					error: function(model, error) {
-						that.showError(error);
-					}
+					error: that.handleError
 				});
 			} else {
 				_accountView.$el.find('#event_login_modal').modal('show');
@@ -399,9 +422,7 @@ log('event saved', model, response);
 				success: function(model, response) {
 					_router.navigate('account/created', { trigger: true });
 				},
-				error: function(model, error) {
-					that.showError(error);
-				}
+				error: that.handleError
 			});
 		},
 
@@ -414,9 +435,7 @@ log(model);
 log(resonse);
 log(_accountModel);
 				},
-				error: function(model, error) {
-					that.showError(error);
-				}
+				error: that.handleError
 			})
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -437,8 +456,7 @@ log(_accountModel);
 				success: function() {
 					_router.navigate('account/saved', { trigger: true });
 				},
-				error: function(){
-				}
+				error: that.handleError
 			});
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -473,12 +491,15 @@ log(_accountModel);
 		// Not repull a million times.
 		pullEventsForMonth: function(monthCode) {
 			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				_eventCollection.fetch({ 
-					data: $.param({ monthCode: monthCode }), 
-					success: function() {
-						_calendarView.onMonthLoaded(monthCode);
-					}
-				});
+				if (_accountModel.get('isLoggedIn')) {
+					_eventCollection.fetch({ 
+						data: $.param({ monthCode: monthCode }), 
+						success: function() {
+							_calendarView.onMonthLoaded(monthCode);
+						},
+						error: that.handleError
+					});
+				}
 			}
 		},
 		///////////////////////////////////////////////////////////////////////

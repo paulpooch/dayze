@@ -56,51 +56,72 @@ define([], function() {
 	C.ErrorCodes.Filter = 2;
 	C.ErrorCodes.AccountLoginPassword = 10;
 	C.ErrorCodes.AccountLoginEmail = 11;
+	C.ErrorCodes.AccountNoCookie = 12;
+	C.ErrorCodes.AccountNotYourId = 13;
 	C.ErrorCodes.LinkNotForUser = 21;
 	C.ErrorCodes.LinkUsed = 22;
 	C.ErrorCodes.LinkExpired = 23;
+	C.ErrorCodes.LinkInvalid = 24;
+	
+	// SPECIAL CASE ERRORS
+	C.Errors[C.ErrorCodes.External] = {
+		code: C.ErrorCodes.External
+	};
 
-	C.Errors.Filter = {
+	C.Errors[C.ErrorCodes.Filter] = {
 		code: C.ErrorCodes.Filter,
 		httpCode: C.HttpCodes.BadRequest,
 		message: null // Will be replaced.
 	};
+	// END SPECIAL CASE ERRORS
 
-	C.Errors.AccountLoginPassword = {
+	C.Errors[C.ErrorCodes.AccountLoginPassword] = {
 		code: C.ErrorCodes.AccountLoginPassword,
 		httpCode: C.HttpCodes.Unauthorized,
 		message: 'Incorrect password.  Looks like your memory is going.'
 	};
 
-	C.Errors.AccountLoginEmail = {
+	C.Errors[C.ErrorCodes.AccountLoginEmail] = {
 		code: C.ErrorCodes.AccountLoginEmail,
 		httpCode: C.HttpCodes.NotFound,
 		message: 'No account with that email exists so good luck with that.'
 	};
 
-	C.Errors.AccountNoCookie = {
+	C.Errors[C.ErrorCodes.AccountNoCookie] = {
 		code: C.ErrorCodes.AccountNoCookie,
 		httpCode: C.HttpCodes.Unauthorized,
 		message: 'User has no cookieId.'
 	};
 
-	C.Errors.LinkNotForUser = {
+	C.Errors[C.ErrorCodes.AccountNotYourId] = {
+		code: C.ErrorCodes.AccountNotYourId,
+		httpCode: C.HttpCodes.Forbidden,
+		message: 'Account requested was not your account.'
+	};
+
+	C.Errors[C.ErrorCodes.LinkNotForUser] = {
 		code: C.ErrorCodes.LinkNotForUser,
 		httpCode: C.HttpCodes.Forbidden,
 		message: 'Link is not for this user.'
 	};
 
-	C.Errors.LinkUsed = {
+	C.Errors[C.ErrorCodes.LinkUsed] = {
 		code: C.ErrorCodes.LinkUsed,
 		httpCode: C.HttpCodes.Gone,
 		message: 'Link was already used.'
 	};
 
-	C.Errors.LinkExpired = {
+	C.Errors[C.ErrorCodes.LinkExpired] = {
 		code: C.ErrorCodes.LinkExpired,
 		httpCode: C.HttpCodes.Gone,
 		message: 'Link is expired.'
 	};
+
+	C.Errors[C.ErrorCodes.LinkInvalid] = {
+		code: C.ErrorCodes.LinkInvalid,
+		httpCode: C.HttpCodes.NotFound,
+		message: 'LinkId was invalid.'
+	}
 
 	return C;
 

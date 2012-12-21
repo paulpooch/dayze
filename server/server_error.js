@@ -1,23 +1,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // SERVER ERRORS
 /////////////////////////////////////////////////////////////////////////////////////////
-define([], function() {
+define([
+	'c'
+], function(
+	C
+) {
 
 	var ServerError = function(error) {
-		if (error.hasOwnProperty(code)) {
 
+		if (typeof error == 'number') {
+			var error = C.Errors[error];
 			if (error.code == C.ErrorCodes.Filter) {
 				this.code = error.code;
 				this.action = arguments[1];
 				this.message = arugments[2];
 			} else {
-
 				// Our custom errors
 				this.code = error.code;
 				this.message = error.message;
-
 			}
-
 		} else {
 			// Error from external source. - Some other lib or unknown failure.	
 			this.code = C.ErrorCodes.External;
@@ -27,11 +29,14 @@ define([], function() {
 	};
 
 	ServerError.prototype.toString = function() {
+		JSON.stringify(this);
+		/*
 		return '##### SERVER ERROR #####\n' + 
 		(this.code || '') + '\n' + 
 		(this.action || '') + '\n' + 
 		(this.message || '') + '\n' + 
 		(this.stackTrace || '');
+		*/
 	};
 
 	return ServerError;

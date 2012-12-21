@@ -63,7 +63,8 @@ requirejs([
 	'q',
 	'logg',
 	'public/js/filter', // Sharing client code.
-	'public/js/c'
+	'public/js/c',
+	'server_error'
 ], function(
 	express, 
 	consolidate,
@@ -75,7 +76,8 @@ requirejs([
 	Q,
 	Log,
 	Filter,
-	C
+	C,
+	ServerError
 ) {	// list all dependencies for this scope
 
 // http://www.senchalabs.org/connect/
@@ -103,7 +105,7 @@ requirejs([
 			if (specialCase == C.FrontDoorSpecialCase.AccountList || specialCase == C.FrontDoorSpecialCase.Login) {
 				deferred.resolve(null);
 			} else {
-				deferred.reject(new ServerError(C.Errors.AccountNoCookie));
+				deferred.reject(new ServerError(C.ErrorCodes.AccountNoCookie));
 			}		
 		}
 		return deferred.promise;
@@ -129,7 +131,7 @@ requirejs([
 				}
 			}
 			errorHtml = errorHtml.join('');
-			deferred.reject(new ServerError(C.Errors.Filter, action, 'Request rejected by filter.<br/>' + errorHtml));
+			deferred.reject(new ServerError(C.ErrorCodes.Filter, action, 'Request rejected by filter.<br/>' + errorHtml));
 		}
 		return deferred.promise;
 	};
@@ -264,7 +266,7 @@ requirejs([
 				.then(function(clean) {
 
 					if (clean['id'] && (!user || user.userId != clean['id'])) {
-						res.send({ errors: 'Account requested was not your account.'});
+						sendError(C.ErrorCodes.AccountNotYourId);
 						return;
 					}
 					if (!user) {
@@ -431,22 +433,13 @@ requirejs([
 
 									res.send();
 								} else {
-									res.send({ errors: 
-										[{
-											code: C.Errors.LoginPassword,
-											message: ''
-										}]
-									});
+									sendError(C.ErrorCodes.AccountLoginPassword);
+									return;
 								}
 							} else {
-								res.send({ errors: 
-									[{
-										code: C.Errors.LoginEmail,
-										message: ''
-									}]
-								});
+								sendError(C.ErrorCodes.AccountLoginEmail);
+								return;
 							}
-
 						})
 						.end();
 
@@ -513,7 +506,7 @@ requirejs([
 						.end();
 
 					} else {
-						res.send({ errors: 'Link was invalid.'});
+						sendError(C.ErrorCodes.InvalidLink);
 						return;
 					}
 				})

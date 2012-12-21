@@ -136,8 +136,7 @@ log(attr);
 
 								},
 								error: function() {
-									// Revert to oldVal, show Error message.
-									// re-open input?
+log("Unhandled Error: SmartForm couldn't save model to server.");
 								}
 							});
 						}

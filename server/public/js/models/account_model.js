@@ -49,7 +49,6 @@ define([
 			unconfirmedEmail: null,
 			email: null,
 			message: '',
-			errors: null,
 			state: null,
 			password: null,
 			missingPassword: null,
@@ -59,10 +58,7 @@ define([
 		},
 
 		validate: function(attrs) {
-			if (attrs.errors) {
-				_appModel.showError(attrs.errors);
-				return attrs.errors;
-			}
+
 		},
 
 		toJSON: function() {

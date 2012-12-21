@@ -15,7 +15,6 @@ define([
 	var BasicModel = Backbone.Model.extend({
 
 		defaults: {
-			error: null,
 			header: '',
 			subheader: '',
 			body: ''
@@ -30,11 +29,7 @@ define([
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////
-		onErrorChange: function() {
-			var error = that.get('error');
-			that.set('header', 'Error');
-			that.set('body', error);
-		},
+
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
@@ -42,9 +37,6 @@ define([
 			_.bindAll(that);
 
 			_appModel = options.appModel;
-
-			// BINDINGS
-			that.bind('change:error', that.onErrorChange);
 		}
 
 	});

@@ -54,7 +54,7 @@ define([
 	    	
 	        // MODEL EVENTS
 	      	_appModel.on('change:activeView', that.onActiveViewChange);
-	      	that.model.on('change:error', that.render);
+	      	that.model.on('change:body', that.render);
 	    }
 
 	});

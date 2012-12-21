@@ -19,20 +19,17 @@ define([
 
 		defaults: {
 			linkId: null,
-			errors: null,
 			type: null
 		},
 
 		validate: function(attrs) {
-			if (attrs.errors) {
-				_appModel.showError(attrs.errors);
-				return attrs.errors;
-			}
+
 		},
 
 		toJSON: function() {
 			return {
-				linkId: that.get('linkId')
+				linkId: that.get('linkId'),
+				type: that.get('type')
 			};
 		},
 		

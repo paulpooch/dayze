@@ -716,19 +716,19 @@ Log.l('CACHE MISS');
 			.then(function(link) {
 				var needsToBeMarkedUsed = false;
 				if (link.userId && link.userId != user.userId) {
-					deferred.reject(new Error(C.Errors.LinkNotForUser));
+					deferred.reject(new ServerError(C.ErrorCodes.LinkNotForUser));
 				}
 				if (link.isSingleUse) {
 					needsToBeMarkedUsed = true;
 					if (link.used) {
-						deferred.reject(new Error(C.Errors.LinkUsed));
+						deferred.reject(new ServerError(C.ErrorCodes.LinkUsed));
 					}
 				}
 				if (link.expiration) {
 					var now = new Date();
 					var expiration = new Date(link.expiration);
 					if (now > expiration) {
-						deferred.reject(new Error(C.Errors.LinkExpired));
+						deferred.reject(new ServerError(C.ErrorCodes.LinkExpired));
 					}
 				}
 				if (needsToBeMarkedUsed) {
