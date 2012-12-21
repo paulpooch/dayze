@@ -10,10 +10,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 define([
 	'logg', // will be logg_shim if on client
-	'validator'
+	'validator',
+	'c' // If on client, includes real c.js, if server goes to server/c.js which points to server/public/js/c.js
 ], function(
 	Log,
-	Validator
+	Validator,
+	C
 ) {
 
 	var Filter = {};
@@ -158,85 +160,84 @@ define([
 	// FILTER FIELDS //////////////////////////////////////////////////////////
 
 	// Regular forms.
-	Filter.fields = {
-		'link.read': [{
-			name: 'linkId',
-			rules: [ Filter.rules.linkId ],
-			immutable: true,
-			required: true
-		}],
-		'event.list': [{
-			name: 'monthCode',
-			rules: [ Filter.rules.monthCode	],
-			immutable: true,
-			required: true
-		}],
-		'account.list': [{
-			name: 'id',
-			rules: [ Filter.rules.uuid ],
-			immutable: true,
-			required: false
-		}],
-		'account.createAccount': [{ 
-			name: 'unconfirmedEmail',
-			rules: [ Filter.rules.email	],
-			immutable: true,
-			required: true
-		}, {
-			name: 'state',
-			rules: [ Filter.rules.alpha ],
-			immutable: true,
-			required: true,
-			serverOnly: true
-		}],
-		'account.login': [{
-			name: 'state',
-			rules: [ Filter.rules.alpha ],
-			immutable: true,
-			required: true,
-			serverOnly: true
-		}, {
-			name: 'loginPassword',
-			rules: [ Filter.rules.password ],
-			immutable: true,
-			required: true
-		}, {
-			name: 'loginEmail',
-			rules: [ Filter.rules.email	],
-			immutable: true,
-			required: true
-		}, {
-			name: 'loginRemember',
-			rules: [ Filter.rules.boolean ],
-			immutable: true,
-			required: false
-		}],
-		'account.initialPwSet': [{
-			name: 'password',
-			rules: [ Filter.rules.password ],
-			immutable: true,
-			required: true
-		}],
-		'account.patch': [{
-			name: 'password',
-			rules: [ Filter.rules.password ],
-			immutable: true,
-			required: false,
-			serverOnly: true
-		}, {
-			name: 'unconfirmedEmail',
-			rules: [ Filter.rules.email	],
-			immutable: true,
-			required: false,
-			serverOnly: true
-		}, {
-			name: 'displayName',
-			rules: [ Filter.rules.displayName	],
-			immutable: true,
-			required: false,
-			serverOnly: true
-		}]
-	};
+	Filter.fields = {};
+	Filter.fields[C.FilterAction.LinkRead] = [{
+		name: 'linkId',
+		rules: [ Filter.rules.linkId ],
+		immutable: true,
+		required: true
+	}];
+	Filter.fields[C.FilterAction.EventList] = [{
+		name: 'monthCode',
+		rules: [ Filter.rules.monthCode	],
+		immutable: true,
+		required: true
+	}];
+	Filter.fields[C.FilterAction.AccountList] = [{
+		name: 'id',
+		rules: [ Filter.rules.uuid ],
+		immutable: true,
+		required: false
+	}];
+	Filter.fields[C.FilterAction.AccountCreate] = [{ 
+		name: 'unconfirmedEmail',
+		rules: [ Filter.rules.email	],
+		immutable: true,
+		required: true
+	}, {
+		name: 'state',
+		rules: [ Filter.rules.alpha ],
+		immutable: true,
+		required: true,
+		serverOnly: true
+	}];
+	Filter.fields[C.FilterAction.AccountLogin] = [{
+		name: 'state',
+		rules: [ Filter.rules.alpha ],
+		immutable: true,
+		required: true,
+		serverOnly: true
+	}, {
+		name: 'loginPassword',
+		rules: [ Filter.rules.password ],
+		immutable: true,
+		required: true
+	}, {
+		name: 'loginEmail',
+		rules: [ Filter.rules.email	],
+		immutable: true,
+		required: true
+	}, {
+		name: 'loginRemember',
+		rules: [ Filter.rules.boolean ],
+		immutable: true,
+		required: false
+	}];
+	Filter.fields[C.FilterAction.AccountInitialPw] = [{
+		name: 'password',
+		rules: [ Filter.rules.password ],
+		immutable: true,
+		required: true
+	}];
+	Filter.fields[C.FilterAction.AccountPatch] = [{
+		name: 'password',
+		rules: [ Filter.rules.password ],
+		immutable: true,
+		required: false,
+		serverOnly: true
+	}, {
+		name: 'unconfirmedEmail',
+		rules: [ Filter.rules.email	],
+		immutable: true,
+		required: false,
+		serverOnly: true
+	}, {
+		name: 'displayName',
+		rules: [ Filter.rules.displayName	],
+		immutable: true,
+		required: false,
+		serverOnly: true
+	}];
 
 	// Will require a matching patch filter above.
 	// Probably could be combined.

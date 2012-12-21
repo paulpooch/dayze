@@ -406,7 +406,7 @@ log('event saved', model, response);
 		},
 
 		login: function() {
-			_accountModel.set('state', 'login');
+			_accountModel.set('state', C.FrontDoorSpecialCase.Login);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {

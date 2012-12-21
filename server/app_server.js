@@ -35,6 +35,8 @@
 // -temp accounts with lastactivity > 1 month
 //
 // Do we really care about model validation?
+//
+// CSRF Tokens
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -101,7 +103,7 @@ requirejs([
 			})
 			.end();
 		} else {
-			if (specialCase == 'accountList' || specialCase == 'login') {
+			if (specialCase == C.FrontDoorSpecialCase.AccountList || specialCase == C.FrontDoorSpecialCase.Login) {
 				deferred.resolve(null);
 			} else {
 				deferred.reject(new Error('User has no cookieId.'));
@@ -152,7 +154,7 @@ requirejs([
 			frontDoor(req, res)
 			.then(function(user) {
 
-				return filterAction(req, res, 'event.list')
+				return filterAction(req, res, C.FilterAction.EventList)
 				.then(function(clean) {
 					var monthCode = clean['monthCode'];
 					if (monthCode) {
@@ -185,7 +187,7 @@ requirejs([
 			Log.l('EVENT CREATE ////////////////////');
 			Log.l();
 
-			frontDoor(req)
+			frontDoor(req, res)
 			.then(function(user) {
 
 				return filterAction(req, res, 'event.create')
@@ -252,10 +254,10 @@ requirejs([
 			Log.l();
 			Log.l('ACCOUNT LIST ////////////////////');
 			Log.l();
-			frontDoor(req, res, 'accountList')
+			frontDoor(req, res, C.FrontDoorSpecialCase.AccountList)
 			.then(function(user) {
 				
-				return filterAction(req, res, 'account.list')
+				return filterAction(req, res, C.FilterAction.AccountList)
 				.then(function(clean) {
 
 					if (clean['id'] && (!user || user.userId != clean['id'])) {
@@ -302,7 +304,7 @@ requirejs([
 			frontDoor(req, res)
 			.then(function(user) {
 
-				return filterAction(req, res, 'account.patch')
+				return filterAction(req, res, C.FilterAction.AccountPatch)
 				.then(function(clean) {
 
 					var anyChange = false;
@@ -366,7 +368,7 @@ requirejs([
 
 				if (state == 'createAccount') {
 					
-					return filterAction(req, res, 'account.createAccount')
+					return filterAction(req, res, C.FilterAction.AccountCreate)
 					.then(function(clean) {
 						return Storage.Users.createAccount(user, clean);
 					})
@@ -385,7 +387,7 @@ requirejs([
 
 				} else if (state =='initialPwSet') {
 								
-					return filterAction(req, res, 'account.initialPwSet')
+					return filterAction(req, res, C.FilterAction.AccountInitialPw)
 					.then(function(clean) {
 
 						var pw = clean['password'];
@@ -405,7 +407,7 @@ requirejs([
 
 				} else if (state == 'login') {
 
-					return filterAction(req, res, 'account.login')
+					return filterAction(req, res, C.FilterAction.AccountLogin)
 					.then(function(clean) {
 
 						var email = clean['loginEmail']
@@ -484,7 +486,7 @@ requirejs([
 			frontDoor(req, res)
 			.then(function(user) {
 
-				return filterAction(req, res, 'link.read')
+				return filterAction(req, res, C.FilterAction.LinkRead)
 				.then(function(clean) {
 
 					var linkId = clean.linkId;

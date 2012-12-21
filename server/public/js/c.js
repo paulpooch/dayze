@@ -23,6 +23,18 @@ define([], function() {
 	C.Errors.LoginPassword = 1;
 	C.Errors.LoginEmail = 2;
 
+	C.FrontDoorSpecialCase = {};
+	C.FrontDoorSpecialCase.AccountList = 'accountList';
+	C.FrontDoorSpecialCase.Login = 'login';
+
+	C.FilterAction = {};
+	C.FilterAction.LinkRead = 'link.read';
+	C.FilterAction.EventList = 'event.list';
+	C.FilterAction.AccountList = 'account.list';
+	C.FilterAction.AccountCreate = 'account.create';
+	C.FilterAction.AccountLogin = 'account.login';
+	C.FilterAction.AccountInitialPw = 'account.initialPwSet';
+
 	return C;
 
 });
