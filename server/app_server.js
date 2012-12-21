@@ -84,9 +84,6 @@ requirejs([
 
 // http://stackoverflow.com/questions/7042340/node-js-error-cant-set-headers-after-they-are-sent
 
-	var ERROR_BAD_REQUEST = 400;
-	var ERROR_RETRYABLE = 500;
-
 	///////////////////////////////////////////////////////////////////////////////
 	// FRONT DOOR
 	///////////////////////////////////////////////////////////////////////////////
@@ -106,7 +103,7 @@ requirejs([
 			if (specialCase == C.FrontDoorSpecialCase.AccountList || specialCase == C.FrontDoorSpecialCase.Login) {
 				deferred.resolve(null);
 			} else {
-				deferred.reject(new Error('User has no cookieId.'));
+				deferred.reject(new ServerError(C.Errors.AccountNoCookie));
 			}		
 		}
 		return deferred.promise;
@@ -132,9 +129,14 @@ requirejs([
 				}
 			}
 			errorHtml = errorHtml.join('');
-			deferred.reject(new Error('Request rejected by filter.<br/>' + errorHtml));
+			deferred.reject(new ServerError(C.Errors.Filter, action, 'Request rejected by filter.<br/>' + errorHtml));
 		}
 		return deferred.promise;
+	};
+
+	var sendError = function(res, err) {
+		var httpCode = err.httpCode || C.HttpCodes.GenericServerError;
+		res.send(httpCode, err);
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +176,7 @@ requirejs([
 			})	
 			.fail(function(err) {
 				Log.e('Error in EVENT LIST', err, err.stack);
-				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				sendError(res, err);
 				return;
 			})
 			.end();
@@ -206,6 +208,7 @@ requirejs([
 			})
 			.fail(function(err) {
 				Log.e('Error in EVENT CREATE', err, err.stack);
+				sendError(res, err);
 			})
 			.end();
 
@@ -287,7 +290,7 @@ requirejs([
 			})			
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT LIST', err, err.stack);
-				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				sendError(res, err);
 				return;
 			})
 			.end();
@@ -351,7 +354,7 @@ requirejs([
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT PATCH', err, err.stack);
-				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				sendError(res, err);
 				return;
 			})
 			.end();
@@ -431,7 +434,7 @@ requirejs([
 									res.send({ errors: 
 										[{
 											code: C.Errors.LoginPassword,
-											message: 'Incorrect password.  Looks like your memory is going.'
+											message: ''
 										}]
 									});
 								}
@@ -439,7 +442,7 @@ requirejs([
 								res.send({ errors: 
 									[{
 										code: C.Errors.LoginEmail,
-										message: 'No account with that email exists so good luck with that.'
+										message: ''
 									}]
 								});
 							}
@@ -457,7 +460,7 @@ requirejs([
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT UPDATE', err, err.stack);
-				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				sendError(res, err);
 				return;
 			})
 			.end();
@@ -519,7 +522,7 @@ requirejs([
 			})			
 			.fail(function(err) {
 				Log.e('Error in LINK READ', err, err.stack);
-				res.send(ERROR_BAD_REQUEST, { errors: err.message });
+				sendError(res, err);
 				return;
 			})
 			.end();

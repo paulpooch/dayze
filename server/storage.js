@@ -17,7 +17,7 @@ define([
 	'config',
 	'utils',
 	'logg',
-	'email'
+	'email',
 ], function(
 	_,
 
@@ -401,6 +401,12 @@ Log.l('CACHE MISS');
 	///////////////////////////////////////////////////////////////////////////
 	// Events
 	///////////////////////////////////////////////////////////////////////////
+
+	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	Storage.Events = (function() {
 
 		var Events = {};
@@ -453,7 +459,7 @@ Log.l('CACHE MISS');
 
 			})	
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -530,7 +536,7 @@ Log.l('CACHE MISS');
 				deferred.resolve(userByEmailPutResult);
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -548,7 +554,7 @@ Log.l('CACHE MISS');
 				deferred.resolve(result);
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -584,7 +590,7 @@ Log.l('CACHE MISS');
 				deferred.resolve(user);
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -617,7 +623,7 @@ Log.l('CACHE MISS');
 					deferred.resolve(user);
 				})
 				.fail(function(err) {
-					deferred.reject(err);
+					deferred.reject(new ServerError(err));
 				})
 				.end();
 			})
@@ -670,7 +676,7 @@ Log.l('CACHE MISS');
 				deferred.resolve(account);
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -685,7 +691,7 @@ Log.l('CACHE MISS');
 				deferred.resolve(user);
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -710,19 +716,19 @@ Log.l('CACHE MISS');
 			.then(function(link) {
 				var needsToBeMarkedUsed = false;
 				if (link.userId && link.userId != user.userId) {
-					deferred.reject(new Error('Link is not for this user.'));
+					deferred.reject(new Error(C.Errors.LinkNotForUser));
 				}
 				if (link.isSingleUse) {
 					needsToBeMarkedUsed = true;
 					if (link.used) {
-						deferred.reject(new Error('Link was already used.'));
+						deferred.reject(new Error(C.Errors.LinkUsed));
 					}
 				}
 				if (link.expiration) {
 					var now = new Date();
 					var expiration = new Date(link.expiration);
 					if (now > expiration) {
-						deferred.reject(new Error('Link is expired.'));
+						deferred.reject(new Error(C.Errors.LinkExpired));
 					}
 				}
 				if (needsToBeMarkedUsed) {
@@ -739,7 +745,7 @@ link.used = 0;
 				}
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -768,7 +774,7 @@ link.used = 0;
 				deferred.resolve(link);
 			})
 			.fail(function(err) {
-				deferred.reject(err);
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
