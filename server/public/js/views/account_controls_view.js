@@ -63,7 +63,7 @@ define([
 	        _$loginForm = that.$el.find('#login_form');
 			_$userButton = that.$el.find('#user_button');
 			_$userEmail = that.$el.find('#user_email');
-			_$feedback = that.$el.find('#feedback_message');
+			_$feedback = that.$el.find('.feedback_message');
 
 			_createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
 			_loginForm = new SmartForm(that.model, _$loginForm, _appModel.login);
@@ -74,6 +74,13 @@ define([
 		hideUserModal: function() {
 			if (_$userModal) {
 				_$userModal.modal('hide');
+			}
+		},
+
+		handleError: function(error) {
+			if (error.code == C.ErrorCodes.AccountLoginPassword || error.code == C.ErrorCodes.AccountLoginEmail) {
+				_$feedback.text(error.message);
+				_loginForm.resetForm(false);
 			}
 		},
 

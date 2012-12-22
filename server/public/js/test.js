@@ -55,27 +55,27 @@ require(['app_client', 'test_registry'], function(App, TestRegistry) {
 // By all means put minimal effort in.
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
+
 module('Login');
 var $form = $('#login_form');
 test('login success', function() {
 
 	$('#controls_login_button').click();
 	$form.find('#loginEmail').val('paul.pucciarelli@gmail.com');
-	$form.find('#loginPassword').val('654654');
+	$form.find('#loginPassword').val('654654a');
 	$form.find('#login_button').click();
 	var $groups = $form.find('.control-group');
 	for (var i = 0; i < 3; i++) {
 		var grp = $groups.eq(i);
 		equal(grp.attr('class'), 'control-group success');
 	}
-	TestRegistry['AccountControlsView'].hideUserModal();
+	//TestRegistry['AccountControlsView'].hideUserModal();
 
 });
-*/
+
 
 // This sends out email and fills up DB so maybe don't run all the time.
-
+/*
 module('Create Account');
 var $form = $('#create_form');	
 test('create account filter', function() {
@@ -101,7 +101,7 @@ test('create account success', function() {
 	TestRegistry['AccountControlsView'].hideUserModal();
 
 });
-
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 	}

@@ -65,7 +65,8 @@ define([], function() {
 	
 	// SPECIAL CASE ERRORS
 	C.Errors[C.ErrorCodes.External] = {
-		code: C.ErrorCodes.External
+		code: C.ErrorCodes.External,
+		httpCode: C.HttpCodes.GenericServerError
 	};
 
 	C.Errors[C.ErrorCodes.Filter] = {

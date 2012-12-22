@@ -13,15 +13,18 @@ define([
 
     var SmartForm = function(model, $formEl, submitFunction, triggerAction) {
     	
-    	this.hotFields = {};
-    	this.$formEl = $formEl;
-    	this.model = model;
+    	var that = this;
+    	that.hotFields = {};
+    	that.$formEl = $formEl;
+    	that.model = model;
+		that.$triggerEl = $formEl.find('[data-submit-trigger=1]');
+		that.origTriggerText = that.$triggerEl.text();
 
+		var filterAction = $formEl.data('filter');
+    	
     	if (!triggerAction) {
     		triggerAction = 'click';
     	}
-		var $triggerEl = $formEl.find('[data-submit-trigger=1]');
-		var filterAction = $formEl.data('filter');
 
 		// syncForm
 		$formEl.on('change', 'input, textarea', function(e) {
@@ -34,11 +37,11 @@ define([
 		// enter key
 		$formEl.on('keypress', 'input', function(e) {
 			if (e.which && e.which == 13) {
-				$triggerEl.trigger(triggerAction);
+				that.$triggerEl.trigger(triggerAction);
 	    	}
 	  	});
 
-		$triggerEl.on(triggerAction, function() {
+		that.$triggerEl.on(triggerAction, function() {
 			var result = Filter.clean($formEl, filterAction, true);
 			var didPass = result.passed;
 	  		$formEl.data('filter-passed', didPass);
@@ -57,19 +60,32 @@ define([
 					data[id] = val;
 				});
 				model.set(data);
-	  			var loadingText = $triggerEl.data('loading-text');
+	  			var loadingText = that.$triggerEl.data('loading-text');
 	  			if (loadingText) {
-	  				$triggerEl.text(loadingText);
+	  				that.$triggerEl.text(loadingText);
 	  			}
-	  			$triggerEl.attr('disabled', true);
+	  			that.$triggerEl.attr('disabled', true);
 
 	  			submitFunction();
 	  		}
 
 	  	});
 
-	  	this.initHotFields();
+	  	that.initHotFields();
 
+	};
+
+	SmartForm.prototype.resetForm = function(clearVals) {
+log('resetForm');
+		if (clearVals) {
+log(this.$formEl);
+log(this.$formEl.find('input'));
+			this.$formEl.find('input').val('');
+			this.$formEl.find('.help-inline').text('');
+			this.$formEl.find('.control-group').attr('class', 'control-group'); // Remove .success / .error
+		}
+		this.$triggerEl.text(this.origTriggerText);
+		this.$triggerEl.removeAttr('disabled');
 	};
 
 	// http://vitalets.github.com/x-editable/

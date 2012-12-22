@@ -134,6 +134,7 @@ define([
 
 		handleError: function(model, response) {
 			var error = response;
+log('handleError', response);
 			if (error.status) {
 				error = JSON.parse(error.responseText);
 			}
@@ -431,11 +432,22 @@ log('event saved', model, response);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
+log('LOGIN SUCCESS');
 log(model);
 log(resonse);
 log(_accountModel);
 				},
-				error: that.handleError
+				// Example of how to do custom error handling.
+				error: function(model, response) {
+					if (response.responseText) {
+						var error = JSON.parse(response.responseText);
+						if (error.code == C.ErrorCodes.AccountLoginPassword || error.code == C.ErrorCodes.AccountLoginEmail) {
+							_accountControlsView.handleError(error);
+						} else {
+							that.handleError(model, response);
+						}
+					}
+				}
 			})
 		},
 		///////////////////////////////////////////////////////////////////////

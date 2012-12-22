@@ -13,16 +13,19 @@ define([
 			var error = C.Errors[error];
 			if (error.code == C.ErrorCodes.Filter) {
 				this.code = error.code;
+				this.httpCode = error.httpCode;
 				this.action = arguments[1];
 				this.message = arugments[2];
 			} else {
 				// Our custom errors
 				this.code = error.code;
+				this.httpCode = error.httpCode;
 				this.message = error.message;
 			}
 		} else {
 			// Error from external source. - Some other lib or unknown failure.	
 			this.code = C.ErrorCodes.External;
+			this.httpCode = C.HttpCodes.GenericServerError
 			this.message = JSON.stringify(error);
 			this.stackTrace = error.stack || null;
 		}

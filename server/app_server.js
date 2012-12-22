@@ -137,6 +137,7 @@ requirejs([
 	};
 
 	var sendError = function(res, err) {
+Log.l('sendError', err);
 		var httpCode = err.httpCode || C.HttpCodes.GenericServerError;
 		res.send(httpCode, err);
 	};
@@ -266,7 +267,7 @@ requirejs([
 				.then(function(clean) {
 
 					if (clean['id'] && (!user || user.userId != clean['id'])) {
-						sendError(C.ErrorCodes.AccountNotYourId);
+						sendError(res, new ServerError(C.ErrorCodes.AccountNotYourId));
 						return;
 					}
 					if (!user) {
@@ -423,29 +424,42 @@ requirejs([
 
 							if (user) {
 
-	Log.l('getUserWithEmail', email, user);
-								var salt = user.passwordSalt;
-								var attemptedPwHash = Utils.hashSha512(pw + salt);
-								if (attemptedPwHash === user.passwordHash) {
-	Log.l('success');
-									user.isLoggedIn = 1;
-									return Storage.Users.update(user);
+								if (user.isFullUser) {
 
-									res.send();
+Log.l('getUserWithEmail', email, user);
+									var salt = user.passwordSalt;
+									var attemptedPwHash = Utils.hashSha512(pw + salt);
+									if (attemptedPwHash === user.passwordHash) {
+Log.l('success');
+										user.isLoggedIn = 1;
+										return Storage.Users.update(user)
+										.then(function(updateUserResult) {
+											res.send();
+											return;										
+										})
+
+									} else {
+
+										sendError(res, new ServerError(C.ErrorCodes.AccountLoginPassword));
+										return;
+									}
+
 								} else {
-									sendError(C.ErrorCodes.AccountLoginPassword);
+
+									sendError(res, new ServerError(C.ErrorCodes.AccountLoginEmail));
 									return;
-								}
+
+								} 
+
 							} else {
-								sendError(C.ErrorCodes.AccountLoginEmail);
+
+								sendError(res, new ServerError(C.ErrorCodes.AccountLoginEmail));
 								return;
+
 							}
 						})
 						.end();
 
-						Log.l('login', clean);	
-						res.send();
-						return;
 					})
 					.end();
 
@@ -506,7 +520,7 @@ requirejs([
 						.end();
 
 					} else {
-						sendError(C.ErrorCodes.InvalidLink);
+						sendError(res, new ServerError(C.ErrorCodes.InvalidLink));
 						return;
 					}
 				})
