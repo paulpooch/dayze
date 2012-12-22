@@ -45,7 +45,7 @@ require.config({
 	}
 });
 
-require(['app_client', 'test_registry'], function(App, TestRegistry) {
+require(['app_client', 'test_registry', 'c'], function(App, TestRegistry, C) {
 	window.Dayze = new App(true);
 
 	// http://addyosmani.com/blog/unit-testing-backbone-js-apps-with-qunit-and-sinonjs/
@@ -58,10 +58,10 @@ require(['app_client', 'test_registry'], function(App, TestRegistry) {
 
 module('Login');
 var $form = $('#login_form');
-test('login success', function() {
 
+test('invalid email', function() {
 	$('#controls_login_button').click();
-	$form.find('#loginEmail').val('paul.pucciarelli@gmail.com');
+	$form.find('#loginEmail').val('thisisfake@fake.com');
 	$form.find('#loginPassword').val('654654a');
 	$form.find('#login_button').click();
 	var $groups = $form.find('.control-group');
@@ -69,10 +69,37 @@ test('login success', function() {
 		var grp = $groups.eq(i);
 		equal(grp.attr('class'), 'control-group success');
 	}
-	//TestRegistry['AccountControlsView'].hideUserModal();
-
+	var $feedback = $form.find('.feedback_message');
+	stop(); // Pause the test 
+    setTimeout(function() {
+       equal($feedback.text(), C.Errors[C.ErrorCodes.AccountLoginEmail].message);
+       // Restart the test
+       start();
+    }, 1000);
 });
 
+test('invalid password', function() {
+	$form.find('#loginEmail').val('paul.pucciarelli@gmail.com');
+	$form.find('#loginPassword').val('654654a');
+	$form.find('#login_button').click();
+	var $feedback = $form.find('.feedback_message');
+	stop();
+    setTimeout(function() {
+	equal($feedback.text(), C.Errors[C.ErrorCodes.AccountLoginPassword].message);
+       start();
+    }, 1000);
+});
+	
+test('login success', function() {
+	$form.find('#loginEmail').val('paul.pucciarelli@gmail.com');
+	$form.find('#loginPassword').val('654654');
+	$form.find('#login_button').click();
+	var $feedback = $form.find('.feedback_message');
+	pause(2000);
+	equal($feedback.text(), C.Errors[C.ErrorCodes.AccountLoginPassword].message);
+
+	//TestRegistry['AccountControlsView'].hideUserModal();
+});
 
 // This sends out email and fills up DB so maybe don't run all the time.
 /*
@@ -87,7 +114,7 @@ test('create account filter', function() {
 	var err = $form.find('.help-inline').text();
 	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
 	equal(grp.attr('class'), 'control-group error');
-	equal(err, 'Email must be a valid email between 1 and 100 characters long.');
+	equal(err, C.FilterErrors.Email);
 
 });
 test('create account success', function() {

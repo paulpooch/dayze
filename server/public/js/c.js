@@ -124,6 +124,18 @@ define([], function() {
 		message: 'LinkId was invalid.'
 	}
 
+	// Makes testing for correct error message easy.
+	C.FilterErrors = {};
+	C.FilterErrors.MonthCode = 'monthCode must be a valid YYYY-MM-DD format.';
+	C.FilterErrors.Email = 'Email must be a valid email between 1 and 100 characters long.';
+	C.FilterErrors.Password = 'Password must be at least 5 characters long.';
+	C.FilterErrors.DisplayName = 'Display name must be 3 or more printable characters.';
+	C.FilterErrors.Boolean = 'Invalid boolean value.';
+	C.FilterErrors.LinkId = 'Invalid linkId.';
+	C.FilterErrors.UUID = 'Invalid UUID.';
+	C.FilterErrors.Action = 'Invalid action.';
+	C.FilterErrors.Alpha = 'Value must be 1 to 100 alphabetic characters.';
+
 	return C;
 
 });

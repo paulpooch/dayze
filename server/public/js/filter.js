@@ -41,7 +41,7 @@ define([
 	Filter.rules = {};
 
 	Filter.rules.monthCode = function(t) {
-		var msg = 'monthCode must be a valid YYYY-MM-DD format.';
+		var msg = C.FilterErrors.MonthCode;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			Validator.check(t).is(/^[0-9]{4}|-|(0[123456789]|10|11|12)$/);
@@ -53,7 +53,7 @@ define([
 	};
 
 	Filter.rules.email = function(t) {
-		var msg = 'Email must be a valid email between 1 and 100 characters long.';
+		var msg = C.FilterErrors.Email;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
@@ -66,7 +66,7 @@ define([
 	};
 
 	Filter.rules.password = function(t) {
-		var msg = 'Password must be at least 5 characters long.';
+		var msg = C.FilterErrors.Password;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			Validator.check(t).len(5, 100);
@@ -78,7 +78,7 @@ define([
 	};
 
 	Filter.rules.boolean = function(t) {
-		var msg = 'Invalid boolean value.';
+		var msg = C.FilterErrors.Boolean;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).toBooleanStrict();
@@ -91,7 +91,7 @@ define([
 
 	// Keep this in sync with Utils.generateCustomLink
 	Filter.rules.linkId = function(t) {
-		var msg = 'Invalid linkId.';
+		var msg = C.FilterErrors.LinkId;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
@@ -104,7 +104,7 @@ define([
 	};
 
 	Filter.rules.uuid = function(t) {
-		var msg = 'Invalid UUID.';
+		var msg = C.FilterErrors.UUID;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
@@ -117,7 +117,7 @@ define([
 	};
 
 	Filter.rules.action = function(t) {
-		var msg = 'Invalid action.';
+		var msg = C.FilterErrors.Action;
 		var result = { passed: false, cleanVal: null, errorMessage: msg };
 		var validActions = {
 			create_account: 1
@@ -130,7 +130,7 @@ define([
 	};
 
 	Filter.rules.alpha = function(t) {
-		var msg = 'Value must be 1 to 100 alphabetic characters.';
+		var msg = C.FilterErrors.Alpha;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
@@ -145,7 +145,7 @@ define([
 	// http://www.regular-expressions.info/posixbrackets.html
 	// Allows hex 20 -> hex 7E of http://www.asciitable.com/
 	Filter.rules.displayName = function(t) {
-		var msg = 'Display name must be 3 or more printable characters.';
+		var msg = C.FilterErrors.DisplayName;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
@@ -359,7 +359,6 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 						fieldFailed = true;
 						allErrors[fieldName] = fieldName + ' was required but not defined.';
 					}
-Log.l('immutalbe?', cleanVal, originalVal);
 					if (!fieldFailed && filterField.immutable && cleanVal != originalVal) {
 						fieldFailed = true;
 						allErrors[fieldName] = fieldName + ' was immutable and could only pass the filter with modification.';
