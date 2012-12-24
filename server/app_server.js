@@ -169,12 +169,10 @@ Log.l('sendError', err);
 							Log.l('got events for month', events);
 							res.send(events);
 							return;
-						})
-						.end();
+						});
 
 					}			
-				})
-				.end();
+				});
 
 			})	
 			.fail(function(err) {
@@ -202,11 +200,9 @@ Log.l('sendError', err);
 					.then(function(result) {
 						res.send(result);
 						return;
-					})
-					.end();
-			
-				})
-				.end();
+					});
+
+				});
 
 			})
 			.fail(function(err) {
@@ -279,16 +275,14 @@ Log.l('sendError', err);
 							res.cookie('cookieId', cookieId, { signed: true });
 							res.send(Filter.forClient(tempUser, Filter.clientBlacklist.user));
 							return;
-						})
-						.end();
+						});
 
 					} else {
 
 						res.send(Filter.forClient(user, Filter.clientBlacklist.user));
 						return;
 					}
-				})
-				.end();
+				});
 
 			})			
 			.fail(function(err) {
@@ -351,9 +345,8 @@ Log.l('sendError', err);
 						return;
 					}
 					return false;
-				})
-				.end();
-
+				});
+				
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT PATCH', err, err.stack);
@@ -403,8 +396,7 @@ Log.l('sendError', err);
 					.then(function(user) {
 						res.send();
 						return;
-					})
-					.end();
+					});
 
 				} else if (state == 'login') {
 
@@ -452,11 +444,9 @@ Log.l('success');
 								return;
 
 							}
-						})
-						.end();
+						});
 
-					})
-					.end();
+					});
 
 				}
 			})
@@ -511,15 +501,13 @@ Log.l('success');
 							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
 							return;
 
-						})
-						.end();
+						});
 
 					} else {
 						sendError(res, new ServerError(C.ErrorCodes.InvalidLink));
 						return;
 					}
-				})
-				.end();
+				});
 
 			})			
 			.fail(function(err) {

@@ -455,11 +455,9 @@ Log.l('CACHE MISS');
 					EVENTS.put(event)
 					.then(function(result) {
 						deferred.resolve(true);
-					})
-					.end();
+					});
 
-				})
-				.end();
+				});
 
 			})	
 			.fail(function(err) {
@@ -496,11 +494,10 @@ Log.l('CACHE MISS');
 						eventIds = eventIds.concat(eventsAtTime.events);
 					});
 					if (eventIds.length) {
-						EVENTS.batchGet(eventIds)
+						return EVENTS.batchGet(eventIds)
 						.then(function(events) {
 							deferred.resolve(events);
-						})
-						.end();
+						});
 					} else {
 						deferred.resolve([]);
 					}	
@@ -564,12 +561,11 @@ Log.l('CACHE MISS');
 					})
 					.then(function(result) {
 						deferred.resolve(result);
-					}).end();
+					});
 				
 				}
 			})
 			.fail(function(err) {
-Log.l('fail 2');
 				deferred.reject(new ServerError(err));
 			})
 			.end();
@@ -618,11 +614,10 @@ Log.l('fail 2');
 
 			USERS_BY_COOKIE.get(cookieId)
 			.then(function(cookieIndex) {
-				USERS.get(cookieIndex.userId)
+				return USERS.get(cookieIndex.userId)
 				.then(function(user) {
 					deferred.resolve(user);
-				})
-				.end();
+				});
 			})
 			.end();
 
@@ -753,8 +748,7 @@ link.used = 0;
 					CUSTOM_LINKS.put(link)
 					.then(function(result) {
 						deferred.resolve(link);
-					})
-					.end();
+					});
 
 				} else {
 					deferred.resolve(link);
