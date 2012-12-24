@@ -378,18 +378,13 @@ Log.l('sendError', err);
 					.then(function(clean) {
 						return Storage.Users.createAccount(user, clean);
 					})
-					.then(function(newUser) {
-
-						Storage.Users.setNewEmail(newUser)
-						.then(function(data) {
-							//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-							res.send();
-							return;
-						})
-						.end();
-
+					.then(Storage.Users.setNewEmail)
+					.then(function(data) {
+						Log.l('f data');
+						//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+						res.send();
+						return;
 					})
-					.end();
 
 				} else if (state =='initialPwSet') {
 								

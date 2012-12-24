@@ -18,6 +18,8 @@ define([
 	'utils',
 	'logg',
 	'email',
+	'server_error',
+	'c'
 ], function(
 	_,
 
@@ -30,7 +32,9 @@ define([
 	Config,
 	Utils,
 	Log,
-	Email
+	Email,
+	ServerError,
+	C
 ) {
 
 	var Storage = {};
@@ -546,14 +550,26 @@ Log.l('CACHE MISS');
 		Users.setNewEmail = function(user) {
 			var deferred = Q.defer();
 
-			Storage.CustomLinks.makeEmailConfirmationLink(user)
-			.then(function(link) {
-				return Email.sendEmailConfirmation(user, link);
-			})
-			.then(function(result) {
-				deferred.resolve(result);
+			Storage.Users.getUserWithEmail(user.unconfirmedEmail)
+			.then(function(userWithEmail) {
+				if (userWithEmail) {
+					
+					deferred.reject(new ServerError(C.ErrorCodes.AccountEmailTaken));
+
+				} else {
+				
+					return Storage.CustomLinks.makeEmailConfirmationLink(user)
+					.then(function(link) {
+						return Email.sendEmailConfirmation(user, link);
+					})
+					.then(function(result) {
+						deferred.resolve(result);
+					}).end();
+				
+				}
 			})
 			.fail(function(err) {
+Log.l('fail 2');
 				deferred.reject(new ServerError(err));
 			})
 			.end();

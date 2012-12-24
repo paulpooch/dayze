@@ -58,6 +58,7 @@ define([], function() {
 	C.ErrorCodes.AccountLoginEmail = 11;
 	C.ErrorCodes.AccountNoCookie = 12;
 	C.ErrorCodes.AccountNotYourId = 13;
+	C.ErrorCodes.AccountEmailTaken = 14;
 	C.ErrorCodes.LinkNotForUser = 21;
 	C.ErrorCodes.LinkUsed = 22;
 	C.ErrorCodes.LinkExpired = 23;
@@ -98,6 +99,12 @@ define([], function() {
 		code: C.ErrorCodes.AccountNotYourId,
 		httpCode: C.HttpCodes.Forbidden,
 		message: 'Account requested was not your account.'
+	};
+
+	C.Errors[C.ErrorCodes.AccountEmailTaken] = {
+		code: C.ErrorCodes.AccountEmailTaken,
+		httpCode: C.HttpCodes.BadRequest,
+		message: 'There is already an account with this email.'
 	};
 
 	C.Errors[C.ErrorCodes.LinkNotForUser] = {

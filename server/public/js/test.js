@@ -58,7 +58,7 @@ require(['app_client', 'test_registry', 'c'], function(App, TestRegistry, C) {
 
 module('Login');
 var $form = $('#login_form');
-
+/*
 test('invalid email', function() {
 	$('#controls_login_button').click();
 	$form.find('#loginEmail').val('thisisfake@fake.com');
@@ -89,20 +89,24 @@ test('invalid password', function() {
        start();
     }, 1000);
 });
-	
+
 test('login success', function() {
 	$form.find('#loginEmail').val('paul.pucciarelli@gmail.com');
 	$form.find('#loginPassword').val('654654');
 	$form.find('#login_button').click();
 	var $feedback = $form.find('.feedback_message');
-	pause(2000);
-	equal($feedback.text(), C.Errors[C.ErrorCodes.AccountLoginPassword].message);
+	stop();
+    setTimeout(function() {
+		equal($feedback.text(), C.Errors[C.ErrorCodes.AccountLoginPassword].message);
+       start();
+    }, 1000);
 
 	//TestRegistry['AccountControlsView'].hideUserModal();
 });
+*/
 
 // This sends out email and fills up DB so maybe don't run all the time.
-/*
+
 module('Create Account');
 var $form = $('#create_form');	
 test('create account filter', function() {
@@ -128,7 +132,6 @@ test('create account success', function() {
 	TestRegistry['AccountControlsView'].hideUserModal();
 
 });
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 	}
