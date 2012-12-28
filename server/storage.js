@@ -98,7 +98,7 @@ define([
 		}
 	};
 
-	Cache.delete = function(key, callback) {
+	Cache.delete = function(key) {
 		if (Config.IS_LOCAL_DEV) {
 			var deferred = Q.defer();
 			// Is this really an error?
@@ -320,6 +320,78 @@ Log.l('CACHE MISS');
 		return deferred.promise;
 	};
 
+	var _batchDelete = function(keys) {
+		var that = this;
+		Log.l('Storage.batchDelete');
+		Log.l('table = ', that.tableName);
+		Log.l('deleteRequest = ', deleteRequest);
+
+		var cacheKeys = [];
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			var rangeKey = null;
+			var hashKey = null;
+			if (typeof key == 'object') { // Array of [hashKey, rangeKey]
+				hashKey = key[0];
+				rangeKey = key[1];
+			} else {
+				hashKey = key;
+			}
+			var cacheKey = (rangeKey) ? hashKey + rangeKey : hashKey;
+			cacheKey = that.cachePrefix + cacheKey;
+			cacheKeys.push(cacheKey);
+		}
+
+		var clearCache = function(key) {
+			var defer2 = Q.defer();
+			var cacheKey = that.cachePrefix + key;
+			Cache.delete(cacheKey)
+			.then(function(cacheResult) {
+				defer2.resolve();
+			})
+			.fail(function(err) {
+				defer2.resolve(); // We don't really care if this fails.
+			})
+			.end();
+			return defer2.promise;
+		};
+
+		var queue = [];
+		keys.forEach(function(key) {
+			queue.push(clearCache(key));
+		});
+		Q.all(queue)
+		.then(function(fulfilled) {
+			var deferred = Q.defer();
+			/*
+			batchWriteItem = function(putRequest, deleteRequest, cb) {
+			Put or delete several items across multiple tables
+			@param putRequest dictionnary { 'table': [item1, item2, item3], 'table2': item }
+			@param deleteRequest dictionnary { 'table': [key1, key2, key3], 'table2': [[id1, range1], [id2, range2]] }
+			@param cb callback(err, res, cap) err is set if an error occured
+			*/
+			var deleteRequest = {};
+			deleteRequest[that.tableName] = keys;
+			Q.ncall(
+				ddb.batchWriteItem,
+				that,
+				{}, // putRequest
+				deleteRequest
+			)
+			.then(function(dbResult) {
+				Log.l('BATCH RESULT');
+				Log.l(dbResult);
+				deferred.resolve(dbResult);
+			})
+			.end();
+		})
+		.fail(function(err) {
+			deferred.reject(err);
+		})
+		.end();
+
+		return deferred.promise;
+	};
 
 	///////////////////////////////////////////////////////////////////////////
 	// TABLES
@@ -585,7 +657,8 @@ Log.l('CACHE MISS');
 
 			var cookieIndex = {
 				cookieId: cookieId,
-				userId: user.userId
+				userId: user.userId,
+				createTime: Utils.getNowIso()
 			};
 
 			USERS.put(user)
@@ -601,6 +674,12 @@ Log.l('CACHE MISS');
 			.end();
 
 			return deferred.promise;
+		};
+
+		Users.deleteAllCookies = function(user) {
+
+
+
 		};
 
 		// Returns user.

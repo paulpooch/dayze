@@ -1,16 +1,12 @@
 <% if (isLoggedIn) { %>
 <div id="user_dropdown" class="pull-left">
 	<div class="btn-group inline">
-		<a id="user_button" class="btn btn-small btn-primary" href="#" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
+		<a id="user_button" class="btn btn-small btn-primary" href="account" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
 		<a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-		<ul class="dropdown-menu">
-			<li><a href="#!settings"><i class="icon-cog"></i> Account Settings</a></li>
-			<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>
-			<li><a href="#"><i class="icon-trash"></i> Delete</a></li>
-			<li><a href="#"><i class="icon-ban-circle"></i> Ban</a></li>
-			<li><a href="#" id="enableNotifications"><i class="icon-ban-circle"></i> Notifications</a></li>
+		<ul class="dropdown-menu" style="margin-left: -21px;">
+			<li><a href="account"><i class="icon-cog"></i> Account Settings</a></li>
 			<li class="divider"></li>
-			<li><a href="#"><i class="i"></i> Make admin</a></li>
+			<li><a href="logout" id="enableNotifications"><i class="icon-ban-circle"></i> Logout</a></li>
 		</ul>
 	</div>
 </div>

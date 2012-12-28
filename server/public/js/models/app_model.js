@@ -242,6 +242,10 @@ log('Pulled account from server', _accountModel, route);
 			that.showView(C.ActiveViews.Calendar);
 		},
 
+		routeLogout: function() {
+			that.logout();
+		},
+
 		routeAccount: function(action, linkId) {
 			switch (action) {
 				case 'confirm_email':
@@ -460,6 +464,17 @@ log(_accountModel);
 					}
 				}
 			})
+		},
+
+		logout: function() {
+			_accountModel.set('state', 'logout');
+			_accountModel.save([], {
+				wait: true,
+				success: function(model, response) {
+					window.location(C.Domain); // Best way to guarantee all backbone state is wiped out.
+				},
+				error: that.handleError
+			});
 		},
 		///////////////////////////////////////////////////////////////////////
 

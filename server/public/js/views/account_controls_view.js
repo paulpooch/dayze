@@ -103,10 +103,9 @@ define([
 		},
 
 		onUserButtonClick: function(event) {
-	        _$userModal.modal('toggle');
-			_$createForm.hide();
-			_$loginForm.show();
-		},
+	        that.hideUserModal();
+	        _appModel.routeAccount();
+	    },
 
  		onGoogleButtonClick: function() {
  			_googleModel.login();

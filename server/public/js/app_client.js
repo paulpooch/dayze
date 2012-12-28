@@ -32,6 +32,7 @@ define([
 			'account/:action/:linkId': 	'account',
 			'account/:action': 			'account',
 			'account':  				'account',
+			'logout':  					'logout',
 			'*path':  					'catchall'
 		},
 
@@ -42,6 +43,16 @@ log('ROUTE: catchall');
 					_appModel.routeCatchall(); 
 				},
 				pullAccountFirst: true
+			};
+			_appModel.route(route);
+		},
+
+		logout: function() {
+			var route = {
+				dest: function() {
+					_appModel.routeLogout();
+				},
+				pullAccountFirst: false
 			};
 			_appModel.route(route);
 		},

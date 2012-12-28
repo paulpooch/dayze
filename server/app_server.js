@@ -143,7 +143,11 @@ Log.l('sendError', err);
 	};
 
 	var sendSuccess = function(res, obj, blacklist) {
-		res.send(Filter.forClient(obj, blacklist));
+		if (obj && blacklist) {
+			res.send(Filter.forClient(obj, blacklist));
+		} else {
+			res.send();
+		}
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -477,6 +481,12 @@ Log.l('logged in yo');
 						});
 
 					});
+
+				} else if (state == 'logout') {
+Log.l('LOGGING OUT');
+					res.clearCookie('cookieId');
+					sendSuccess(res);
+					return;
 
 				}
 			})
