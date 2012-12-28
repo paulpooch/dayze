@@ -33,7 +33,8 @@ define([
 		_$loginForm,
 		_$createForm,
 		_$userButton,
-		_$feedback,
+		_$feedbackLogin,
+		_$feedbackCreate,
 		_createAccountForm,
 		_loginForm;
 
@@ -63,7 +64,8 @@ define([
 	        _$loginForm = that.$el.find('#login_form');
 			_$userButton = that.$el.find('#user_button');
 			_$userEmail = that.$el.find('#user_email');
-			_$feedback = that.$el.find('.feedback_message');
+			_$feedbackLogin = that.$el.find('.feedback_message_login');
+			_$feedbackCreate = that.$el.find('.feedback_message_create');
 
 			_createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
 			_loginForm = new SmartForm(that.model, _$loginForm, _appModel.login);
@@ -78,9 +80,13 @@ define([
 		},
 
 		handleError: function(error) {
-			if (error.code == C.ErrorCodes.AccountLoginPassword || error.code == C.ErrorCodes.AccountLoginEmail) {
-				_$feedback.text(error.message);
-				_loginForm.resetForm(false);
+			if (error.code == C.ErrorCodes.AccountLoginPassword || 
+			error.code == C.ErrorCodes.AccountLoginEmail) {
+				_$feedbackLogin.text(error.message);
+				_loginForm.resetForm(false); // don't reset inputs
+			} else if (error.code == C.ErrorCodes.AccountEmailTaken) {
+				_$feedbackCreate.text(error.message);
+				_createAccountForm.resetForm(true); // reset inputs
 			}
 		},
 

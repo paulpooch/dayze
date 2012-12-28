@@ -58,6 +58,34 @@ require(['app_client', 'test_registry', 'c'], function(App, TestRegistry, C) {
 
 module('Login');
 var $form = $('#login_form');
+
+
+module('Create Account');
+var $form = $('#create_form');	
+test('create account filter', function() {
+
+
+	$('#controls_create_account_button').click();
+	$form.find('#unconfirmedEmail').val('abc');
+	$form.find('#create_account_button').click();
+	var err = $form.find('.help-inline').text();
+	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
+	equal(grp.attr('class'), 'control-group error');
+	equal(err, C.FilterErrors.Email);
+
+});
+test('create account success', function() {
+
+	$form.find('#unconfirmedEmail').val('paul.pucciarelli@gmail.com');
+	$form.find('#create_account_button').click();
+	var err = $form.find('.help-inline').text();
+	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
+	equal(grp.attr('class'), 'control-group success');
+	equal(err, '');
+	TestRegistry['AccountControlsView'].hideUserModal();
+
+});
+
 /*
 test('invalid email', function() {
 	$('#controls_login_button').click();
@@ -107,31 +135,7 @@ test('login success', function() {
 
 // This sends out email and fills up DB so maybe don't run all the time.
 
-module('Create Account');
-var $form = $('#create_form');	
-test('create account filter', function() {
 
-
-	$('#controls_create_account_button').click();
-	$form.find('#unconfirmedEmail').val('abc');
-	$form.find('#create_account_button').click();
-	var err = $form.find('.help-inline').text();
-	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
-	equal(grp.attr('class'), 'control-group error');
-	equal(err, C.FilterErrors.Email);
-
-});
-test('create account success', function() {
-
-	$form.find('#unconfirmedEmail').val('paul.pucciarelli@gmail.com');
-	$form.find('#create_account_button').click();
-	var err = $form.find('.help-inline').text();
-	var grp = $form.find('#unconfirmedEmail').parents('.control-group');
-	equal(grp.attr('class'), 'control-group success');
-	equal(err, '');
-	TestRegistry['AccountControlsView'].hideUserModal();
-
-});
 
 ///////////////////////////////////////////////////////////////////////////////
 	}

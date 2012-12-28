@@ -423,7 +423,16 @@ log('event saved', model, response);
 				success: function(model, response) {
 					_router.navigate('account/created', { trigger: true });
 				},
-				error: that.handleError
+				error: function(model, response) {
+					if (response.responseText) {
+						var error = JSON.parse(response.responseText);
+						if (error.code == C.ErrorCodes.AccountEmailTaken) {
+							_accountControlsView.handleError(error);
+						} else {
+							that.handleError(model, response);
+						}
+					}
+				}
 			});
 		},
 
@@ -434,8 +443,10 @@ log('event saved', model, response);
 				success: function(model, response) {
 log('LOGIN SUCCESS');
 log(model);
-log(resonse);
+log(response);
 log(_accountModel);
+					_accountControlsView.hideUserModal();
+					_accountControlsView.render();
 				},
 				// Example of how to do custom error handling.
 				error: function(model, response) {

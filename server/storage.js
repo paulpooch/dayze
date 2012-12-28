@@ -573,25 +573,19 @@ Log.l('CACHE MISS');
 			return deferred.promise;
 		};
 
-		// Returns new tempUser
-		Users.createTempUser = function() {
+		// Save user.
+		// Save cookie.
+		// Returns user.
+		Users.setCookie = function(user, cookieId) {
 			var deferred = Q.defer();
-
-			var cookieId = Utils.generatePassword(20, 2);
-			var userId = Uuid.v4();
-
-			// Minimalist version.
-			// Real entry made if user decides to create account.
-			var user = { 
-				userId: userId,
-				cookieId: cookieId,
-				isFullUser: 0,
-				createTime: Utils.getNowIso()
-			};
+			
+			if (!cookieId) {
+				cookieId = Utils.generatePassword(20, 2);
+			}
 
 			var cookieIndex = {
 				cookieId: cookieId,
-				userId: userId
+				userId: user.userId
 			};
 
 			USERS.put(user)
@@ -607,6 +601,23 @@ Log.l('CACHE MISS');
 			.end();
 
 			return deferred.promise;
+		};
+
+		// Returns user.
+		Users.createTempUser = function() {
+			var cookieId = Utils.generatePassword(20, 2);
+			var userId = Uuid.v4();
+
+			// Minimalist version.
+			// Real entry made if user decides to create account.
+			var user = { 
+				userId: userId,
+				cookieId: cookieId,
+				isFullUser: 0,
+				createTime: Utils.getNowIso()
+			};
+
+			return Users.setCookie(user, cookieId);
 		};
 
 		Users.getUserWithCookieId = function(cookieId) {
@@ -678,11 +689,10 @@ Log.l('CACHE MISS');
 			};
 
 			USERS.put(account)
-			.then(function(result) {
-
-				return USERS_BY_EMAIL.put(emailIndex);
-
-			})
+			// This gets called by AccountRest createAccount code.
+			// .then(function(result) {
+			// 	return USERS_BY_EMAIL.put(emailIndex);
+			// })
 			.then(function(result) {
 				deferred.resolve(account);
 			})

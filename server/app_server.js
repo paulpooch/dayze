@@ -142,6 +142,10 @@ Log.l('sendError', err);
 		res.send(httpCode, err);
 	};
 
+	var sendSuccess = function(res, obj, blacklist) {
+		res.send(Filter.forClient(obj, blacklist));
+	};
+
 	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
 	///////////////////////////////////////////////////////////////////////////////
@@ -273,8 +277,10 @@ Log.l('sendError', err);
 							var cookieId = tempUser.cookieId;
 							// Set cookie.
 							res.cookie('cookieId', cookieId, { signed: true });
-							res.send(Filter.forClient(tempUser, Filter.clientBlacklist.user));
+							
+							sendSuccess(res, tempUser, Filter.clientBlacklist.user);
 							return;
+
 						});
 
 					} else {
@@ -346,7 +352,7 @@ Log.l('sendError', err);
 					}
 					return false;
 				});
-				
+
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT PATCH', err, err.stack);
@@ -369,15 +375,34 @@ Log.l('sendError', err);
 					
 					return filterAction(req, res, C.FilterAction.AccountCreate)
 					.then(function(clean) {
-						return Storage.Users.createAccount(user, clean);
-					})
-					.then(Storage.Users.setNewEmail)
-					.then(function(data) {
-						Log.l('f data');
-						//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
-						res.send();
-						return;
-					})
+
+						var email = clean['unconfirmedEmail'];
+						
+Log.l('searching for email conflicts', email);
+						return Storage.Users.getUserWithEmail(email)
+						.then(function(userWithEmail) {
+Log.l('userWithEmail = ', userWithEmail);
+
+							if (userWithEmail) {
+								
+								sendError(res, new ServerError(C.ErrorCodes.AccountEmailTaken));
+								return;
+							
+							} else {
+
+								return Storage.Users.createAccount(user, clean)
+								.then(Storage.Users.setNewEmail)
+								.then(function(data) {
+									//res.send(Filter.forClient(user, Filter.clientBlacklist.user));
+									res.send();
+									return;
+								});
+
+							}
+						});
+
+					});
+						
 
 				} else if (state =='initialPwSet') {
 								
@@ -419,11 +444,16 @@ Log.l('getUserWithEmail', email, user);
 									if (attemptedPwHash === user.passwordHash) {
 Log.l('success');
 										user.isLoggedIn = 1;
-										return Storage.Users.update(user)
-										.then(function(updateUserResult) {
-											res.send();
-											return;										
-										})
+
+										Storage.Users.setCookie(user)
+										.then(function(setCookieResult) {
+Log.l('logged in yo');						
+											var cookieId = setCookieResult.cookieId;
+											res.cookie('cookieId', cookieId, { signed: true });
+											sendSuccess(res, user, Filter.clientBlacklist.user);
+											return;
+
+										});
 
 									} else {
 
