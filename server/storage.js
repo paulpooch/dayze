@@ -326,6 +326,8 @@ Log.l('CACHE MISS');
 		Log.l('table = ', that.tableName);
 		Log.l('deleteRequest = ', deleteRequest);
 
+		var deferred = Q.defer();
+
 		var cacheKeys = [];
 		for (var i = 0; i < keys.length; i++) {
 			var key = keys[i];
@@ -393,6 +395,44 @@ Log.l('CACHE MISS');
 		return deferred.promise;
 	};
 
+	/* 
+		RESUME HERE:
+		figure out best practices for iterating through scanLimit amount
+		push these all to some buffer
+		return big ass buffer yo
+	*/
+	var _scan = function(scanOptions) {
+		var that = this;
+		Log.l('Storage.scan');
+		Log.l('table = ', that.tableName);
+		Log.l('scanOptions = ', scanOptions);
+
+		var deferred = Q.defer();
+		scanOptions = scanOptions || {};
+		/*
+		* scan = function(table, options, cb) {
+		* returns one or more items and its attributes by performing a full scan of a table.
+		* @param table the tableName
+		* @param options {attributesToGet, limit, count, scanFilter, exclusiveStartKey}
+		* @param cb callback(err, {count, items, lastEvaluatedKey}) err is set if an error occured
+		*/
+		Q.ncall(
+			ddb.scan,
+			that,
+			that.tableName,
+			scanOptions
+		)
+		.then(function(scanResult) {
+			deferred.resolve(scanResult);
+		})
+		.fail(function(err) {
+			deferred.reject(err);
+		})
+		.end();
+
+		return deferred.promise;
+	};
+
 	///////////////////////////////////////////////////////////////////////////
 	// TABLES
 	//
@@ -449,7 +489,8 @@ Log.l('CACHE MISS');
 			return this.cachePrefix + item.cookieId;
 		},
 		put: _put,
-		get: _get
+		get: _get,
+		scan: _scan
 	};
 
 	USERS_BY_EMAIL = {
@@ -881,6 +922,30 @@ link.used = 0;
 		};		
 
 		return CustomLinks;
+	})();
+
+	Storage.AdminTools = (function() {
+
+		var AdminTools = {};
+
+		AdminTools.cleanTables = function() {
+			var deferred = Q.defer();
+
+			USERS_BY_COOKIE.scan()
+			.then(function(result) {
+				Log.l('USERS_BY_COOKIE SCAN RESULT', result);
+				deferred.resolve(result);
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		return AdminTools;
+
 	})();
 
 	return Storage;

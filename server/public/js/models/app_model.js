@@ -471,7 +471,8 @@ log(_accountModel);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
-					window.location(C.Domain); // Best way to guarantee all backbone state is wiped out.
+log(C);
+					window.location = C.Domain; // Best way to guarantee all backbone state is wiped out.
 				},
 				error: that.handleError
 			});

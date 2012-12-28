@@ -563,6 +563,32 @@ Log.l('LOGGING OUT');
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
+	// ADMIN TOOLS
+	///////////////////////////////////////////////////////////////////////////////
+	var AdminTools = function(app) {
+		var AdminTools = {};
+
+		AdminTools.cleanTables = function(req, res) {
+
+			Storage.AdminTools.cleanTables()
+			.then(function(result) {
+				sendSuccess(res);
+				return;
+			})
+			.fail(function(err) {
+				Log.e('Error in AdminTools.cleanTables', err, err.stack);
+				sendError(res, err);
+				return;
+			})
+			.end();
+
+		};
+
+		app.get('/admin/clean_tables', AdminTools.cleanTables);
+		return AdminTools;
+	};
+
+	///////////////////////////////////////////////////////////////////////////////
 	// TESTS
 	///////////////////////////////////////////////////////////////////////////////
 	// We could push this to a separate process with true HTTP requests:
@@ -622,13 +648,13 @@ Log.l('LOGGING OUT');
 		var accountRestApi = AccountRestApi(app);
 		var eventRestApi = EventRestApi(app);
 		var linkRestApi = LinkRestApi(app);
+		var adminTools = AdminTools(app);
 
 		// handle requests to roots
 		app.get('/', function(req, res) {
 			Log.l('INDEX ////////////////////');
-
 			var data = {};
-			res.render('index', data);	
+			res.render('index', data);
 		});
 
 		// cache facebook channel file
