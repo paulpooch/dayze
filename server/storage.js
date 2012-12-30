@@ -409,26 +409,53 @@ Log.l('CACHE MISS');
 
 		var deferred = Q.defer();
 		scanOptions = scanOptions || {};
-		/*
-		* scan = function(table, options, cb) {
-		* returns one or more items and its attributes by performing a full scan of a table.
-		* @param table the tableName
-		* @param options {attributesToGet, limit, count, scanFilter, exclusiveStartKey}
-		* @param cb callback(err, {count, items, lastEvaluatedKey}) err is set if an error occured
-		*/
-		Q.ncall(
-			ddb.scan,
-			that,
-			that.tableName,
-			scanOptions
-		)
-		.then(function(scanResult) {
-			deferred.resolve(scanResult);
-		})
-		.fail(function(err) {
-			deferred.reject(err);
-		})
-		.end();
+		
+		var scan = function(startKey) {
+			var options = {};
+			_.extend(options, scanOptions);
+			if (startKey) {
+				options['exclusiveStartKey'] = startKey;
+			}
+			/*
+			* scan = function(table, options, cb) {
+			* returns one or more items and its attributes by performing a full scan of a table.
+			* @param table the tableName
+			* @param options {attributesToGet, limit, count, scanFilter, exclusiveStartKey}
+			* @param cb callback(err, {count, items, lastEvaluatedKey}) err is set if an error occured
+			*/
+			return Q.ncall(
+				ddb.scan,
+				that,
+				that.tableName,
+				options
+			);
+		};
+
+		var totalItems = [];
+		var totalCount = 0;
+
+		var loop = function(lastKey) {
+			scan(lastKey)
+			.then(function(scanResult) {
+				scanResult = scanResult[0];
+				totalItems = totalItems.concat(scanResult.items);
+				totalCount += scanResult.count;
+				nextKey = scanResult.lastEvaluatedKey;
+				if (nextKey && nextKey.hash) {
+					setTimeout(function() {
+						loop(nextKey);	
+					}, 500); // Delay so we don't crush db
+				} else {
+					deferred.resolve({ count: totalCount, items: totalItems });
+				}
+			})
+			.fail(function(err) {
+				deferred.reject(err);
+			})
+			.end();
+		};
+
+		loop();
 
 		return deferred.promise;
 	};
@@ -930,11 +957,53 @@ link.used = 0;
 
 		AdminTools.cleanTables = function() {
 			var deferred = Q.defer();
+			
+			// Remove all entries from USERS_BY_COOKIE unless the cookieId corresponds to a real user.
+			///////////////////////////////////////////////////////////////////
+			var cookieIndices = null;
 
-			USERS_BY_COOKIE.scan()
+			var delCount = 0;
+			var keepCount = 0;
+
+			var loop = function(callback) {
+
+				if (cookieIndices.length) {
+					return processQueue()
+					.then(function() {
+						loop(callback);
+					});
+				} else {
+					callback();
+				}
+
+			};
+
+			// Does this create a huge stack of promises?
+			var processQueue = function() {
+				var defer2 = Q.defer();
+				var cookieIndex = cookieIndices.pop();
+				USERS.get(cookieIndex.userId)
+				.then(function(user) {	
+					if (!user || user.cookieId != cookieIndex.cookieId) {
+						// Delete it
+						delCount++;
+					} else {
+						keepCount++;
+					}
+					defer2.resolve();
+				});
+				return defer2.promise;
+			};
+
+			USERS_BY_COOKIE.scan({ limit: Config.DYNAMO_SCAN_CHUNK_SIZE })
 			.then(function(result) {
-				Log.l('USERS_BY_COOKIE SCAN RESULT', result);
-				deferred.resolve(result);
+
+				cookieIndices = result.items;
+Log.l('BEGIN LOOP');
+				loop(function() {
+Log.l('LOOP DONE');
+				});
+
 			})
 			.fail(function(err) {
 				deferred.reject(new ServerError(err));
