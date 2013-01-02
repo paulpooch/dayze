@@ -13,7 +13,7 @@ if (!(window.console && console.log)) {
 
 // Place any jQuery/helper plugins in here.
 $(function() {
-
+/*
 	$('#page_holder').on('keyup', 'input.time_input', function() {
 		
 		var valid = false;
@@ -52,7 +52,7 @@ $(function() {
 		$(this).trigger('change');
 
 	});
-
+*/
 });
 
 // usage: log('inside coolFunc', this, arguments);

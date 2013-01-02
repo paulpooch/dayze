@@ -26,6 +26,8 @@ define([], function() {
 	C.FilterAction = {};
 	C.FilterAction.LinkRead = 'link.read';
 	C.FilterAction.EventList = 'event.list';
+	C.FilterAction.EventCreate = 'event.create';
+	C.FilterAction.EventAdd = 'event.add';
 	C.FilterAction.AccountList = 'account.list';
 	C.FilterAction.AccountCreate = 'account.create';
 	C.FilterAction.AccountLogin = 'account.login';
@@ -142,6 +144,10 @@ define([], function() {
 	C.FilterErrors.UUID = 'Invalid UUID.';
 	C.FilterErrors.Action = 'Invalid action.';
 	C.FilterErrors.Alpha = 'Value must be 1 to 100 alphabetic characters.';
+	C.FilterErrors.EventDescription = 'Description must be 1000 or less printable characters.';
+	C.FilterErrors.EventLocation = 'Location must be 100 or less printable characters.';
+	C.FilterErrors.EventName = 'Name must be 1 to 30 printable characters.';
+	C.FilterErrors.Time = 'Time must be valid (3:30pm).';
 
 	return C;
 

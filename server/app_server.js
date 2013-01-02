@@ -191,8 +191,6 @@ Log.l('sendError', err);
 			.end();
 		};
 
-
-		// REDO THIS!
 		EventRestApi.create = function(req, res) {
 			Log.l();
 			Log.l('EVENT CREATE ////////////////////');
@@ -201,13 +199,15 @@ Log.l('sendError', err);
 			frontDoor(req, res)
 			.then(function(user) {
 
-				return filterAction(req, res, 'event.create')
+				return filterAction(req, res, C.FilterAction.EventCreate)
 				.then(function(clean) {
 				
 					return Storage.Events.createEvent(user, clean)
-					.then(function(result) {
-						res.send(result);
+					.then(function(event) {
+
+						sendSuccess(res, event, Filter.clientBlacklist.event);
 						return;
+					
 					});
 
 				});

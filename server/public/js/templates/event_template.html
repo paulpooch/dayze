@@ -16,14 +16,19 @@
 	    <li><a href="#">Invite</a></li>
 	    <li><a href="#">Privacy</a></li>
 	</ul>
-	<div class="row-fluid" style="min-width: 500px;">
-		<div class="span7">
-			<form class="form-horizontal">
+	<!-- C.FilterAction.EventCreate -->
+	<form id="event_create_form"
+	data-filter="event.create" 
+	onsubmit="return false;"
+	class="form-horizontal">
+
+		<div class="row-fluid" style="min-width: 500px;">
+			<div class="span7">
 				<div class="control-group">
 					<label class="control-label" for="beginTime">Begins</label>
 					<div class="controls">
 						<div class="input-append">
-							<input class="span6 time_input" id="beginTime" size="16" type="text"><span class="add-on"><i class="icon-time"></i> EST</span>
+							<input tabindex="1" class="span6 time_input" id="beginTime" size="16" type="text"><span class="add-on"><i class="icon-time"></i> EST</span>
 						</div>
 						<span class="help-inline"></span>
 					</div>
@@ -32,7 +37,7 @@
 					<label class="control-label" for="endTime">Ends</label>
 					<div class="controls">
 						<div class="input-append">
-							<input class="span6 time_input" id="endTime" size="16" type="text"><span class="add-on"><i class="icon-time"></i> EST</span>
+							<input tabindex="2" class="span6 time_input" id="endTime" size="16" type="text"><span class="add-on"><i class="icon-time"></i> EST</span>
 						</div>
 						<span class="help-inline"></span>
 					</div>
@@ -40,34 +45,35 @@
 				<div class="control-group">
 					<label class="control-label" for="description">Description</label>
 					<div class="controls">
-						<textarea id="description" class="span12" rows="8"></textarea>
+						<textarea tabindex="3" id="description" class="span12" rows="8"></textarea>
 					</div>
+					<span class="help-inline"></span>
 				</div>
 				<div class="control-group">
 					<div class="controls">
-					    <button type="button" id="save_button" class="btn btn-primary">Save changes</button>
+						<button tabindex="4" 
+							id="save_event_button" 
+							type="button" 
+							class="btn btn-primary" 
+							data-submit-trigger="1" 
+							data-loading-text="Saving...">Save Event</button>
 					</div>
 				</div>
 			</form>
 		</div>
 		<div class="span5">
-			<form class="form-horizontal">
-				<div class="control-group" style="margin-bottom: 0px;">
-					<label for="location" style="float: left; margin-top: 5px; padding-right: 10px;">Where</label>
-					<div class="controls" style="margin-left: 20px;">
-						<input class="span10" id="location" size="16" type="text">
-					</div>
-					<span class="help-inline"></span>
+			<div class="control-group" style="margin-bottom: 0px;">
+				<label for="location" style="float: left; margin-top: 5px; padding-right: 10px;">Where</label>
+				<div class="controls" style="margin-left: 20px;">
+					<input tabindex="4" class="span10" id="location" size="16" type="text">
 				</div>
-				<div style="margin: 0px 10px 10px 0px">
-					<div id="event_map" style="width: 100%; height: 400px; border: 1px solid #ccc;"></div>
-				</div>
-			</form>
+				<span class="help-inline"></span>
+			</div>
+			<div style="margin:10px 10px 10px 0px">
+				<div id="event_map" style="width: 100%; height: 400px; border: 1px solid #ccc;"></div>
+			</div>
 		</div>
-		<div class="span12">
-
-		</div>
-	</div>
+	</form>
 
 <% } %>
 

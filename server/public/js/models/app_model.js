@@ -362,7 +362,6 @@ log('Pulled account from server', _accountModel, route);
 		},
 
 		setSelectedEvent: function(cid) {
-log(_eventCollection);
 			var selectedEventModel = _eventCollection.get(cid);
 			_eventView.setModel(selectedEventModel);
 		},

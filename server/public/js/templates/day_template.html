@@ -1,10 +1,27 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span3">
-            <form>
+            <!-- C.FilterAction.EventAdd -->
+            <form id="event_add_form"
+            data-filter="event.add" 
+            onsubmit="return false;"
+            class="form-horizontal"
+            style="margin-bottom: 20px;">
                 <legend>Today's Events</legend>
-                <div class="input-append">
-                    <input class="span9" id="addEventText" size="16" type="text" placeholder="Event Name"><button id="addEventButton" class="btn" type="button">Add</button>
+                <div class="control-group">
+                    <div class="controls" style="margin-left: 0px;">
+                        <div class="input-append">
+                            <input tabindex="1" class="span9" id="addEventText" size="16" type="text" placeholder="Event Name">
+                            <button 
+                            tabindex="2" 
+                            id="event_add_button" 
+                            type="button" 
+                            class="btn btn-primary" 
+                            data-submit-trigger="1" 
+                            data-loading-text="Adding...">Add</button>
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
                 </div>
             </form>
             <div class="event_listing">

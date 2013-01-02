@@ -633,7 +633,7 @@ Log.l('CACHE MISS');
 				.then(function(result) {
 					EVENTS.put(event)
 					.then(function(result) {
-						deferred.resolve(true);
+						deferred.resolve(event);
 					});
 
 				});

@@ -15,7 +15,7 @@ define([
 				this.code = error.code;
 				this.httpCode = error.httpCode;
 				this.action = arguments[1];
-				this.message = arugments[2];
+				this.message = arguments[2];
 			} else {
 				// Our custom errors
 				this.code = error.code;

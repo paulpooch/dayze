@@ -8,17 +8,21 @@ define([
 
 	'c',
 	'text!templates/day_template.html',
+	'smart_form'
 ], function(
 	jQuery,
 	_,
 	Backbone,
 
 	C,
-	DayTemplate
+	DayTemplate,
+	SmartForm
 ) {
 
 	var that,
-		_appModel;
+		_appModel,
+		_$eventAddForm,
+		_eventAddForm;
 
 	var DayView = Backbone.View.extend({
 
@@ -27,13 +31,24 @@ define([
 		render: function() {
 			this.$el.html(that.template(that.model.toJSON()));
 			_appModel.renderEventView(this.$el);
+			_$eventAddForm = that.$el.find('#event_add_form');
+			_eventAddForm = new SmartForm(that.model, _$eventAddForm, that.onAddEventButtonClick);
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
-			'click #addEventButton': 'onAddEventButtonClick',
+			'change input': 'syncForm',
+			'change textarea': 'syncForm',
 			'click .event_listing button': 'onEventClick',
 			'keydown #addEventText': 'onAddEventTextKeydown',
+			'keydown #addEventText': 'syncForm',
+		},
+
+		syncForm: function(e) {
+			var target = $(e.currentTarget);
+      		var data = {};
+      		data[target.attr('id')] = target.val();
+      		that.model.set(data);
 		},
 
 		onAddEventButtonClick: function() {
@@ -90,9 +105,9 @@ define([
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
+			that = this;
 
 			// VARS
-			that = this;
 			_appModel = options.appModel;
 			_$headerEls = $('.day_view_header');
 			

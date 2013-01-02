@@ -40,6 +40,63 @@ define([
 	*/
 	Filter.rules = {};
 
+	// http://www.regular-expressions.info/posixbrackets.html
+	// Allows hex 20 -> hex 7E of http://www.asciitable.com/
+	Filter.rules.location = function(t) {
+		var msg = C.FilterErrors.EventLocation;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			Validator.check(t).is(/^[\x20-\x7E]{0,100}$/); // 0-100 printable chars.
+			result.cleanVal = t;
+		} catch(e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
+	Filter.rules.description = function(t) {
+		var msg = C.FilterErrors.EventDescription;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			Validator.check(t).is(/^[\x20-\x7E]{0,1000}$/); // 0-1000 printable chars.
+			result.cleanVal = t;
+		} catch(e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
+	Filter.rules.eventName = function(t) {
+		var msg = C.FilterErrors.EventName;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+Log.l(t);
+			Validator.check(t).is(/^[\x20-\x7E]{1,30}$/); // 1-30 printable chars.
+			result.cleanVal = t;
+Log.l('pass');
+		} catch(e) {
+			result.passed = false;
+Log.l('fail');
+		}
+		return result;
+	};
+
+	// http://regexlib.com/REDetails.aspx?regexp_id=144
+	Filter.rules.time = function(t) {
+		var msg = C.FilterErrors.Time;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			Validator.check(t).is(/^((([0]?[1-9]|1[0-2])(:|\.)[0-5][0-9]((:|\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\.)[0-5][0-9]((:|\.)[0-5][0-9])?))$/);
+			result.cleanVal = t;
+		} catch(e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
 	Filter.rules.monthCode = function(t) {
 		var msg = C.FilterErrors.MonthCode;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
@@ -142,14 +199,12 @@ define([
 		return result;
 	};
 
-	// http://www.regular-expressions.info/posixbrackets.html
-	// Allows hex 20 -> hex 7E of http://www.asciitable.com/
 	Filter.rules.displayName = function(t) {
 		var msg = C.FilterErrors.DisplayName;
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
-			Validator.check(t).is(/^[\x20-\x7E]{3,}$/); // 3 or more printable chars.
+			Validator.check(t).is(/^[\x20-\x7E]{3,20}$/); // 3-20 printable chars.
 			result.cleanVal = t;
 		} catch(e) {
 			result.passed = false;
@@ -171,6 +226,33 @@ define([
 		name: 'monthCode',
 		rules: [ Filter.rules.monthCode	],
 		immutable: true,
+		required: true
+	}];
+	Filter.fields[C.FilterAction.EventCreate] = [{
+		name: 'beginTime',
+		rules: [ Filter.rules.time ],
+		immutable: false,
+		required: true
+	}, {
+		name: 'endTime',
+		rules: [ Filter.rules.time ],
+		immutable: false,
+		required: true
+	}, {
+		name: 'description',
+		rules: [ Filter.rules.description ],
+		immutable: false,
+		required: false
+	}, {
+		name: 'location',
+		rules: [ Filter.rules.location ],
+		immutable: false,
+		required: false
+	}];
+	Filter.fields[C.FilterAction.EventAdd] = [{
+		name: 'addEventText',
+		rules: [ Filter.rules.eventName ],
+		immutable: false,
 		required: true
 	}];
 	Filter.fields[C.FilterAction.AccountList] = [{
@@ -266,7 +348,7 @@ define([
 		}
 		var rules = field.rules;
 		var $controlGroup = $fieldEl.closest('.control-group');
-		var $helpInline = $fieldEl.siblings('.help-inline');
+		var $helpInline = $controlGroup.find('.help-inline');
 		$controlGroup.attr('class', 'control-group'); // Reset class	
 		$helpInline.text('');
 		var dirtyVal = newVal;
@@ -330,7 +412,7 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 					}
 
 					var $controlGroup = $fieldEl.closest('.control-group');
-					var $helpInline = $fieldEl.siblings('.help-inline');
+					var $helpInline = $controlGroup.find('.help-inline');
 					// Reset error/success messages.
 					$controlGroup.attr('class', 'control-group');
 					$helpInline.text('');
@@ -345,7 +427,8 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 					for (var j = 0; j < fieldRules.length; j++) {
 						var fieldRule = fieldRules[j];
 						var ruleResult = fieldRule(dirtyVal);
-						if (!ruleResult.passed && filterField.required) {
+						// (fail + required) || (fail + not blank)
+						if (!ruleResult.passed && (filterField.required ||  !(typeof dirtyVal == 'undefined' || dirtyVal == undefined))) {
 							fieldFailed = true;
 			 				allErrors[fieldName] = ruleResult.errorMessage;
 			 				break;
@@ -439,6 +522,9 @@ Log.l('Cleaned = ', allCleaned);
 		'expiration',
 		'used',
 		'userId'
+	];
+
+	Filter.clientBlacklist.event = [
 	];
 
 	Filter.forClient = function(item, blacklist) {

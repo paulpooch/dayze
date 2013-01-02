@@ -55,13 +55,27 @@ require(['app_client', 'test_registry', 'c'], function(App, TestRegistry, C) {
 // By all means put minimal effort in.
 ///////////////////////////////////////////////////////////////////////////////
 
+module('Create Event');
 
-module('Login');
-var $form = $('#login_form');
+test('create account success', function() {
+	$('.day:first').click();
+	var eventName = 'Test Event';
+	$('#addEventText').val(eventName);
+	$('#event_add_button').click();
+	var title = $('#event_view_holder h2:first').text();
+	equal(title, eventName);
+	$('#beginTime').val('1:00pm');
+	$('#endTime').val('3:00pm');
+	$('#save_event_button').click();
+});
 
+
+
+/*
 
 module('Create Account');
-var $form = $('#create_form');	
+var $form = $('#create_form');
+
 test('create account filter', function() {
 
 
@@ -86,7 +100,13 @@ test('create account success', function() {
 
 });
 
+*/
+
 /*
+
+module('Login');
+var $form = $('#login_form');
+
 test('invalid email', function() {
 	$('#controls_login_button').click();
 	$form.find('#loginEmail').val('thisisfake@fake.com');
@@ -131,6 +151,7 @@ test('login success', function() {
 
 	//TestRegistry['AccountControlsView'].hideUserModal();
 });
+
 */
 
 // This sends out email and fills up DB so maybe don't run all the time.

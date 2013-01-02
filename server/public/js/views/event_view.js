@@ -8,18 +8,22 @@ define([
 	'google',
 
 	'text!templates/event_template.html',
+	'smart_form'
 ], function(
 	jQuery,
 	_,
 	Backbone,
 	Google,
 
-	EventTemplate
+	EventTemplate,
+	SmartForm
 ) {
 
 	var that,
 		_appModel,
-		_delayedMapAction;
+		_delayedMapAction,
+		_$eventForm,
+		_eventForm;
 
 	var EventView = Backbone.View.extend({
 
@@ -27,6 +31,8 @@ define([
 
 		render: function() {
 			that.$el.html(that.template(that.model.toJSON()));
+			_$eventForm = that.$el.find('#event_create_form');
+			_eventForm = new SmartForm(that.model, _$eventForm, _appModel.saveEvent);
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -35,7 +41,6 @@ define([
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
 			'click #location_button': 'mapLocation',
-			'click #save_button': 'onSaveButtonClick'
 		},
 
 		syncForm: function(e) {
@@ -55,24 +60,16 @@ log('WARNING - mapLocation is currently useless.')
 log(loc);
 			}, 2000);
 		},
-
-		onSaveButtonClick: function(event) {
-			_appModel.saveEvent();
-		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////////////////
 
-		update: function() {
-			that.render();
-		},
-
 		setModel: function(m) {
 			that.model = m;
-			that.update();
-			that.addMap();	
+			that.render();
+			that.addMap();
 		},
 
 		addMap: function() {
@@ -85,7 +82,7 @@ log(loc);
 		setElAndRender: function(el) {
 			that.$el = el;
 			that.delegateEvents(); // Must occur whenever we change $el or 'events' won't work.
-			that.update();
+			that.render();
 		},
 
 		initialize: function(options) {
@@ -93,9 +90,6 @@ log(loc);
 			that = this;
 
 			_appModel = options.appModel;
-
-			// BINDINGS
-			//that.update();
 		}
 
 	});
