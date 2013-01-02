@@ -82,8 +82,8 @@ define([
 		var dParts = monthCode.split('-');
 		var year = (dParts.length > 0) ? Number(dParts[0]) : null;
 		var month = (dParts.length > 1) ? Number(dParts[1]) - 1 : null;
-		var endMonth = (month == 11) ? 0 : month + 1; 
-		if (year && month) {
+		var endMonth = (month == 11) ? 0 : month + 1;
+		if (year != null && month != null) {
 			return { 
 				begin: new Date(year, month).toISOString(),
 				end: new Date(year, endMonth).toISOString()

@@ -84,8 +84,12 @@ header {
 }
 
 #calendar_controls {
-  width: 310px; 
+  width: 400px; 
   margin: auto;
+}
+
+h2#day_display_date {
+  font-size: 26px;
 }
 
 #header_right {

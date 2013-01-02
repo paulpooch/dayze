@@ -362,7 +362,8 @@ log('Pulled account from server', _accountModel, route);
 		},
 
 		setSelectedEvent: function(cid) {
-			var selectedEventModel = _eventCollection.getByCid(cid);
+log(_eventCollection);
+			var selectedEventModel = _eventCollection.get(cid);
 			_eventView.setModel(selectedEventModel);
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -395,8 +396,8 @@ log('Pulled account from server', _accountModel, route);
 		// FROM EVENT VIEW ////////////////////////////////////////////////////
 		saveEvent: function() {
 			if (_accountModel.get('isFullUser')) {
-				var eventCid = that.getDayModel().get('selectedEventId');
-				var eventModel = _eventCollection.getByCid(eventCid);
+				var eventCid = _dayModel.get('selectedEventId');
+				var eventModel = _eventCollection.get(eventCid);
 				eventModel.save([], {
 					wait: true,
 					success: function(model, response) {

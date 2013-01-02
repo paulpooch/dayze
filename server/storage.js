@@ -274,6 +274,46 @@ Log.l('CACHE MISS');
 		return deferred.promise;
 	};
 
+	var _delete = function(hashKey, rangeKey) {
+		var that = this;
+		Log.l('Storage.delete');
+		Log.l('table = ', that.tableName);
+		Log.l('hashKey = ', hashKey);
+		Log.l('rangeKey = ', rangeKey);
+
+		var deferred = Q.defer();
+		rangeKey = rangeKey || null;
+		var cacheKey = (rangeKey) ? hashKey + rangeKey : hashKey;
+		cacheKey = that.cachePrefix + cacheKey;
+		var options = {}; // Implement options support if we ever need that.
+					      // Can support expected value.
+
+		var deleteFromTable = function() {
+			return Q.ncall(
+				ddb.deleteItem,
+				that,
+				that.tableName,
+				hashKey,
+				rangeKey,
+				options
+			)
+			.then(function(deleteResult) {
+				deferred.resolve(deleteResult);
+			});
+		};
+
+		Cache.delete(cacheKey)
+		.then(function(result) {
+			return deleteFromTable();
+		})
+		.fail(function(err) {
+			return deleteFromTable();
+		})
+		.end();	
+
+		return deferred.promise;
+	};
+
 	var _query = function(hashKey, cacheKey, options) {
 		var that = this;
 		Log.l('Storage.query');
@@ -396,10 +436,9 @@ Log.l('CACHE MISS');
 	};
 
 	/* 
-		RESUME HERE:
-		figure out best practices for iterating through scanLimit amount
-		push these all to some buffer
-		return big ass buffer yo
+	This does not add entries to memcache since it's usually pulling everything which includes a lot of garbage.
+	Like during table cleans.
+	If you need it to dump to cache build that.
 	*/
 	var _scan = function(scanOptions) {
 		var that = this;
