@@ -36,9 +36,7 @@ define([
 		_$feedbackLogin,
 		_$feedbackCreate,
 		_createAccountForm,
-		_loginForm;
-
-		/*
+		_loginForm,
 		_accountModel,
 		_googleModel,
 		_facebookModel,
@@ -48,8 +46,7 @@ define([
 		_$loginButton,
 
 		_$googleButton,
-		_$facebookButton,
-		*/
+		_$facebookButton;
 
 	var AccountControlsView = Backbone.View.extend({
 
@@ -66,11 +63,35 @@ define([
 			_$userEmail = that.$el.find('#user_email');
 			_$feedbackLogin = that.$el.find('.feedback_message_login');
 			_$feedbackCreate = that.$el.find('.feedback_message_create');
+			_$userPassword = that.$el.find('#user_password');
+	        _$loginButton = that.$el.find('#login_button');
+   	        _$googleButton = that.$el.find('#google_button');
+   	        _$facebookButton = that.$el.find('#facebook_button');
+
+	        _accountModel = that.model;
+	        _googleModel = that.model.get('googleModel');
+	        _facebookModel = that.model.get('facebookModel');
 
 			_createAccountForm = new SmartForm(that.model, _$createForm, _appModel.createAccount);
 			_loginForm = new SmartForm(that.model, _$loginForm, _appModel.login);
 			_$userModal.bind('show', that.onUserModalShow);
 			_$userModal.bind('hide', that.onUserModalHide);
+
+			_googleModel.bind('change:isLoggedIn', function() {
+				if (_googleModel.get('isLoggedIn')) {
+					_$googleButton.html('Log out of Google');
+				} else {
+					_$facebookButton.html('Use Google');
+				}
+	        });
+
+			_facebookModel.bind('change:isLoggedIn', function(facebook) {
+				if (_facebookModel.get('isLoggedIn')) {
+					_$facebookButton.html('Log out of Facebook');
+				} else {
+					_$facebookButton.html('Use Facebook');
+				}
+			});
 		},
 
 		hideUserModal: function() {
@@ -171,38 +192,6 @@ define([
 
 			// BINDINGS
 	        _appModel.bind('change:activeView', that.onActiveViewChange);
-
-	        // Don't do shit like this.
-	        // These dom els are reset every render.
-	        // And we re-render whenever user logs in and shit.
-	        /*
-	        _accountModel = that.model;
-	        _googleModel = that.model.get('googleModel');
-	        _facebookModel = that.model.get('facebookModel');
-	        _$userPassword = that.$el.find('#user_password');
-	        _$loginButton = that.$el.find('#login_button');
-   	        _$googleButton = that.$el.find('#google_button');
-   	        _$facebookButton = that.$el.find('#facebook_button');
-	        _$headerEls = $('.account_view_header');
-	        
-	        
-	        _googleModel.bind('change:isLoggedIn', function() {
-				if (_googleModel.get('isLoggedIn')) {
-					_$googleButton.html('Log out of Google');
-				} else {
-					_$facebookButton.html('Use Google');
-				}
-	        });
-
-			_facebookModel.bind('change:isLoggedIn', function(facebook) {
-				if (_facebookModel.get('isLoggedIn')) {
-					_$facebookButton.html('Log out of Facebook');
-				} else {
-					_$facebookButton.html('Use Facebook');
-				}
-			});
-			*/
-
 	    }
 
 	   
