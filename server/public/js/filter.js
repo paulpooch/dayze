@@ -40,6 +40,19 @@ define([
 	*/
 	Filter.rules = {};
 
+	// http://regexlib.com/REDetails.aspx?regexp_id=933
+	Filter.rules.dayCode = function(t) {
+		var msg = C.FilterErrors.DayCode;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			Validator.check(t).is(/^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$/);
+			result.cleanVal = t;
+		} catch(e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
 	// http://www.regular-expressions.info/posixbrackets.html
 	// Allows hex 20 -> hex 7E of http://www.asciitable.com/
 	Filter.rules.location = function(t) {
@@ -229,6 +242,18 @@ Log.l('fail');
 		required: true
 	}];
 	Filter.fields[C.FilterAction.EventCreate] = [{
+		name: 'name',
+		rules: [ Filter.rules.eventName ],
+		immutable: false,
+		required: true,
+		serverOnly: true
+	}, {
+		name: 'dayCode',
+		rules: [ Filter.rules.dayCode ],
+		immutable: true,
+		required: true,
+		serverOnly: true
+	}, {
 		name: 'beginTime',
 		rules: [ Filter.rules.time ],
 		immutable: false,

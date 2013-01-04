@@ -37,6 +37,8 @@
 // Do we really care about model validation?
 //
 // CSRF Tokens
+//
+// Clean up Q flows in Storage
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -198,13 +200,13 @@ Log.l('sendError', err);
 
 			frontDoor(req, res)
 			.then(function(user) {
-
+Log.l(req.body);
 				return filterAction(req, res, C.FilterAction.EventCreate)
 				.then(function(clean) {
 				
 					return Storage.Events.createEvent(user, clean)
 					.then(function(event) {
-
+Log.l('event created successfully', event);
 						sendSuccess(res, event, Filter.clientBlacklist.event);
 						return;
 					

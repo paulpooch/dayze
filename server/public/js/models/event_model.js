@@ -19,12 +19,12 @@ define([
 		idAttribute: 'eventId',
 
 		defaults: {
-			name: 'No Events',
-			dayCode: '',
-			description: '',
-			location: '',
-			beginTime: '',
-			endTime: ''
+			name: null,
+			dayCode: null,
+			description: null,
+			location: null,
+			beginTime: null,
+			endTime: null
 		},
 
 		validate: function() {
@@ -61,6 +61,8 @@ define([
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 			that = this;
+			//that.set('name', options.name || null);
+			//that.set('dayCode', options.dayCode || null);
 			
 			// BINDINGS
 			that.bind('change', that.onChange);			

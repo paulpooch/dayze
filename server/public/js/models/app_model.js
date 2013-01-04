@@ -355,9 +355,11 @@ log('Pulled account from server', _accountModel, route);
 		},
 
 		addEvent: function(eventName, eventDayCode) {
+log('addEvent', eventName, eventDayCode);
 			// Begin here creating event model.
 			var event = new EventModel({ app: this, appModel: that, name: eventName, dayCode: eventDayCode });
 			_eventCollection.add(event);
+log(event, event.cid);
 			return event.cid;
 		},
 

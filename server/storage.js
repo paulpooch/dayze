@@ -597,8 +597,12 @@ Log.l('CACHE MISS');
 		Events.createEvent = function(user, post) {
 			var deferred = Q.defer();
 
-			var eventId = Uuid.v4();
-			var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
+			try {
+				var eventId = Uuid.v4();
+				var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
+			} catch (err) {
+				deferred.reject(new ServerError(err));
+			}
 
 			var event = {
 				eventId: eventId,
@@ -611,6 +615,8 @@ Log.l('CACHE MISS');
 				endTime: post.endTime
 			};
 
+			event = Utils.removeEmptyStrings(event);
+
 			EVENTS_BY_USERID_AND_TIME.get(user.userId, eventTime)
 			.then(function(eventsByUserIdAndTime) {
 
@@ -618,7 +624,7 @@ Log.l('CACHE MISS');
 				if (eventsByUserIdAndTime) {
 					var existingEvents = eventsByUserIdAndTime.events;
 					if (existingEvents) {
-						eventArr.push(existingEvents);
+						eventArr.concat(existingEvents);
 					}
 				}
 				eventArr.push(event.eventId);
@@ -629,9 +635,10 @@ Log.l('CACHE MISS');
 					events: eventArr
 				};
 
-				EVENTS_BY_USERID_AND_TIME.put(eventsEntry)
+				return EVENTS_BY_USERID_AND_TIME.put(eventsEntry)
 				.then(function(result) {
-					EVENTS.put(event)
+
+					return EVENTS.put(event)
 					.then(function(result) {
 						deferred.resolve(event);
 					});
@@ -815,8 +822,7 @@ Log.l('CACHE MISS');
 				.then(function(user) {
 					deferred.resolve(user);
 				});
-			})
-			.end();
+			});
 
 			return deferred.promise;
 		};
