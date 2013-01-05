@@ -1,4 +1,6 @@
-<% if (isLoggedIn) { %>
+<% 
+if (isLoggedIn) { 
+%>
 <div id="user_dropdown" class="pull-left">
 	<div class="btn-group inline">
 		<a id="user_button" class="btn btn-small btn-primary" href="account" data-toggle="button"><i class="icon-user icon-white" style="margin-right: 5px;"></i> <%= displayName %></a>
@@ -73,7 +75,15 @@
 					</div>
 				</div>
 
-				<hr />
+				<hr id="forgot_hr"/>
+
+				<div class="control-group">
+					<div class="controls">
+						<a id="forgot_password" href="#">Forgot Password?</a>
+					</div>
+				</div>
+
+				<hr/>
 
 				<div class="control-group">
 					<label class="control-label">Or Connect</label>
@@ -89,12 +99,22 @@
 		<div class="modal-footer">
 			<div class="controls controls-row">
 				<a id="show_create_button" class="btn btn-large span2" href="#">Create Account</a>
+				
 				<button tabindex="4" 
 				id="login_button" 
 				type="button" 
 				class="btn btn-primary btn-large span4" 
 				data-submit-trigger="1" 
 				data-loading-text="Signing in...">Sign In</button>
+
+				<button tabindex="2" 
+				style="display: none"
+				id="forgot_button" 
+				type="button" 
+				class="btn btn-primary btn-large span4" 
+				data-submit-trigger="1" 
+				data-loading-text="Sending Reset Email...">Reset Password</button>
+
 			</div>
 		</div>
 

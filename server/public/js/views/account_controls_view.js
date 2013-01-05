@@ -42,8 +42,6 @@ define([
 		_facebookModel,
 
 		_$userEmail,
-		_$userPassword,
-		_$loginButton,
 
 		_$googleButton,
 		_$facebookButton;
@@ -63,8 +61,6 @@ define([
 			_$userEmail = that.$el.find('#user_email');
 			_$feedbackLogin = that.$el.find('.feedback_message_login');
 			_$feedbackCreate = that.$el.find('.feedback_message_create');
-			_$userPassword = that.$el.find('#user_password');
-	        _$loginButton = that.$el.find('#login_button');
    	        _$googleButton = that.$el.find('#google_button');
    	        _$facebookButton = that.$el.find('#facebook_button');
 
@@ -120,7 +116,8 @@ define([
 			'click #show_login_button': 'showLoginForm',
 			'click #show_create_button': 'showCreateAccountForm',
 			'click #controls_create_account_button': 'showCreateAccountForm',
-			'click #controls_login_button': 'showLoginForm'
+			'click #controls_login_button': 'showLoginForm',
+			'click #forgot_password': 'onForgotPasswordClick'
 		},
 
 		onUserButtonClick: function(event) {
@@ -159,6 +156,17 @@ define([
 			setTimeout(function() {
 				_$createForm.find('[data-focus=1]').focus();
 			}, 500);
+		},
+
+		onForgotPasswordClick: function() {
+			that.model.set('state', 'forgotPassword');
+			that.$el.find('#loginPassword').closest('.control-group').fadeOut();
+			that.$el.find('#loginRemember').closest('.control-group').fadeOut();
+			that.$el.find('#forgot_password').closest('.control-group').fadeOut();
+			that.$el.find('#forgot_hr').fadeOut();
+			that.$el.find('#login_button').hide();
+			that.$el.find('#forgot_button').show();
+			that.$el.find('.modal-header h3').text('Reset Password');
 		},
 		///////////////////////////////////////////////////////////////////////
 
