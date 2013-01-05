@@ -28,6 +28,7 @@ define(function() {
 	Config.DYNAMO_DEFAULT_READ_PER_SEC = 2;
 	Config.DYNAMO_DEFAULT_WRITE_PER_SEC = 2;
 	Config.DYNAMO_SCAN_CHUNK_SIZE = 20;
+	Config.DYNAMO_BATCH_DELAY = 1000;
 	Config.DYNAMODB_CREDENTIALS = {
 		accessKeyId: 'AKIAINHDEIZ3QVSHQ3PA', 
 		secretAccessKey: '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'

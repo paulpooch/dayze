@@ -54,16 +54,16 @@ define([
 	var Cache = {};
 
 	Memcached.on('issue', function(issue) {
-		Log.e('Issue occured on server ' + issue.server + ', ' + issue.retries  + 
+Log.e('Issue occured on server ' + issue.server + ', ' + issue.retries  + 
 		' attempts left untill failure');
 	});
 	
 	Memcached.on('failure', function(issue) {
-		Log.e(issue.server + ' failed!');
+Log.e(issue.server + ' failed!');
 	});
 	
 	Memcached.on('reconnecting', function(issue) {
-		Log.e('reconnecting to server: ' + issue.server + ' failed!');
+Log.e('reconnecting to server: ' + issue.server + ' failed!');
 	});
 
 	Cache.get = function(key) {
@@ -98,13 +98,10 @@ define([
 		}
 	};
 
-	Cache.delete = function(key) {
+	Cache.remove = function(key) {
 		if (Config.IS_LOCAL_DEV) {
 			var deferred = Q.defer();
-			// Is this really an error?
-			// I guess caller shouldn't freak out when this fails, 
-			// but we shouldn't fake success.
-			deferred.reject(new Error(key + ' could not be deleted from cache.'));
+			deferred.resolve(true);
 			return deferred.promise;
 		} else {
 			return Q.ncall(
@@ -152,7 +149,7 @@ Log.l('CACHE MISS');
 				dbResult = dbResult[0];
 				Cache.set(cacheKey, dbResult, that.cacheTimeout)
 				.then(function(cacheResult) {
-					Log.l(dbResult);
+Log.l(dbResult);
 					deferred.resolve(dbResult);
 				})
 				.end();
@@ -164,11 +161,13 @@ Log.l('CACHE MISS');
 		return deferred.promise;
 	};
 
+	// This is wrong.  It doesn't use exclusiveStartKey stuff.
+	// See _scan
 	var _batchGet = function(keys) {
 		var that = this;
-		Log.l('Storage.batchGet');
-		Log.l('table = ', that.tableName);
-		Log.l('keys = ', keys);
+Log.l('Storage.batchGet');
+Log.l('table = ', that.tableName);
+Log.l('keys = ', keys);
 		
 		var deferred = Q.defer();
 		var keysRequiringDbHit = [];
@@ -180,13 +179,13 @@ Log.l('CACHE MISS');
 			var cacheKey = that.cachePrefix + key;
 			Cache.get(cacheKey)
 			.then(function(cacheResult) {
-				Log.l('CACHE HIT');
-				Log.l(cacheResult);
+Log.l('CACHE HIT');
+Log.l(cacheResult);
 				results.push(cacheResult);
 				defer2.resolve();
 			})
 			.fail(function(err) {
-				Log.l('CACHE MISS');
+Log.l('CACHE MISS');
 				keysRequiringDbHit.push(key);
 				defer2.resolve();
 			})
@@ -215,7 +214,7 @@ Log.l('CACHE MISS');
 
 			var batchReq = {};
 			batchReq[that.tableName] =  { keys: keysRequiringDbHit };
-			Log.l('batchReq', batchReq);
+Log.l('batchReq', batchReq);
 
 			Q.ncall(
 				ddb.batchGetItem,
@@ -223,8 +222,8 @@ Log.l('CACHE MISS');
 				batchReq
 			)
 			.then(function(dbResult) {
-				Log.l('BATCH RESULT');
-				Log.l(dbResult);
+Log.l('BATCH RESULT');
+Log.l(dbResult);
 
 				var result = dbResult[0].items;
 				var queue = [];
@@ -250,11 +249,8 @@ Log.l('CACHE MISS');
 //Log.l('Storage.put');
 //Log.l('table = ', that.tableName);
 //Log.l('item = ', item);
-			
-		var deferred = Q.defer();
 		cacheKey = item[that.cacheKey];	
-				
-		Q.ncall(
+		return Q.ncall(
 			ddb.putItem,
 			that,
 			that.tableName,
@@ -262,24 +258,19 @@ Log.l('CACHE MISS');
 			{}
 		)
 		.then(function(dbResult) {
-			Cache.set(that.cacheKey(item), item, that.cacheTimeout)
-			.then(function(cacheResult) {
-//Log.l(true);
-				deferred.resolve(true);
-			})
-			.end();	
+			return Cache.set(that.cacheKey(item), item, that.cacheTimeout);
 		})
-		.end();
-
-		return deferred.promise;
+		.then(function(cacheResult) {
+			return true;
+		});
 	};
 
 	var _delete = function(hashKey, rangeKey) {
 		var that = this;
-		Log.l('Storage.delete');
-		Log.l('table = ', that.tableName);
-		Log.l('hashKey = ', hashKey);
-		Log.l('rangeKey = ', rangeKey);
+Log.l('Storage.delete');
+Log.l('table = ', that.tableName);
+Log.l('hashKey = ', hashKey);
+Log.l('rangeKey = ', rangeKey);
 
 		var deferred = Q.defer();
 		rangeKey = rangeKey || null;
@@ -302,7 +293,7 @@ Log.l('CACHE MISS');
 			});
 		};
 
-		Cache.delete(cacheKey)
+		Cache.remove(cacheKey)
 		.then(function(result) {
 			return deleteFromTable();
 		})
@@ -314,19 +305,21 @@ Log.l('CACHE MISS');
 		return deferred.promise;
 	};
 
+	// This is wrong.  Needs to use exclusiveStartKey stuff.
+	// See _scan
 	var _query = function(hashKey, cacheKey, options) {
 		var that = this;
-		Log.l('Storage.query');
-		Log.l('table = ', that.tableName);
-		Log.l('hashKey = ', hashKey);
-		Log.l('cacheKey = ', cacheKey);
-		Log.l('options = ', options);
+Log.l('Storage.query');
+Log.l('table = ', that.tableName);
+Log.l('hashKey = ', hashKey);
+Log.l('cacheKey = ', cacheKey);
+Log.l('options = ', options);
 
 		var deferred = Q.defer();
 
 		Cache.get(cacheKey)
 		.then(function(cacheResult) {
-			Log.l(cacheResult);
+Log.l(cacheResult);
 			cacheResult = cacheResult.items;
 			deferred.resolve(cacheResult);
 		})
@@ -348,7 +341,7 @@ Log.l('CACHE MISS');
 				}
 				Cache.set(cacheKey, dbResult, that.cacheTimeout)
 				.then(function(cacheResult) {
-					Log.l(dbResult);
+Log.l(dbResult);
 					deferred.resolve(dbResult);
 				})
 				.end();
@@ -362,15 +355,15 @@ Log.l('CACHE MISS');
 
 	var _batchDelete = function(keys) {
 		var that = this;
-		Log.l('Storage.batchDelete');
-		Log.l('table = ', that.tableName);
-		Log.l('deleteRequest = ', deleteRequest);
+Log.l('Storage.batchDelete');
+Log.l('table = ', that.tableName);
+Log.l('keys = ', keys);
 
 		var deferred = Q.defer();
+		var remainingKeys = keys;
 
 		var cacheKeys = [];
-		for (var i = 0; i < keys.length; i++) {
-			var key = keys[i];
+		keys.forEach(function(key, index) {
 			var rangeKey = null;
 			var hashKey = null;
 			if (typeof key == 'object') { // Array of [hashKey, rangeKey]
@@ -382,20 +375,64 @@ Log.l('CACHE MISS');
 			var cacheKey = (rangeKey) ? hashKey + rangeKey : hashKey;
 			cacheKey = that.cachePrefix + cacheKey;
 			cacheKeys.push(cacheKey);
-		}
-
+		});
+		
 		var clearCache = function(key) {
-			var defer2 = Q.defer();
 			var cacheKey = that.cachePrefix + key;
-			Cache.delete(cacheKey)
-			.then(function(cacheResult) {
-				defer2.resolve();
-			})
-			.fail(function(err) {
-				defer2.resolve(); // We don't really care if this fails.
-			})
-			.end();
-			return defer2.promise;
+Log.l('clearCache', cacheKey);
+			return Cache.remove(cacheKey);
+		};
+
+		var dbDelete = function(keys) {
+			/*
+			batchWriteItem = function(putRequest, deleteRequest, cb) {
+			Put or delete several items across multiple tables
+			@param putRequest dictionnary { 'table': [item1, item2, item3], 'table2': item }
+			@param deleteRequest dictionnary { 'table': [key1, key2, key3], 'table2': [[id1, range1], [id2, range2]] }
+			@param cb callback(err, res, cap) err is set if an error occured
+			*/
+			var deleteRequest = {};		
+			deleteRequest[that.tableName] = keys;
+Log.l('deleteRequest', deleteRequest);
+			return Q.ncall(
+				ddb.batchWriteItem,
+				that,
+				{}, // putRequest
+				deleteRequest
+			);
+		};
+
+		var dbDeleteInBatches = function() {
+			if (remainingKeys.length) {
+
+				var keysToDelete = [];
+				var i = 0;
+				while (i < Config.DYNAMO_DEFAULT_WRITE_PER_SEC && remainingKeys.length) {
+					keysToDelete.push(remainingKeys.pop());
+					i++;
+				}
+
+				return dbDelete(keysToDelete)
+				.then(function(deleteResult) {
+Log.l('remainingKeys', remainingKeys);
+					if (remainingKeys.length)  {
+						setTimeout(function() {
+Log.l('NEXT BATCH');
+							return dbDeleteInBatches();
+						}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
+					} else {
+Log.l('DONE!!!! remainingKeys', remainingKeys);
+						return;
+					}
+				})
+				.fail(function(err) {
+Log.l('Error in _batchDelete', err);
+					deferred.reject(err);
+				})
+				.end();
+
+
+			}
 		};
 
 		var queue = [];
@@ -404,28 +441,12 @@ Log.l('CACHE MISS');
 		});
 		Q.all(queue)
 		.then(function(fulfilled) {
-			var deferred = Q.defer();
-			/*
-			batchWriteItem = function(putRequest, deleteRequest, cb) {
-			Put or delete several items across multiple tables
-			@param putRequest dictionnary { 'table': [item1, item2, item3], 'table2': item }
-			@param deleteRequest dictionnary { 'table': [key1, key2, key3], 'table2': [[id1, range1], [id2, range2]] }
-			@param cb callback(err, res, cap) err is set if an error occured
-			*/
-			var deleteRequest = {};
-			deleteRequest[that.tableName] = keys;
-			Q.ncall(
-				ddb.batchWriteItem,
-				that,
-				{}, // putRequest
-				deleteRequest
-			)
-			.then(function(dbResult) {
-				Log.l('BATCH RESULT');
-				Log.l(dbResult);
-				deferred.resolve(dbResult);
-			})
-			.end();
+
+			return dbDeleteInBatches();
+
+		})
+		.then(function() {
+			deferred.resolve();
 		})
 		.fail(function(err) {
 			deferred.reject(err);
@@ -442,9 +463,9 @@ Log.l('CACHE MISS');
 	*/
 	var _scan = function(scanOptions) {
 		var that = this;
-		Log.l('Storage.scan');
-		Log.l('table = ', that.tableName);
-		Log.l('scanOptions = ', scanOptions);
+Log.l('Storage.scan');
+Log.l('table = ', that.tableName);
+Log.l('scanOptions = ', scanOptions);
 
 		var deferred = Q.defer();
 		scanOptions = scanOptions || {};
@@ -483,7 +504,7 @@ Log.l('CACHE MISS');
 				if (nextKey && nextKey.hash) {
 					setTimeout(function() {
 						loop(nextKey);	
-					}, 500); // Delay so we don't crush db
+					}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
 				} else {
 					deferred.resolve({ count: totalCount, items: totalItems });
 				}
@@ -556,7 +577,8 @@ Log.l('CACHE MISS');
 		},
 		put: _put,
 		get: _get,
-		scan: _scan
+		scan: _scan,
+		batchDelete: _batchDelete
 	};
 
 	USERS_BY_EMAIL = {
@@ -585,11 +607,6 @@ Log.l('CACHE MISS');
 	// Events
 	///////////////////////////////////////////////////////////////////////////
 
-	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// REDO THIS SECTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	Storage.Events = (function() {
 
 		var Events = {};
@@ -674,22 +691,28 @@ Log.l('CACHE MISS');
 			var eventIds = [];
 			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
 			.then(function(eventsByTime) {
+				
 				if (eventsByTime.length) {
 					eventsByTime.forEach(function(eventsAtTime) {
 						// Less than optimal.
 						eventIds = eventIds.concat(eventsAtTime.events);
 					});
 					if (eventIds.length) {
+				
 						return EVENTS.batchGet(eventIds)
 						.then(function(events) {
 							deferred.resolve(events);
 						});
+				
 					} else {
 						deferred.resolve([]);
 					}	
 				} else {
 					deferred.resolve([]);
 				}
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
 			})
 			.end();
 
@@ -1001,61 +1024,98 @@ link.used = 0;
 		var AdminTools = {};
 
 		AdminTools.cleanTables = function() {
-			var deferred = Q.defer();
 			
-			// Remove all entries from USERS_BY_COOKIE unless the cookieId corresponds to a real user.
-			///////////////////////////////////////////////////////////////////
-			var cookieIndices = null;
-
-			var delCount = 0;
-			var keepCount = 0;
-
-			var loop = function(callback) {
-
-				if (cookieIndices.length) {
-					return processQueue()
-					.then(function() {
-						loop(callback);
-					});
-				} else {
-					callback();
+			var referentialIntegrityMappings = [
+				{
+					// For each cookieId in USERS_BY_COOKIE
+					// 		Ensure USERS contains a user with that cookieId.
+					//  	If not, delete that row in USERS_BY_COOKIE (it's an orphan).
+					slaveTable: USERS_BY_COOKIE, 
+					masterTable: USERS,
+					slaveKey: 'cookieId',
+					masterKey: 'userId'
 				}
+			];
 
+			var loop = function() {
+				if (referentialIntegrityMappings.length) {
+					var refMap = referentialIntegrityMappings.pop();
+					return clean(refMap)
+					.then(function(result) {
+
+						if (referentialIntegrityMappings.length) {
+							return loop();
+						} else {
+							return;
+						}
+
+					});
+				}
 			};
 
-			// Does this create a huge stack of promises?
-			var processQueue = function() {
-				var defer2 = Q.defer();
-				var cookieIndex = cookieIndices.pop();
-				USERS.get(cookieIndex.userId)
-				.then(function(user) {	
-					if (!user || user.cookieId != cookieIndex.cookieId) {
-						// Delete it
-						delCount++;
-					} else {
-						keepCount++;
+			var clean = function(refMap) {
+				var deferred = Q.defer();
+
+				var SLAVE = refMap.slaveTable;
+				var MASTER = refMap.masterTable;
+				var masterKeyName = refMap.masterKey;
+				var slaveKeyName = refMap.slaveKey;
+				var slaveItems;
+				var slavesToDelete = [];
+
+				var processSlaveItemsOneAtATime = function() {
+					if (slaveItems.length) {
+					
+						var slaveItem = slaveItems.pop();
+						var masterKey = slaveItem[masterKeyName];
+						
+						return MASTER.get(masterKey)
+						.then(function(masterItem) {
+							
+							if (!masterItem || masterItem[slaveKeyName] != slaveItem[slaveKeyName]) {
+								var slaveKey = slaveItem[slaveKeyName];
+								slavesToDelete.push(slaveKey);
+							} else {
+								// Do nothing.  This item should live.
+							}
+
+							// Keep going?
+							if (slaveItems.length) {
+								return processSlaveItemsOneAtATime();
+							} else {
+Log.l('BOTTOM OF RESURSION STACK');
+								return;
+							}
+								
+						});
+
 					}
-					defer2.resolve();
-				});
-				return defer2.promise;
+				};
+
+				SLAVE.scan({ limit: Config.DYNAMO_SCAN_CHUNK_SIZE })
+				.then(function(result) {
+					slaveItems = result.items;
+Log.l('slaveItems', slaveItems);
+					return processSlaveItemsOneAtATime();				
+				})
+				.then(function() {
+Log.l('savesToDelete', slavesToDelete);
+					return SLAVE.batchDelete(slavesToDelete);
+
+				})
+				.then(function() {
+					deferred.resolve();
+				})
+				.fail(function(err) {
+					deferred.reject(new ServerError(err));
+				})
+				.end();
+
+				return deferred.promise;
 			};
 
-			USERS_BY_COOKIE.scan({ limit: Config.DYNAMO_SCAN_CHUNK_SIZE })
-			.then(function(result) {
+			return loop();
 
-				cookieIndices = result.items;
-Log.l('BEGIN LOOP');
-				loop(function() {
-Log.l('LOOP DONE');
-				});
-
-			})
-			.fail(function(err) {
-				deferred.reject(new ServerError(err));
-			})
-			.end();
-
-			return deferred.promise;
 		};
 
 		return AdminTools;
