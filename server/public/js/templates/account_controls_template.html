@@ -35,6 +35,50 @@ if (isLoggedIn) {
 
 <div id="user_modal" class="modal hide fade">
 
+	<!-- data-filter = C.FilterAction.AccountForgot -->
+	<form id="forgot_form"
+	data-filter="account.forgot" 
+	style="display: none;"
+	onsubmit="return false;">
+
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Reset Password</h3>
+		</div>
+
+		<div class="modal-body">
+			<div class="form-horizontal">
+
+				<p class="feedback_message_reset"></p>
+
+				<div class="control-group">
+					<label class="control-label" for="loginEmail">Email</label>
+					<div class="controls">
+						<input tabindex="1" type="text" id="loginEmail" placeholder="Email"/>
+						<span class="help-inline"></span>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<div class="controls controls-row">
+				<a id="show_create_button" class="btn btn-large span2" href="#">Create Account</a>
+				<a tabindex="5" id="show_login_button" class="btn btn-large span1" href="#">Sign In</a>
+
+				<button tabindex="2" 
+				id="forgot_button" 
+				type="button" 
+				class="btn btn-primary btn-large span3" 
+				data-submit-trigger="1" 
+				data-loading-text="Sending Reset Email...">Reset Password</button>
+
+			</div>
+		</div>
+
+	</form>
+
 	<!-- data-filter = C.FilterAction.AccountLogin -->
 	<form id="login_form"
 	data-filter="account.login" 
@@ -75,7 +119,7 @@ if (isLoggedIn) {
 					</div>
 				</div>
 
-				<hr id="forgot_hr"/>
+				<hr/>
 
 				<div class="control-group">
 					<div class="controls">
@@ -106,14 +150,6 @@ if (isLoggedIn) {
 				class="btn btn-primary btn-large span4" 
 				data-submit-trigger="1" 
 				data-loading-text="Signing in...">Sign In</button>
-
-				<button tabindex="2" 
-				style="display: none"
-				id="forgot_button" 
-				type="button" 
-				class="btn btn-primary btn-large span4" 
-				data-submit-trigger="1" 
-				data-loading-text="Sending Reset Email...">Reset Password</button>
 
 			</div>
 		</div>

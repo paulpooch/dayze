@@ -32,6 +32,7 @@ define([
 		_$userModal,
 		_$loginForm,
 		_$createForm,
+		_$forgotForm,
 		_$userButton,
 		_$feedbackLogin,
 		_$feedbackCreate,
@@ -57,6 +58,7 @@ define([
 			_$userModal = that.$el.find('#user_modal');
 			_$createForm = that.$el.find('#create_form');
 	        _$loginForm = that.$el.find('#login_form');
+			_$forgotForm = that.$el.find('#forgot_form');
 			_$userButton = that.$el.find('#user_button');
 			_$userEmail = that.$el.find('#user_email');
 			_$feedbackLogin = that.$el.find('.feedback_message_login');
@@ -145,28 +147,33 @@ define([
 
 		showLoginForm: function() {
 			_$userModal.modal('show');
+			_$forgotForm.hide();
 			_$createForm.hide();
-			_$loginForm.show();
+			_$loginForm.fadeIn();
 		},
 
 		showCreateAccountForm: function() {
 			_$userModal.modal('show');
+			_$forgotForm.hide();
 			_$loginForm.hide();
-			_$createForm.show();
+			_$createForm.fadeIn();
 			setTimeout(function() {
 				_$createForm.find('[data-focus=1]').focus();
 			}, 500);
 		},
 
 		onForgotPasswordClick: function() {
-			that.model.set('state', 'forgotPassword');
+			//that.model.set('state', 'forgotPassword');
+			_$loginForm.hide();
+			_$forgotForm.fadeIn();
+			/*
 			that.$el.find('#loginPassword').closest('.control-group').fadeOut();
 			that.$el.find('#loginRemember').closest('.control-group').fadeOut();
 			that.$el.find('#forgot_password').closest('.control-group').fadeOut();
 			that.$el.find('#forgot_hr').fadeOut();
 			that.$el.find('#login_button').hide();
 			that.$el.find('#forgot_button').show();
-			that.$el.find('.modal-header h3').text('Reset Password');
+			that.$el.find('.modal-header h3').text('Reset Password');*/
 		},
 		///////////////////////////////////////////////////////////////////////
 
