@@ -825,7 +825,7 @@ Log.l('scanOptions = ', scanOptions);
 
 				} else {
 				
-					return Storage.CustomLinks.makeEmailConfirmationLink(user)
+					return Storage.CustomLinks.makeLink(user, C.Links.EmailConfirmation)
 					.then(function(link) {
 						return Email.sendEmailConfirmation(user, link);
 					})
@@ -834,6 +834,26 @@ Log.l('scanOptions = ', scanOptions);
 					});
 				
 				}
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.resetPassword = function(user) {
+			var deferred = Q.defer();
+
+			Storage.CustomLinks.makeLink(user, C.Links.ResetPassword)
+			.then(function(link) {
+
+				return Email.sendResetPassword(user, link);
+
+			})
+			.then(function(sendResetPasswordResult) {
+				deferred.resolve(sendResetPasswordResult);
 			})
 			.fail(function(err) {
 				deferred.reject(new ServerError(err));
@@ -872,12 +892,6 @@ Log.l('scanOptions = ', scanOptions);
 			.end();
 
 			return deferred.promise;
-		};
-
-		Users.deleteAllCookies = function(user) {
-
-
-
 		};
 
 		// Returns user.
@@ -931,6 +945,21 @@ Log.l('scanOptions = ', scanOptions);
 			})
 			.end();
 
+			return deferred.promise;
+		};
+
+		Users.getUserWithId = function(userId) {
+			var deferred = Q.defer();
+
+			USERS.get(userId)
+			.then(function(user) {
+				deferred.resolve(user);
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+			
 			return deferred.promise;
 		};
 
@@ -1006,20 +1035,29 @@ Log.l('scanOptions = ', scanOptions);
 
 		var CustomLinks = {};
 
-		CustomLinks.getLink = function(user, linkId) {
+		CustomLinks.getLink = function(linkId, ignoreRules) {
 			var deferred = Q.defer();
 
 			CUSTOM_LINKS.get(linkId)
 			.then(function(link) {
+
+				if (ignoreRules) {
+					deferred.resolve(link);
+				}
+
 				var needsToBeMarkedUsed = false;
+				
+				/* No guarantee user is logged in when they hit link.
 				if (link.userId && link.userId != user.userId) {
 					deferred.reject(new ServerError(C.ErrorCodes.LinkNotForUser));
 				}
+				*/
+
 				if (link.isSingleUse) {
-					needsToBeMarkedUsed = true;
-					if (link.used) {
-						deferred.reject(new ServerError(C.ErrorCodes.LinkUsed));
-					}
+					// needsToBeMarkedUsed = true;
+					// if (link.used) {
+					// 	deferred.reject(new ServerError(C.ErrorCodes.LinkUsed));
+					// }
 				}
 				if (link.expiration) {
 					var now = new Date();
@@ -1029,9 +1067,10 @@ Log.l('scanOptions = ', scanOptions);
 					}
 				}
 				if (needsToBeMarkedUsed) {
-link.used = 0;
-//link.used = 1;
-					CUSTOM_LINKS.put(link)
+
+					link.used = 1;
+					
+					return CUSTOM_LINKS.put(link)
 					.then(function(result) {
 						deferred.resolve(link);
 					});
@@ -1048,22 +1087,42 @@ link.used = 0;
 			return deferred.promise;
 		};
 
-		CustomLinks.makeEmailConfirmationLink = function(user) {
+		CustomLinks.makeLink = function(user, type) {
 			var deferred = Q.defer();
 
 			var expiration = new Date();
-			expiration.setDate(expiration.getDate() + Config.LINK_EXPIRATION_EMAIL_CONFIRMATION);
+			var life = C.Links.Expiration[type];
+			expiration.setDate(expiration.getDate() + life);
 			expiration = expiration.toISOString();
-			var link = {
-				linkId: Utils.generateCustomLink(),
-				type: Config.LINK_TYPE_EMAIL_CONFIRMATION,
-				isSingleUse: 1,
-				createTime: Utils.getNowIso(),
-				expiration: expiration,
-				used: 0,
-				userId: user.userId,
-				pendingEmail: user.unconfirmedEmail
-			};
+
+			if (type == C.Links.EmailConfirmation) {
+
+				var link = {
+					linkId: Utils.generateCustomLink(),
+					type: type,
+					isSingleUse: 1,
+					createTime: Utils.getNowIso(),
+					expiration: expiration,
+					used: 0,
+					userId: user.userId,
+					pendingEmail: user.unconfirmedEmail 
+					// We store the email in link so we know exactly what email we mailed.
+					// Otherwise we'd be blindly trusting user.unconfirmedEmail at the time of link click which is bad.
+				};
+
+			} else if (type == C.Links.ResetPassword) {
+				
+				var link = {
+					linkId: Utils.generateCustomLink(),
+					type: type,
+					isSingleUse: 1,
+					createTime: Utils.getNowIso(),
+					expiration: expiration,
+					used: 0,
+					userId: user.userId
+				};
+
+			}
 
 			CUSTOM_LINKS.put(link)
 			.then(function(result) {
@@ -1075,7 +1134,7 @@ link.used = 0;
 			.end();
 
 			return deferred.promise;
-		};		
+		};
 
 		return CustomLinks;
 	})();

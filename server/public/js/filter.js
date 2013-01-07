@@ -165,7 +165,7 @@ Log.l('fail');
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			t = Validator.sanitize(t).xss().trim();
-			Validator.check(t).is(/^[abcdefghjkmnpqrstuvwxyz0123456789]{30}$/);
+			Validator.check(t).is(/^[abcdefghjkmnpqrstuvwxyz0123456789]{40}$/);
 			result.cleanVal = t;
 		} catch (e) {
 			result.passed = false;
@@ -291,20 +291,14 @@ Log.l('fail');
 		rules: [ Filter.rules.email	],
 		immutable: true,
 		required: true
-	}, {
-		name: 'state',
-		rules: [ Filter.rules.alpha ],
+	}];
+	Filter.fields[C.FilterAction.AccountForgot] = [{
+		name: 'forgotEmail',
+		rules: [ Filter.rules.email	],
 		immutable: true,
-		required: true,
-		serverOnly: true
+		required: true
 	}];
 	Filter.fields[C.FilterAction.AccountLogin] = [{
-		name: 'state',
-		rules: [ Filter.rules.alpha ],
-		immutable: true,
-		required: true,
-		serverOnly: true
-	}, {
 		name: 'loginPassword',
 		rules: [ Filter.rules.password ],
 		immutable: true,
@@ -320,7 +314,7 @@ Log.l('fail');
 		immutable: true,
 		required: false
 	}];
-	Filter.fields[C.FilterAction.AccountInitialPw] = [{
+	Filter.fields[C.FilterAction.AccountPasswordChange] = [{
 		name: 'password',
 		rules: [ Filter.rules.password ],
 		immutable: true,

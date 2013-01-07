@@ -19,10 +19,6 @@ define([], function() {
 	C.ActiveViews.Basic = 4;
 	C.ActiveViews.Thinking = 5;
 
-	C.FrontDoorSpecialCase = {};
-	C.FrontDoorSpecialCase.AccountList = 'accountList';
-	C.FrontDoorSpecialCase.Login = 'login';
-
 	C.FilterAction = {};
 	C.FilterAction.LinkRead = 'link.read';
 	C.FilterAction.EventList = 'event.list';
@@ -31,7 +27,8 @@ define([], function() {
 	C.FilterAction.AccountList = 'account.list';
 	C.FilterAction.AccountCreate = 'account.create';
 	C.FilterAction.AccountLogin = 'account.login';
-	C.FilterAction.AccountInitialPw = 'account.initialPwSet';
+	C.FilterAction.AccountPasswordChange = 'account.password';
+	C.FilterAction.AccountForgot = 'account.forgot';
 
 	C.HttpCodes = {};
 	// Add more if you need to - http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
@@ -58,9 +55,11 @@ define([], function() {
 	C.ErrorCodes.Filter = 2;
 	C.ErrorCodes.AccountLoginPassword = 10;
 	C.ErrorCodes.AccountLoginEmail = 11;
-	C.ErrorCodes.AccountNoCookie = 12;
-	C.ErrorCodes.AccountNotYourId = 13;
-	C.ErrorCodes.AccountEmailTaken = 14;
+	C.ErrorCodes.AccountLoginPartialAccount = 12;
+	C.ErrorCodes.AccountNoCookie = 13;
+	C.ErrorCodes.AccountNotYourId = 14;
+	C.ErrorCodes.AccountEmailTaken = 15;
+	C.ErrorCodes.AccountForgotNoAccount = 16;
 	C.ErrorCodes.LinkNotForUser = 21;
 	C.ErrorCodes.LinkUsed = 22;
 	C.ErrorCodes.LinkExpired = 23;
@@ -69,7 +68,8 @@ define([], function() {
 	// SPECIAL CASE ERRORS
 	C.Errors[C.ErrorCodes.External] = {
 		code: C.ErrorCodes.External,
-		httpCode: C.HttpCodes.GenericServerError
+		httpCode: C.HttpCodes.GenericServerError,
+		message: 'An unknown server error occured.'
 	};
 
 	C.Errors[C.ErrorCodes.Filter] = {
@@ -91,6 +91,12 @@ define([], function() {
 		message: 'No account with that email exists so good luck with that.'
 	};
 
+	C.Errors[C.ErrorCodes.AccountLoginPartialAccount] = {
+		code: C.ErrorCodes.AccountLoginPartialAccount,
+		httpCode: C.HttpCodes.BadRequest,
+		message: 'This account was not fully created.  Please use the forgot password link.'
+	};
+
 	C.Errors[C.ErrorCodes.AccountNoCookie] = {
 		code: C.ErrorCodes.AccountNoCookie,
 		httpCode: C.HttpCodes.Unauthorized,
@@ -107,6 +113,12 @@ define([], function() {
 		code: C.ErrorCodes.AccountEmailTaken,
 		httpCode: C.HttpCodes.BadRequest,
 		message: 'There is already an account with this email.'
+	};
+
+	C.Errors[C.ErrorCodes.AccountForgotNoAccount] = {
+		code: C.ErrorCodes.AccountForgotNoAccount,
+		httpCode: C.HttpCodes.NotFound,
+		message: 'These is no account with this email.'
 	};
 
 	C.Errors[C.ErrorCodes.LinkNotForUser] = {
@@ -133,6 +145,11 @@ define([], function() {
 		message: 'LinkId was invalid.'
 	}
 
+	C.Strings = {};
+	C.Strings.ResetPassword = function(p) {
+		return 'A password reset link was sent to ' + p + '.<br/>The links expires in 3 days.<br/>';
+	};
+
 	// Makes testing for correct error message easy.
 	C.FilterErrors = {};
 	C.FilterErrors.DayCode = 'dayCode must be a valid YYYY-MM-DD format.';
@@ -149,6 +166,33 @@ define([], function() {
 	C.FilterErrors.EventLocation = 'Location must be 100 or less printable characters.';
 	C.FilterErrors.EventName = 'Name must be 1 to 30 printable characters.';
 	C.FilterErrors.Time = 'Time must be valid (3:30pm).';
+
+	C.Links = {};
+	C.Links.Expiration = {};
+	C.Links.EmailConfirmation = 'email_confirmation';
+	C.Links.Expiration[C.Links.EmailConfirmation] = 7; // 7 days
+	C.Links.ResetPassword = 'reset_password';
+	C.Links.Expiration[C.Links.ResetPassword] = 3;
+
+	C.States = {};
+	C.States.Saved = 'saved';
+	C.States.Created = 'created';
+	C.States.InitialPasswordSet = 'initialPwSet';
+	C.States.Create = 'create';
+	C.States.ForgotPassword = 'forgotPassword';
+	C.States.PasswordReset = 'passwordReset';
+	C.States.Logout = 'logout';
+	C.States.Login = 'login';
+	// Not really States... just used for frontDoor.
+	C.States.AccountList = 'accountList';
+	C.States.Link = 'link';
+
+	C.FrontDoorSpecialCase = {};
+	C.FrontDoorSpecialCase.NoAccountRequired = {};
+	C.FrontDoorSpecialCase.NoAccountRequired[C.States.AccountList] = 1;
+	C.FrontDoorSpecialCase.NoAccountRequired[C.States.Login] = 1;
+	C.FrontDoorSpecialCase.NoAccountRequired[C.States.ForgotPassword] = 1;
+	C.FrontDoorSpecialCase.NoAccountRequired[C.States.Link] = 1;
 
 	return C;
 

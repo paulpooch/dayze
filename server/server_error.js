@@ -2,9 +2,11 @@
 // SERVER ERRORS
 /////////////////////////////////////////////////////////////////////////////////////////
 define([
-	'c'
+	'c',
+	'config'
 ], function(
-	C
+	C,
+	Config
 ) {
 
 	var ServerError = function(error) {
@@ -26,8 +28,12 @@ define([
 			// Error from external source. - Some other lib or unknown failure.	
 			this.code = C.ErrorCodes.External;
 			this.httpCode = C.HttpCodes.GenericServerError
-			this.message = JSON.stringify(error);
-			this.stackTrace = error.stack || null;
+			if (Config.IS_LOCAL_DEV) {
+				this.message = JSON.stringify(error);
+				this.stackTrace = error.stack || null;	
+			} else {
+				this.message = C.Errors[C.ErrorCodes.External].message;
+			}
 		}
 	};
 

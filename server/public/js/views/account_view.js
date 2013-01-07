@@ -40,8 +40,8 @@ define([
 			var data = that.model.toJSON();
 			that.$el.html(that.template(data));
 			_$accountForm = that.$el.find('#account_form');
-			_accountForm = new SmartForm(that.model, _$accountForm, _appModel.setInitialPassword);
-			that.model.set('state', null);
+			_accountForm = new SmartForm(that.model, _$accountForm, _appModel.changePassword);
+			that.model.set('message', '');
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////

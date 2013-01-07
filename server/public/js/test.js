@@ -55,6 +55,19 @@ require(['app_client', 'test_registry', 'c'], function(App, TestRegistry, C) {
 // By all means put minimal effort in.
 ///////////////////////////////////////////////////////////////////////////////
 
+module('Forgot Password');
+
+test('forgot password success', function() {
+	$('#controls_login_button').click();
+	$('#forgot_password').click();
+	$('#forgotEmail').val('paul.pucciarelli@gmail.com');
+	$('#forgot_button').click();
+	equal(1, 1);
+});
+
+
+/*
+
 module('Create Event');
 
 test('create account success', function() {
@@ -69,6 +82,7 @@ test('create account success', function() {
 	$('#save_event_button').click();
 });
 
+*/
 
 
 /*

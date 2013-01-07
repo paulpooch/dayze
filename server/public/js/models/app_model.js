@@ -248,20 +248,28 @@ log('Pulled account from server', _accountModel, route);
 
 		routeAccount: function(action, linkId) {
 			switch (action) {
-				case 'confirm_email':
+				case C.Links.EmailConfirmation:
 					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
 					that.showView(C.ActiveViews.Thinking);
 					linkModel.fetch({
 						success: function() {
-							if (linkModel.get('type') == 'email_confirmation') {
+							if (linkModel.get('type') == C.Links.EmailConfirmation) {
 								_accountModel.fetch({
 									success: function() {
 										if (_accountModel.get('missingPassword')) {
-											_accountModel.set('state', 'initialPwSet');
+											
+											// Reflect that we logged user in.
+											_accountControlsView.render();
+											_accountModel.set('state', C.States.InitialPasswordSet);
+										log('AAA', _accountModel);
 											_accountControlsView.render();
 											that.showView(C.ActiveViews.Account);
+											setTimeout(function() {
+												_accountView.$el.find('[data-focus=1]').focus();
+											}, 500);
+
 										} else {
-											_accountModel.set('state', 'saved');
+											_accountModel.set('state', C.States.Saved);
 											that.showView(C.ActiveViews.Account);
 										}
 									},
@@ -272,10 +280,36 @@ log('Pulled account from server', _accountModel, route);
 						error: that.handleError				
 					});
 					break;
-				case 'created':
+				case C.Links.ResetPassword:
+					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
+					that.showView(C.ActiveViews.Thinking);
+					linkModel.fetch({
+						success: function() {
+							if (linkModel.get('type') == C.Links.ResetPassword) {
+								_accountModel.fetch({
+									success: function() {
+										
+										// Reflect that we logged user in.
+										_accountControlsView.render();
+										_accountModel.set('state', C.States.PasswordReset);
+										_accountModel.set('pwResetToken', linkId);
+										that.showView(C.ActiveViews.Account);
+										setTimeout(function() {
+											_accountView.$el.find('[data-focus=1]').focus();
+										}, 500);
+										
+									},
+									error: that.handleError
+								});
+							}
+						},
+						error: that.handleError				
+					});
+					break;
+				case C.States.Created:
 					_accountModel.fetch({
 						success: function() {
-							_accountModel.set('state', 'created');
+							_accountModel.set('state', C.States.Created);
 							_accountControlsView.hideUserModal();
 							_accountControlsView.render();
 							that.showView(C.ActiveViews.Account);
@@ -283,8 +317,8 @@ log('Pulled account from server', _accountModel, route);
 						error: that.handleError
 					});
 					break;
-				case 'saved':
-					_accountModel.set('state', 'saved');
+				case C.States.Saved:
+					_accountModel.set('state', C.States.Saved);
 					that.showView(C.ActiveViews.Account);
 					break;
 				default:
@@ -423,7 +457,7 @@ log('event saved', model, response);
 
 		// FROM ACCOUNT CONTROLS VIEW /////////////////////////////////////////
 		createAccount: function() {
-			_accountModel.set('state', 'createAccount');
+			_accountModel.set('state', C.States.Create);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
@@ -443,7 +477,7 @@ log('event saved', model, response);
 		},
 
 		login: function() {
-			_accountModel.set('state', C.FrontDoorSpecialCase.Login);
+			_accountModel.set('state', C.States.Login);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
@@ -458,7 +492,9 @@ log(_accountModel);
 				error: function(model, response) {
 					if (response.responseText) {
 						var error = JSON.parse(response.responseText);
-						if (error.code == C.ErrorCodes.AccountLoginPassword || error.code == C.ErrorCodes.AccountLoginEmail) {
+						if (error.code == C.ErrorCodes.AccountLoginPassword || 
+						error.code == C.ErrorCodes.AccountLoginPartialAccount ||
+						error.code == C.ErrorCodes.AccountLoginEmail) {
 							_accountControlsView.handleError(error);
 						} else {
 							that.handleError(model, response);
@@ -469,14 +505,33 @@ log(_accountModel);
 		},
 
 		logout: function() {
-			_accountModel.set('state', 'logout');
+			_accountModel.set('state', C.States.Logout);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
-log(C);
 					window.location = C.Domain; // Best way to guarantee all backbone state is wiped out.
 				},
 				error: that.handleError
+			});
+		},
+
+		forgotPassword: function() {
+			_accountModel.set('state', C.States.ForgotPassword);
+			_accountModel.save([], {
+				wait: true,
+				success: function(model, response) {
+					_accountControlsView.handleForgotPasswordSuccess();
+				},
+				error: function(model, response) {
+					if (response.responseText) {
+						var error = JSON.parse(response.responseText);
+						if (error.code == C.ErrorCodes.AccountForgotNoAccount) {
+							_accountControlsView.handleError(error);
+						} else {
+							that.handleError(model, response);
+						}
+					}
+				}
 			});
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -490,11 +545,13 @@ log(C);
 
 
 		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
-		setInitialPassword: function() {
-			_accountModel.set('state', 'initialPwSet')
+		changePassword: function() {
+log('changePassword');
+log(_accountModel);
 			_accountModel.save([], {
 				wait: true,
 				success: function() {
+log('success');
 					_router.navigate('account/saved', { trigger: true });
 				},
 				error: that.handleError
@@ -567,7 +624,7 @@ log(C);
 			_calendarView = new CalendarView({ model: that.get('calendarModel'), appModel: that, el: $('#calendar_view_holder') });
 			_appView = new AppView({ model: that, el: $('body') });
 
-			//_accountModel.set('state', 'initialPwSet')
+			//_accountModel.set('state', C.States.InitialPasswordSet);
 			//that.showView(C.ActiveViews.Account);			
 		},
 

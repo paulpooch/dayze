@@ -7,12 +7,14 @@ define([
 	'logg', // The 'log' package.  Hence why this is called logg.
 	'config',
 	'amazon-ses',
-	'q'
+	'q',
+	'c'
 ], function(
 	Log,
 	Config,
 	AmazonSES,
-	Q
+	Q,
+	C
 ) {
 
 	var Email = {};
@@ -70,9 +72,20 @@ define([
 			'Can you just click this link so we know your email is real?\r\n',
 			'We promise to only email you invites and never spam or reveal this address.\r\n',
 			'\r\n\r\n',
-			'http:', Config.URL_ROOT, 'account/confirm_email/', link.linkId
+			'http:', Config.URL_ROOT, 'account/' + C.Links.EmailConfirmation + '/', link.linkId
 		].join('');
 		return sendEmail(user, user.unconfirmedEmail, subject, bodyText, null);
+	};
+
+	Email.sendResetPassword = function(user, link) {
+		var subject = 'Your DayPaint Password Reset Link';
+		var bodyText = [
+			'Click this link to set a new password.  This link will only work once.\r\n',
+			'We know remembering passwords is annoying but glad you\'re still using DayPaint.\r\n',
+			'\r\n\r\n',
+			'http:', Config.URL_ROOT, 'account/' + C.Links.ResetPassword + '/', link.linkId
+		].join('');
+		return sendEmail(user, user.email, subject, bodyText, null);
 	};
 
 	return Email;

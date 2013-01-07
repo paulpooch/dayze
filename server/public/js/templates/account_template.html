@@ -39,11 +39,11 @@
 		</div>
 	</form>
 
-<% } else if (state == 'initialPwSet') { %>
+<% } else if (state == 'initialPwSet' || state == 'passwordReset') { %>
 
 	<!-- C.FilterAction.AccountInitialPw -->
 	<form id="account_form" 
-	data-filter="account.initialPwSet" 
+	data-filter="account.password" 
 	onsubmit="return false;">
 		<div class="row-fluid">
 			<table class="table span10">
@@ -67,7 +67,7 @@
 	 				<td class="span3"><strong>Password</strong></td>
 	 				<td class="span6">
 						<div class="form-inline">
-							<input tabindex="1" type="password" id="password" placeholder="Password">
+							<input tabindex="1" data-focus="1" type="password" id="password" placeholder="Password">
 							<button tabindex="2" 
 							id="create_password_button" 
 							type="button" 

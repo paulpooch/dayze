@@ -17,13 +17,18 @@ define([
   		return (new Date().toISOString());
   	};
 
+  	Utils.secureRandom = function() {
+  		var buffer = Crypto.randomBytes(1);
+  		return (buffer[0] / 255);  		
+  	};
+
   	Utils.generateCustomLink = function() {
 		var validChars = 'abcdefghjkmnpqrstuvwxyz0123456789';
 		var password = '';
 		var counter = 0;
-		var length = 30;
+		var length = 40;
 		while (counter < length) {
-			var rand = Math.round(Math.random() * (validChars.length - 1));
+			var rand = Math.round(Utils.secureRandom() * (validChars.length - 1));
 			var oneChar = validChars.substr(rand, 1);
 			password += oneChar;
 			counter++;
@@ -43,7 +48,7 @@ define([
 		var password = '';
 		var counter = 0;
 		while (counter < length) {
-			var rand = Math.round(Math.random() * (validChars[level].length - 1));
+			var rand = Math.round(Utils.secureRandom() * (validChars[level].length - 1));
 			var oneChar = validChars[level].substr(rand, 1);
 			password += oneChar;
 			counter++;

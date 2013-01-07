@@ -6,7 +6,8 @@ define([
 	'plugins',
 	'bootstrap',
 
-	'models/app_model'
+	'models/app_model',
+	'c'
 ], function(
 	jQuery,
 	Modernizr,
@@ -15,7 +16,8 @@ define([
 	plugins,
 	Bootstrap,
 
-	AppModel
+	AppModel,
+	C
 ) {
 
 	var that,
@@ -77,7 +79,7 @@ log('ROUTE: account', action, linkId);
 				},
 				pullAccountFirst: true
 			}
-			if (action == 'confirm_email' || action == 'created') {
+			if (action == C.Links.EmailConfirmation || action == C.Links.ResetPassword || action == C.States.Created) {
 				route.pullAccountFirst = false;
 			}
 			_appModel.route(route);	

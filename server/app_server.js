@@ -30,15 +30,37 @@
 // Automatically update user's last activity time during frontDoor?  maybe login======//
 // Awesome validation framework.
 //
-// Clean out table job
-// -expired links
-// -temp accounts with lastactivity > 1 month
 //
 // Do we really care about model validation?
 //
 // CSRF Tokens
 //
 // Clean up Q flows in Storage
+/*
+
+1. table cleanout script [DONE]
+2. profile pics (John)
+3. forgot password (Paul)
+4. login security - does user have permission to do action / is user really logged in (Paul)
+5. event create
+6. show events on cal
+7. table cleanout by expiration
+	// Clean out table job
+	// -expired links
+	// -temp accounts with lastactivity > 1 month
+8. remember me
+
+POSTLAUNCH
+
+7. friending
+8. show friends events
+9. privacy
+10. google cal sync
+11. google friend sync
+12. fb cal sync
+13. fb friend sync
+
+*/
 ///////////////////////////////////////////////////////////////////////////////
 
 'use strict';
@@ -104,7 +126,7 @@ requirejs([
 			})
 			.end();
 		} else {
-			if (specialCase == C.FrontDoorSpecialCase.AccountList || specialCase == C.FrontDoorSpecialCase.Login) {
+			if (specialCase && C.FrontDoorSpecialCase.NoAccountRequired.hasOwnProperty(specialCase)) {
 				deferred.resolve(null);
 			} else {
 				deferred.reject(new ServerError(C.ErrorCodes.AccountNoCookie));
@@ -139,6 +161,7 @@ requirejs([
 	};
 
 	var sendError = function(res, err) {
+		err = err || {};
 Log.l('sendError', err);
 		var httpCode = err.httpCode || C.HttpCodes.GenericServerError;
 		res.send(httpCode, err);
@@ -266,7 +289,7 @@ Log.l('event created successfully', event);
 			Log.l();
 			Log.l('ACCOUNT LIST ////////////////////');
 			Log.l();
-			frontDoor(req, res, C.FrontDoorSpecialCase.AccountList)
+			frontDoor(req, res, C.States.AccountList)
 			.then(function(user) {
 				
 				return filterAction(req, res, C.FilterAction.AccountList)
@@ -377,7 +400,7 @@ Log.l('event created successfully', event);
 			frontDoor(req, res, state)
 			.then(function(user) {
 
-				if (state == 'createAccount') {
+				if (state == C.States.Create) {
 					
 					return filterAction(req, res, C.FilterAction.AccountCreate)
 					.then(function(clean) {
@@ -409,27 +432,33 @@ Log.l('userWithEmail = ', userWithEmail);
 
 					});
 						
-
-				} else if (state =='initialPwSet') {
+				} else if (state == C.States.InitialPasswordSet || state == C.States.PasswordReset) {
 								
-					return filterAction(req, res, C.FilterAction.AccountInitialPw)
-					.then(function(clean) {
+					// Important security check here!
+					if (state == C.States.PasswordReset ||
+					(state == C.States.InitialPasswordSet &&
+					(user.missingPassword == 1 && !user.passwordHash && !user.passwordSalt))) {
 
-						var pw = clean['password'];
-						var salt = Utils.generatePassword(16);
-						var pwHash = Utils.hashSha512(pw + salt);
-						user.passwordHash = pwHash;
-						user.passwordSalt = salt;
-						user.missingPassword = 0;
-						return Storage.Users.update(user);	
-						
-					})
-					.then(function(user) {
-						res.send();
-						return;
-					});
+						return filterAction(req, res, C.FilterAction.PasswordChange)
+						.then(function(clean) {
 
-				} else if (state == 'login') {
+							var pw = clean['password'];
+							var salt = Utils.generatePassword(16);
+							var pwHash = Utils.hashSha512(pw + salt);
+							user.passwordHash = pwHash;
+							user.passwordSalt = salt;
+							user.missingPassword = 0;
+							return Storage.Users.update(user);	
+							
+						})
+						.then(function(user) {
+							sendSuccess(res);
+							return;
+						});
+
+					}
+
+				} else if (state == C.States.Login) {
 
 					return filterAction(req, res, C.FilterAction.AccountLogin)
 					.then(function(clean) {
@@ -442,7 +471,7 @@ Log.l('userWithEmail = ', userWithEmail);
 
 							if (user) {
 
-								if (user.isFullUser) {
+								if (user.isFullUser && !user.missingPassword) {
 
 Log.l('getUserWithEmail', email, user);
 									var salt = user.passwordSalt;
@@ -469,13 +498,15 @@ Log.l('logged in yo');
 
 								} else {
 
-									sendError(res, new ServerError(C.ErrorCodes.AccountLoginEmail));
+									sendError(res, new ServerError(C.ErrorCodes.AccountLoginPartialAccount));
 									return;
 
 								} 
 
 							} else {
 
+								// It's bad practice to reveal if the email is or is not an account.
+								// Usability over security.
 								sendError(res, new ServerError(C.ErrorCodes.AccountLoginEmail));
 								return;
 
@@ -484,13 +515,47 @@ Log.l('logged in yo');
 
 					});
 
-				} else if (state == 'logout') {
+				} else if (state == C.States.Logout) {
 Log.l('LOGGING OUT');
 					res.clearCookie('cookieId');
 					sendSuccess(res);
 					return;
 
+				} else if (state == C.States.ForgotPassword) {
+
+					return filterAction(req, res, C.FilterAction.AccountForgot)
+					.then(function(clean) {
+
+						var forgotEmail = clean['forgotEmail'];
+						return Storage.Users.getUserWithEmail(forgotEmail)
+						.then(function(userWithEmail) {
+
+							if (userWithEmail) {
+
+								return Storage.Users.resetPassword(userWithEmail)
+								.then(function(resetPasswordResult) {
+						
+									sendSuccess(res, userWithEmail, Filter.clientBlacklist.user);
+									return;
+						
+								});
+
+							} else {
+
+								// It's bad practice to reveal if the email is or is not an account.
+								// But for now that's how we do login too.  Usability over security.
+								sendError(res, new ServerError(C.ErrorCodes.AccountForgotNoAccount));
+								//sendSuccess(res);
+								return;
+
+							}
+
+						});
+
+					});
+
 				}
+
 			})
 			.fail(function(err) {
 				Log.e('Error in ACCOUNT UPDATE', err, err.stack);
@@ -520,35 +585,67 @@ Log.l('LOGGING OUT');
 			Log.l();
 			Log.l('LINK READ ////////////////////');
 			Log.l();
-			frontDoor(req, res)
-			.then(function(user) {
+			frontDoor(req, res, C.States.Link)
+			.then(function() {
 
+				// Links must pull up user if needed.
 				return filterAction(req, res, C.FilterAction.LinkRead)
 				.then(function(clean) {
 
 					var linkId = clean.linkId;
-					return Storage.CustomLinks.getLink(user, linkId);
+					return Storage.CustomLinks.getLink(linkId);
 
 				})
 				.then(function(link) {
-					
-					if (link.type === 'email_confirmation') {
-						user.isFullUser = 1;
-						user.email = link.pendingEmail;
-						user.unconfirmedEmail = null;
 
-						return Storage.Users.updateWithEmail(user)
-						.then(function(result) {
+					return Storage.Users.getUserWithId(link.userId)
+					.then(function(user) {
 
-							res.send(Filter.forClient(link, Filter.clientBlacklist.link));
-							return;
+						// WARNING: LOGGING USER IN HERE!
+						// All future code paths must save user.
+						user.isLoggedIn = 1;
+
+						return Storage.Users.setCookie(user)
+						.then(function(setCookieResult) {
+
+							var cookieId = setCookieResult.cookieId;
+							res.cookie('cookieId', cookieId, { signed: true });
+
+							if (link.type === C.Links.EmailConfirmation) {
+								
+								user.isFullUser = 1;
+								user.email = link.pendingEmail;
+								user.unconfirmedEmail = null;
+
+								return Storage.Users.updateWithEmail(user)
+								.then(function(result) {
+
+									res.send(Filter.forClient(link, Filter.clientBlacklist.link));
+									return;
+
+								});
+
+							} else if (link.type == C.Links.ResetPassword) {
+
+								return Storage.Users.update(user)
+								.then(function(result) {
+
+									res.send(Filter.forClient(link, Filter.clientBlacklist.link));
+									return;
+
+								});
+
+							} else {
+								
+								sendError(res, new ServerError(C.ErrorCodes.InvalidLink));
+								return;
+
+							}
 
 						});
 
-					} else {
-						sendError(res, new ServerError(C.ErrorCodes.InvalidLink));
-						return;
-					}
+					});
+					
 				});
 
 			})			
