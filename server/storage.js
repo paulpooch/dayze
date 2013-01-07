@@ -1054,10 +1054,10 @@ Log.l('scanOptions = ', scanOptions);
 				*/
 
 				if (link.isSingleUse) {
-					// needsToBeMarkedUsed = true;
-					// if (link.used) {
-					// 	deferred.reject(new ServerError(C.ErrorCodes.LinkUsed));
-					// }
+					needsToBeMarkedUsed = true;
+					if (link.used) {
+						deferred.reject(new ServerError(C.ErrorCodes.LinkUsed));
+					}
 				}
 				if (link.expiration) {
 					var now = new Date();

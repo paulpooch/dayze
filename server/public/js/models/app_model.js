@@ -261,7 +261,6 @@ log('Pulled account from server', _accountModel, route);
 											// Reflect that we logged user in.
 											_accountControlsView.render();
 											_accountModel.set('state', C.States.InitialPasswordSet);
-										log('AAA', _accountModel);
 											_accountControlsView.render();
 											that.showView(C.ActiveViews.Account);
 											setTimeout(function() {
@@ -546,12 +545,9 @@ log(_accountModel);
 
 		// FROM ACCOUNT VIEW //////////////////////////////////////////////////
 		changePassword: function() {
-log('changePassword');
-log(_accountModel);
 			_accountModel.save([], {
 				wait: true,
 				success: function() {
-log('success');
 					_router.navigate('account/saved', { trigger: true });
 				},
 				error: that.handleError
