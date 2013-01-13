@@ -153,6 +153,9 @@ log('ROUTE: error');
 		overrideATags: function() {
 			$(document).on('click', 'a:not([data-bypass])', function (event) {
 				// intercept all 'a' clicks
+				if ($(event.target).data('ignore')) {
+					return;
+				}
 
 				var href= $(this).attr('href');
 				// if 'href' contains 'http://', let event leak

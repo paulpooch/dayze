@@ -196,8 +196,9 @@ Log.l(dbResult);
 
 	// COMPLETELY UNTESTED :)
 	var _batchGet = function(keys) {
-
 		var that = this;
+		var deferred = Q.defer();
+
 Log.l('Storage.batchGet');
 Log.l('table = ', that.tableName);
 Log.l('keys = ', keys);
@@ -255,26 +256,29 @@ Log.l('batchReq', batchReq);
 
 				return dbGet(keysToGet)
 				.then(function(getResult) {
-
 					var dbResults = getResult[0].items;
 					// DB RESULTS
 					results.concat(dbResults);
 
 					if (remainingKeys.length)  {
-						setTimeout(function() {
-							return dbGetInBatches();
-						}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
-					} else {
-						return;
-					}
-					
-				})
-				.fail(function(err) {
-Log.l('Error in _batchGet', err);
-					deferred.reject(err);
-				})
-				.end();
 
+						var recursiveDefer = Q.defer();
+						setTimeout(function() {
+							
+							dbGetInBatches()
+							.then(function() {
+								recursiveDefer.resolve();
+							})
+							.fail(function(err) {
+								recursiveDefer.reject(err);
+							})
+							.end();
+
+						}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
+						return recursiveDefer.promise;
+
+					}					
+				});
 			}
 		};
 
@@ -284,13 +288,14 @@ Log.l('Error in _batchGet', err);
 			queue.push(checkCache(key));
 		});
 		
-		return Q.all(queue)
+		Q.all(queue)
 		.then(function(fulfilled) {
 
 			remainingKeys = keysRequiringDbHit;
 			return dbGetInBatches();
 
-		}).then(function() {
+		})
+		.then(function() {
 
 Log.l('BATCH RESULT');
 Log.l(results);
@@ -300,14 +305,19 @@ Log.l(results);
 				queue.push(putCache(itemToCache));
 			});
 
-			return Q.all(queue)
-			.then(function(fulfilled) {
-				Log.l('Done caching all items from batch get.');
-				return(results);
-			});
+			return Q.all(queue);
 
-		});
+		})
+		.then(function() {
+			deferred.resolve(results);
+		})
+		.fail(function(err) {
+			Log.l('Error in _batchGet', err);
+			deferred.reject(err);
+		})
+		.end();
 
+		return deferred.promise;
 	};
 
 	var _put = function(item) {
@@ -417,12 +427,13 @@ Log.l(dbResult);
 
 	var _batchDelete = function(keys) {
 		var that = this;
+		var deferred = Q.defer();
+
 Log.l('Storage.batchDelete');
 Log.l('table = ', that.tableName);
 Log.l('keys = ', keys);
 
 		var remainingKeys = keys;
-
 		var cacheKeys = makeCacheKeysFromDbKeys(that.cachePrefix, keys);
 		
 		var clearCache = function(cacheKey) {
@@ -461,22 +472,25 @@ Log.l('deleteRequest', deleteRequest);
 
 				return dbDelete(keysToDelete)
 				.then(function(deleteResult) {
-Log.l('remainingKeys', remainingKeys);
+Log.l('remainingKeys', remainingKeys.length);
 					if (remainingKeys.length)  {
+						var recursiveDefer = Q.defer();
 						setTimeout(function() {
-Log.l('NEXT BATCH');
-							return dbDeleteInBatches();
+							
+							dbDeleteInBatches()
+							.then(function() {
+								recursiveDefer.resolve();
+							})
+							.fail(function(err) {
+								recursiveDefer.reject(err);
+							})
+							.end();
+
 						}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
-					} else {
-Log.l('DONE!!!! remainingKeys', remainingKeys);
-						return;
+						return recursiveDefer.promise;
+
 					}
-				})
-				.fail(function(err) {
-Log.l('Error in _batchDelete', err);
-					deferred.reject(err);
-				})
-				.end();
+				});
 
 			}
 		};
@@ -486,17 +500,18 @@ Log.l('Error in _batchDelete', err);
 			queue.push(clearCache(cacheKey));
 		});
 
-		return Q.all(queue)
-		.then(function(fulfilled) {
-
-			return dbDeleteInBatches();
-
-		})
+		Q.all(queue)
+		.then(dbDeleteInBatches)
 		.then(function() {
 Log.l('_batchDelete complete.');
-			return;
-		});
+			deferred.resolve();
+		})
+		.fail(function(err) {
+			deferred.reject(err);
+		})
+		.end();
 
+		return deferred.promise;
 	};
 
 	/* 
@@ -608,7 +623,9 @@ Log.l('scanOptions = ', scanOptions);
 			return this.cachePrefix +  item.userId;
 		},
 		put: _put,
-		get: _get
+		get: _get,
+		scan: _scan,
+		batchDelete: _batchDelete
 	};
 
 	USERS_BY_COOKIE = {
@@ -645,7 +662,9 @@ Log.l('scanOptions = ', scanOptions);
 			return this.cachePrefix + item.linkId;
 		},
 		put: _put,
-		get: _get
+		get: _get,
+		scan: _scan,
+		batchDelete: _batchDelete
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -876,7 +895,8 @@ Log.l('scanOptions = ', scanOptions);
 			var cookieIndex = {
 				cookieId: cookieId,
 				userId: user.userId,
-				createTime: Utils.getNowIso()
+				createTime: Utils.getNowIso(),
+				lastActivityTime: Utils.getNowIso()
 			};
 
 			USERS.put(user)
@@ -1143,8 +1163,92 @@ Log.l('scanOptions = ', scanOptions);
 
 		var AdminTools = {};
 
-		AdminTools.cleanTables = function() {
+		AdminTools.createGarbage = function() {
+			var deferred = Q.defer();
+
+			var garbage = [];
+
+			for (var i = 0; i < 100; i++) {
+				var link = {
+					linkId: Utils.generateCustomLink(),
+					isSingleUse: 1,
+					used: 1
+				};
+				garbage.push(link);
+			}
+
+			var dbWrite = function(items) {
+				/*
+				batchWriteItem = function(putRequest, deleteRequest, cb) {
+				Put or delete several items across multiple tables
+				@param putRequest dictionnary { 'table': [item1, item2, item3], 'table2': item }
+				@param deleteRequest dictionnary { 'table': [key1, key2, key3], 'table2': [[id1, range1], [id2, range2]] }
+				@param cb callback(err, res, cap) err is set if an error occured
+				*/
+				var putRequest = {};		
+				putRequest['DAYZE_CUSTOM_LINKS'] = items;
+Log.l('putRequest', putRequest);
+				return Q.ncall(
+					ddb.batchWriteItem,
+					this,
+					putRequest, // putRequest
+					{}
+				);
+			};
+
+			var writeInBatches = function() {
 			
+				if (garbage.length) {
+					var itemsToWrite = [];
+					var i = 0;
+					while (i < Config.DYNAMO_DEFAULT_WRITE_PER_SEC && garbage.length) {
+						itemsToWrite.push(garbage.pop());
+						i++;
+					}
+				}
+
+				return dbWrite(itemsToWrite)
+				.then(function(writeResult) {
+Log.l('garbage', garbage.length);
+					if (garbage.length)  {
+
+						var recursiveDefer = Q.defer();
+						setTimeout(function() {
+							
+							writeInBatches()
+							.then(function() {
+								recursiveDefer.resolve();
+							})
+							.fail(function(err) {	
+								recursiveDefer.reject(err);
+							})
+							.end();
+
+						}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
+						return recursiveDefer.promise;
+
+					}
+				});
+
+			};
+
+			writeInBatches()
+			.then(function() {
+Log.l('DONE');
+				deferred.resolve();
+			})
+			.fail(function(err) {
+Log.l('FAIL', err);
+				deferred.reject();
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		AdminTools.cleanTables = function() {
+			var rootDefer = Q.defer();
+
 			var referentialIntegrityMappings = [
 				{
 					// For each cookieId in USERS_BY_COOKIE
@@ -1163,15 +1267,45 @@ Log.l('scanOptions = ', scanOptions);
 				}
 			];
 
-			var loop = function() {
-Log.l('loop');
+			var expirationMappings = [
+				{
+					masterTable: CUSTOM_LINKS,
+					masterKey: 'linkId',
+					expirationField: 'expiration',
+					daysOverExpirationForDeletion: 10,
+					deleteIfMissingExpiration: false,
+					otherRules: [ // return true if should be deleted.
+						function(item) {
+							if (item.hasOwnProperty('isSingleUse') &&
+							item.hasOwnProperty('used')) {
+								if (item.isSingleUse == 1 && item.used == 1) {
+									return true;
+								}
+							}
+							return false;
+						}
+					]
+				}, {
+					masterTable: USERS,
+					masterKey: 'userId',
+					expirationField: 'lastActivityTime',
+					daysOverExpirationForDeletion: 10,
+					deleteIfMissingExpiration: true
+				}
+
+			];
+
+			var refMapLoop = function() {
 				if (referentialIntegrityMappings.length) {
 					var refMap = referentialIntegrityMappings.pop();
-					return clean(refMap)
+					
+					return cleanRef(refMap)
 					.then(function(result) {
 
 						if (referentialIntegrityMappings.length) {
-							return loop();
+					
+							return refMapLoop();
+					
 						} else {
 							return;
 						}
@@ -1180,8 +1314,11 @@ Log.l('loop');
 				}
 			};
 
-			var clean = function(refMap) {
-Log.l('CLEANING TABLES BASED ON ', refMap);
+			var cleanRef = function(refMap) {
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('// CLEANING TABLE FOR REFERENTIAL INTEGRITY');
+Log.l(refMap.slaveTable.tableName);
+Log.l('//////////////////////////////////////////////////////////////////');
 				var deferred = Q.defer();
 
 				var SLAVE = refMap.slaveTable;
@@ -1209,9 +1346,10 @@ Log.l('CLEANING TABLES BASED ON ', refMap);
 
 							// Keep going?
 							if (slaveItems.length) {
+
 								return processSlaveItemsOneAtATime();
+
 							} else {
-Log.l('BOTTOM OF RESURSION STACK');
 								return;
 							}
 								
@@ -1224,26 +1362,154 @@ Log.l('BOTTOM OF RESURSION STACK');
 				.then(function(result) {
 					slaveItems = result.items;
 Log.l('slaveItems', slaveItems);
-					return processSlaveItemsOneAtATime();				
+					
+					return processSlaveItemsOneAtATime();	
+
 				})
 				.then(function() {
 Log.l('savesToDelete', slavesToDelete);
+					
 					return SLAVE.batchDelete(slavesToDelete);
 
 				})
 				.then(function() {
-Log.l('clean complete.');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('// THIS TABLE CLEAN');
+Log.l(refMap.slaveTable.tableName);
+Log.l('//////////////////////////////////////////////////////////////////');
 					deferred.resolve();
 				})
 				.fail(function(err) {
-					deferred.reject(new ServerError(err));
+					deferred.reject(err);
 				})
 				.end();
 
 				return deferred.promise;
 			};
 
-			return loop();
+			var expirationLoop = function() {
+				if (expirationMappings.length) {
+					var expirationMap = expirationMappings.pop();
+					
+					return cleanExpiration(expirationMap)
+					.then(function(result) {
+
+						if (expirationMappings.length) {
+							return expirationLoop();
+						} else {
+							return;
+						}
+
+					});
+				}
+			};
+
+			var cleanExpiration = function(expirationMap) {
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('// CLEANING TABLE FOR EXPIRATION');
+Log.l(expirationMap.masterTable.tableName);
+Log.l('//////////////////////////////////////////////////////////////////');
+				var deferred = Q.defer();
+
+				var MASTER = expirationMap.masterTable;
+				var masterKeyName = expirationMap.masterKey;
+				var expirationField = expirationMap.expirationField;
+
+				var keysToDelete = [];
+				var masterItems;
+
+				var now = new Date().getTime();
+				var cutoffDate = expirationMap.daysOverExpirationForDeletion * 24 * 60 * 60 * 1000;
+				cutoffDate = now - cutoffDate;
+
+				MASTER.scan({ limit: Config.DYNAMO_SCAN_CHUNK_SIZE })
+				.then(function(result) {
+
+Log.l('scan result', result);
+					masterItems = result.items;
+					var compareDates = function() {
+						masterItems.forEach(function(item, index, arr) {
+							
+							var alreadyDeleted = false;
+
+							var expirationFieldExists = item.hasOwnProperty(expirationField);
+							if (expirationFieldExists) {
+								var itemDate = new Date(item[expirationField]).getTime();
+								if (itemDate < cutoffDate) {
+									keysToDelete.push(item[masterKeyName]);
+									alreadyDeleted = true;
+	Log.l('item = ', itemDate, 'cutoffDate = ', cutoffDate);
+	Log.l('expired item', item);
+								}
+							} else {
+								if (expirationMap.deleteIfMissingExpiration) {
+	Log.l('item missing expiration', item);
+									keysToDelete.push(item[masterKeyName]);
+									alreadyDeleted = true;
+								}
+							}
+
+							if (expirationMap.otherRules) {
+								var otherRules = expirationMap.otherRules;
+								otherRules.forEach(function(rule) {
+									if (rule(item) && !alreadyDeleted) {
+										keysToDelete.push(item[masterKeyName]);
+										alreadyDeleted = true;
+									}
+								});
+							}
+
+						});
+					};
+					return Q.fcall(compareDates);
+
+				})
+				.then(function() {
+
+Log.l('keysToDelete', keysToDelete);
+					return MASTER.batchDelete(keysToDelete);
+
+				})
+				.then(function() {
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('// THIS TABLE CLEAN');
+Log.l(expirationMap.masterTable.tableName);
+Log.l('//////////////////////////////////////////////////////////////////');
+					deferred.resolve();
+				})
+				.fail(function(err) {
+					deferred.reject(err);
+				})
+				.end();
+
+				return deferred.promise;
+			};
+
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('// BEGIN CLEANING ALL TABLES');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+			refMapLoop()
+			.then(expirationLoop)
+			.then(function() {
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('// ALL TABLES CLEAN');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+Log.l('//////////////////////////////////////////////////////////////////');
+				rootDefer.resolve({ msg: 'all tables clean' });
+			})
+			.fail(function(err) {
+				rootDefer.reject(new ServerError(err));
+			})
+			.end();
+
+			return rootDefer.promise;
 
 		};
 

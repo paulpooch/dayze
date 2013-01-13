@@ -45,10 +45,11 @@
 5. event create
 6. show events on cal
 7. table cleanout by expiration
-	// Clean out table job
-	// -expired links
 	// -temp accounts with lastactivity > 1 month
 8. remember me
+20. wrap db calls in some kind of over API limit handler - increase capacity temporarily. (DANGEROUS!)
+	maybe just email me instead. and ill do it manually?
+	maybe log context of call so we can work on optimizing?
 
 POSTLAUNCH
 
@@ -671,7 +672,7 @@ Log.l('LOGGING OUT');
 
 			Storage.AdminTools.cleanTables()
 			.then(function(result) {
-				sendSuccess(res);
+				sendSuccess(res, result);
 				return;
 			})
 			.fail(function(err) {
@@ -683,7 +684,25 @@ Log.l('LOGGING OUT');
 
 		};
 
+		AdminTools.createGarbage = function(req, res) {
+
+			Storage.AdminTools.createGarbage()
+			.then(function(result) {
+				sendSuccess(res, result);
+				return;
+			})
+			.fail(function(err) {
+				Log.e('Error in AdminTools.createGarbage', err, err.stack);
+				sendError(res, err);
+				return;
+			})
+			.end();
+
+		};
+
 		app.get('/admin/clean_tables', AdminTools.cleanTables);
+		app.get('/admin/create_garbage', AdminTools.createGarbage);
+		
 		return AdminTools;
 	};
 

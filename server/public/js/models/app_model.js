@@ -332,11 +332,11 @@ log('Pulled account from server', _accountModel, route);
 		},
 
 		routeDay: function(dayCode) {
-			var events = _eventCollection.get(dayCode);
-			
 			that.buildDayModel();
-			_dayModel.set('events', events);
+			
 			_dayModel.set('dayCode', dayCode);
+			var daysEvents = that.getCurrentDaysEvents();
+			that.setSelectedEvent(daysEvents.length && daysEvents[0].cid);
 
 			// Trigger modal in app_view.
 			that.showView(C.ActiveViews.Day);
@@ -388,17 +388,30 @@ log('Pulled account from server', _accountModel, route);
 		},
 
 		addEvent: function(eventName, eventDayCode) {
-log('addEvent', eventName, eventDayCode);
 			// Begin here creating event model.
 			var event = new EventModel({ app: this, appModel: that, name: eventName, dayCode: eventDayCode });
 			_eventCollection.add(event);
-log(event, event.cid);
+			that.getCurrentDaysEvents();
+			that.setSelectedEvent(event.cid);
 			return event.cid;
 		},
 
 		setSelectedEvent: function(cid) {
-			var selectedEventModel = _eventCollection.get(cid);
-			_eventView.setModel(selectedEventModel);
+			if (cid) {
+				var selectedEventModel = _eventCollection.get(cid);
+				_eventView.setModel(selectedEventModel);
+				_dayModel.set('selectedEventId', selectedEventModel.cid);
+			} else {
+				var blankEventModel = new EventModel({ appModel: that });
+				_eventView.setModel(blankEventModel);
+				_dayModel.set('selectedEventId', null);
+			}
+		},
+
+		getCurrentDaysEvents: function() {	
+			var evtColl =  _eventCollection.getEventsWithDayCode(_dayModel.get('dayCode'));
+			_dayModel.set('todaysEvents', evtColl);
+			return evtColl;
 		},
 		///////////////////////////////////////////////////////////////////////
 

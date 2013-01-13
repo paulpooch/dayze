@@ -1,13 +1,39 @@
-
 <% if (!dayCode) { %>
 
-	<h2>Select or add an event.</h2>
-	<div class="row-fluid" style="min-width: 500px; min-height: 300px">
-		Select an existing event from the left or add a new one.
-	</div>
+<h2>Add an event to begin.</h2>
 
 <% } else { %>
 
+<div class="row-fluid" style="min-width: 500px; margin-top: 20px;">
+	<div class="span12">
+		<div id="eventNav" class="navbar navbar-static">
+          <div class="navbar-inner">
+            <div class="container" style="width: auto;">
+              <h3 style="float: left; margin: 0px 50px 0px 0px;"><%= name %></h3>
+              <ul class="nav">
+                <li class=""><a href="#who" data-ignore="1">Who</a></li>
+                <li class=""><a href="#what" data-ignore="1">What</a></li>
+                <li class=""><a href="#send" data-ignore="1">Finish & Send</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div data-spy="scroll" data-target="#eventNav" data-offset="0">
+			<div id="who">@fat</div>
+			<div id="what">@mdo</div>
+			<div id="send">@fat</div>
+		</div>
+	</div>
+	<div class="span6">
+		<div class="span4"></div>
+		<div class="span4"></div>
+		<div class="span4"></div>
+	</div>
+</div>
+
+<% } %>
+
+<!--
 	<h2><%= name %></h2>
 	<ul class="nav nav-tabs">
 	    <li class="active">
@@ -16,7 +42,7 @@
 	    <li><a href="#">Invite</a></li>
 	    <li><a href="#">Privacy</a></li>
 	</ul>
-	<!-- C.FilterAction.EventCreate -->
+	
 	<form id="event_create_form"
 	data-filter="event.create" 
 	onsubmit="return false;"
@@ -74,6 +100,6 @@
 			</div>
 		</div>
 	</form>
+-->
 
-<% } %>
 

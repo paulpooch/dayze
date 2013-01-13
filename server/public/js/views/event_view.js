@@ -33,6 +33,7 @@ define([
 			that.$el.html(that.template(that.model.toJSON()));
 			_$eventForm = that.$el.find('#event_create_form');
 			_eventForm = new SmartForm(that.model, _$eventForm, _appModel.saveEvent);
+			this.$el.scrollspy('refresh');
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -57,7 +58,6 @@ log('WARNING - mapLocation is currently useless.')
 			}
 			_delayedMapAction = setTimeout(function() {
 				var loc = $('#location').val();
-log(loc);
 			}, 2000);
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -73,10 +73,12 @@ log(loc);
 		},
 
 		addMap: function() {
-			setTimeout(function() {
-				Google.Maps.addMapToCanvas($('#event_map').get(0));
-				Google.Maps.setupGeocodeAutocomplete($('#location').eq(0));
-			}, 1000);	
+/*
+				setTimeout(function() {
+					Google.Maps.addMapToCanvas($('#event_map').get(0));
+					Google.Maps.setupGeocodeAutocomplete($('#location').eq(0));
+				}, 1000);	
+*/
 		},
 
 		setElAndRender: function(el) {

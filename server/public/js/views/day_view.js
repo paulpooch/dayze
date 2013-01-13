@@ -29,17 +29,18 @@ define([
 		template: _.template(DayTemplate),
 
 		render: function() {
-			this.$el.html(that.template(that.model.toJSON()));
+			that.$el.html(that.template(that.model.toJSON()));
 			_appModel.renderEventView(this.$el);
 			_$eventAddForm = that.$el.find('#event_add_form');
 			_eventAddForm = new SmartForm(that.model, _$eventAddForm, that.onAddEventButtonClick);
+			that.$el.css({ height: ($(window).height() - C.RESERVED_VERTICAL_SPACE) + 'px' });
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
-			'click .event_listing button': 'onEventClick',
+			'click .event_listing a': 'onEventClick',
 			'keydown #addEventText': 'onAddEventTextKeydown',
 			'keydown #addEventText': 'syncForm',
 		},
@@ -55,15 +56,11 @@ define([
 			var eventText = that.$el.find('#addEventText').val();
 			var dayCode = that.model.get('dayCode');
 			var eventCid = _appModel.addEvent(eventText, dayCode);
-
-			// Trigger onEventClick.
-			that.$el.find('button[data-id=' + eventCid + ']').click();
 		},
 
 		onEventClick: function(e) {
 			var id = $(e.target).data('id');
 			_appModel.setSelectedEvent(id);
-			that.model.set('selectedEventId', id);
 		},
 
 		onAddEventTextKeydown: function(e) {
@@ -78,19 +75,6 @@ define([
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
-		update: function() {
-			var dayCode = that.model.get('dayCode');
-			that.render();
-		},
-
-		onTodaysEventsChange: function() {
-			that.update();
-		},
-
-		onSelectedEventIdChange: function() {
-			that.update();
-		},
-
 		onActiveViewChange: function() {
 			if (_appModel.get('activeView') == C.ActiveViews.Day) {
 				_$headerEls.show();
@@ -112,12 +96,18 @@ define([
 			_$headerEls = $('.day_view_header');
 			
 			// BINDINGS
-			that.model.on('change:dayCode', that.update);
-			that.model.on('change:todaysEvents', that.onTodaysEventsChange);
-			that.model.on('change:selectedEventId', that.onSelectedEventIdChange);
-			_appModel.on('change:activeView', that.onActiveViewChange);
+			that.model.bind('change:selectedEventId', that.render);
+			_appModel.bind('change:activeView', that.onActiveViewChange);
 
-			//that.update();
+			// When user selects a different day.
+			//that.model.bind('change:dayCode', that.render);
+			// When user clicks an event.
+			// When user adds an event.
+			//that.model.bind('change:todaysEvents', that.render);
+
+			
+
+			that.render();
 		}
 
 	});

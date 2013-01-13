@@ -1,7 +1,61 @@
 <div class="container-fluid">
     <div class="row-fluid">
+
+        <div class="tabbable tabs-left">
+            <ul class="nav nav-tabs event_listing" style="min-height: 400px;">
+<% 
+_.each(todaysEvents, function(item, key, list) { 
+    var eventName = item.get('name');
+    var active = '';
+    if (item.cid == selectedEventId) {
+        active = 'class="activeTab"';
+    }
+%>
+                <li <%= active %>>
+                    <a href="#" data-id="<%= item.cid %>" data-ignore="1">
+                        <%= eventName %>
+                    </a>
+                </li>
+<%
+});
+%>
+                <li style="margin-top: 40px; margin-right: 20px;">           
+                <form id="event_add_form"
+                data-filter="event.add" 
+                onsubmit="return false;"
+                class="form-horizontal">
+                    <div class="control-group" style="margin: 0px;">
+                        <div class="controls" style="margin: 0px;">
+                            <div class="input-append">
+                                <input tabindex="1" class="span9" id="addEventText" size="16" type="text" placeholder="Event Name">
+                                <button 
+                                tabindex="2" 
+                                id="event_add_button" 
+                                type="button" 
+                                class="btn btn-primary" 
+                                data-submit-trigger="1" 
+                                data-loading-text="Adding...">Add</button>
+                            </div>
+                            <div style="width: 170px;" >
+                                <span class="help-inline"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div id="event_view_holder">
+                <!-- EVENT VIEW GOES HERE -->
+                </div>
+            </div>           
+        </div>
+
+    </div>
+</div>
+<!--
         <div class="span3">
-            <!-- C.FilterAction.EventAdd -->
+            <!-- C.FilterAction.EventAdd --><!--
             <form id="event_add_form"
             data-filter="event.add" 
             onsubmit="return false;"
@@ -40,7 +94,7 @@
         </div>
         <div class="span9">
             <div id="event_view_holder" style="margin-left: 10px;">
-                <!-- EVENT VIEW GOES HERE -->
+                <!-- EVENT VIEW GOES HERE --><!--
             </div>
         </div>
     </div>
@@ -48,4 +102,4 @@
         <a style="float: right; margin: 20px;" href="/calendar" id="close" class="btn btn-inverse">Cancel</a>
     </div>
 </div>
-
+-->

@@ -50,9 +50,6 @@ define([
 		},
 		
 		// EVENTS /////////////////////////////////////////////////////////////
-		onChange: function() {
-			
-		},
 
 		///////////////////////////////////////////////////////////////////////
 
@@ -61,11 +58,7 @@ define([
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 			that = this;
-			//that.set('name', options.name || null);
-			//that.set('dayCode', options.dayCode || null);
-			
-			// BINDINGS
-			that.bind('change', that.onChange);			
+				
 		}
 
 	});

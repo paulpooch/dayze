@@ -12,8 +12,7 @@ define([
 ) {
 
 	var that,
-		_appModel,
-		_eventCollection;
+		_appModel;
 
 	var DayModel = Backbone.Model.extend({
 
@@ -33,25 +32,19 @@ define([
 			addEventText: null
 		},
 
-		checkEventCollectionForNewEvents: function() {
-			var evtColl =  _eventCollection.getEventsWithDayCode(that.get('dayCode'));
-			that.set('todaysEvents', evtColl);
-			if (evtColl.length > 1) {
-				that.trigger('change:todaysEvents');	// Need a manual trigger since it's always an array.
-														// Can't detect change.
-			}
+		toJSON: function() {
+			return {
+				todaysEvents: that.get('todaysEvents'),
+				selectedEventId: that.get('selectedEventId'),
+				dayCode: that.get('dayCode')
+			};
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////
-		onEventCollectionAdd: function() {
-			that.checkEventCollectionForNewEvents();
-		},
-
 		onDayCodeChange: function() {
 			var dayCode = that.get('dayCode');
 			var parts = dayCode.split('-');
 			that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString());
-			that.checkEventCollectionForNewEvents();
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -63,12 +56,6 @@ define([
 			// VARS
 			that = this;
 			_appModel = options.appModel;
-			_eventCollection = _appModel.get('eventCollection');
-
-			// BINDINGS
-			that.bind('change:dayCode', that.onDayCodeChange);
-			_eventCollection.bind('add', that.onEventCollectionAdd);
-
 		}
 
 	});
