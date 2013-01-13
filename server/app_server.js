@@ -701,8 +701,9 @@ Log.l('LOGGING OUT');
 		};
 
 		app.get('/admin/clean_tables', AdminTools.cleanTables);
-		app.get('/admin/create_garbage', AdminTools.createGarbage);
-		
+		// Let's disable this.
+		//app.get('/admin/create_garbage', AdminTools.createGarbage);
+
 		return AdminTools;
 	};
 

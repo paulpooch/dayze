@@ -553,27 +553,37 @@ Log.l('scanOptions = ', scanOptions);
 		var totalCount = 0;
 
 		var loop = function(lastKey) {
-			scan(lastKey)
+			return scan(lastKey)
 			.then(function(scanResult) {
 				scanResult = scanResult[0];
 				totalItems = totalItems.concat(scanResult.items);
 				totalCount += scanResult.count;
 				nextKey = scanResult.lastEvaluatedKey;
 				if (nextKey && nextKey.hash) {
+
+					var recursiveDefer = Q.defer();
 					setTimeout(function() {
-						loop(nextKey);	
+						loop(nextKey)
+						.then(function() {
+							recursiveDefer.resolve();
+						});
 					}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
+					return recursiveDefer.promise;
+
 				} else {
-					deferred.resolve({ count: totalCount, items: totalItems });
+					
 				}
-			})
-			.fail(function(err) {
-				deferred.reject(err);
-			})
-			.end();
+			});
 		};
 
-		loop();
+		loop()
+		.then(function() {
+			deferred.resolve({ count: totalCount, items: totalItems });
+		})
+		.fail(function(err) {
+			deferred.reject(err);
+		})
+		.end();
 
 		return deferred.promise;
 	};
@@ -769,6 +779,7 @@ Log.l('scanOptions = ', scanOptions);
 			};
 
 			var eventIds = [];
+			// THIS IS PRETTY MUCH GARBAGE.  REDO IT.
 			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
 			.then(function(eventsByTime) {
 				
@@ -1273,7 +1284,7 @@ Log.l('FAIL', err);
 					masterKey: 'linkId',
 					expirationField: 'expiration',
 					daysOverExpirationForDeletion: 10,
-					deleteIfMissingExpiration: false,
+					deleteIfMissingExpiration: true,
 					otherRules: [ // return true if should be deleted.
 						function(item) {
 							if (item.hasOwnProperty('isSingleUse') &&
@@ -1427,42 +1438,39 @@ Log.l('//////////////////////////////////////////////////////////////////');
 
 Log.l('scan result', result);
 					masterItems = result.items;
-					var compareDates = function() {
-						masterItems.forEach(function(item, index, arr) {
-							
-							var alreadyDeleted = false;
+					masterItems.forEach(function(item) {
+						
+						var alreadyDeleted = false;
 
-							var expirationFieldExists = item.hasOwnProperty(expirationField);
-							if (expirationFieldExists) {
-								var itemDate = new Date(item[expirationField]).getTime();
-								if (itemDate < cutoffDate) {
+						var expirationFieldExists = item.hasOwnProperty(expirationField);
+						if (expirationFieldExists) {
+							var itemDate = new Date(item[expirationField]).getTime();
+							if (itemDate < cutoffDate) {
+								keysToDelete.push(item[masterKeyName]);
+								alreadyDeleted = true;
+Log.l('item = ', itemDate, 'cutoffDate = ', cutoffDate);
+Log.l('expired item', item);
+							}
+						} else {
+							if (expirationMap.deleteIfMissingExpiration) {
+Log.l('item missing expiration', item);
+								keysToDelete.push(item[masterKeyName]);
+								alreadyDeleted = true;
+							}
+						}
+
+						if (expirationMap.otherRules) {
+							var otherRules = expirationMap.otherRules;
+							otherRules.forEach(function(rule) {
+								if (rule(item) && !alreadyDeleted) {
 									keysToDelete.push(item[masterKeyName]);
 									alreadyDeleted = true;
-	Log.l('item = ', itemDate, 'cutoffDate = ', cutoffDate);
-	Log.l('expired item', item);
 								}
-							} else {
-								if (expirationMap.deleteIfMissingExpiration) {
-	Log.l('item missing expiration', item);
-									keysToDelete.push(item[masterKeyName]);
-									alreadyDeleted = true;
-								}
-							}
+							});
+						}
 
-							if (expirationMap.otherRules) {
-								var otherRules = expirationMap.otherRules;
-								otherRules.forEach(function(rule) {
-									if (rule(item) && !alreadyDeleted) {
-										keysToDelete.push(item[masterKeyName]);
-										alreadyDeleted = true;
-									}
-								});
-							}
-
-						});
-					};
-					return Q.fcall(compareDates);
-
+					});
+					
 				})
 				.then(function() {
 
