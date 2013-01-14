@@ -29,14 +29,14 @@ define(function() {
 	Config.DYNAMO_DEFAULT_WRITE_PER_SEC = 2;
 	Config.DYNAMO_SCAN_CHUNK_SIZE = 20;
 	Config.DYNAMO_BATCH_DELAY = 1000;
-	Config.DYNAMO_RETRY_LIMIT = 3;
+
 	Config.DYNAMODB_CREDENTIALS = {
 		accessKeyId: 'AKIAINHDEIZ3QVSHQ3PA', 
 		secretAccessKey: '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'
 	};
 
-	Config.DYNAMO_ERROR_THROUGHPUT = 'ProvisionedThroughputExceededException';
-	Config.DYNAMO_ERROR_NOT_FOUND = 'ResourceNotFoundException';
+	//Config.DYNAMO_ERROR_THROUGHPUT = 'ProvisionedThroughputExceededException';
+	//Config.DYNAMO_ERROR_NOT_FOUND = 'ResourceNotFoundException';
 
 	// For aws-sdk.
 	Config.AWS_ACCESS_KEY_ID = 'AKIAINHDEIZ3QVSHQ3PA';
