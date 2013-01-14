@@ -175,5 +175,5 @@ test('login success', function() {
 
 ///////////////////////////////////////////////////////////////////////////////
 	}
-	setTimeout(runTests, 1000);
+	setTimeout(runTests, 2000);
 });

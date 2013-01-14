@@ -160,7 +160,6 @@ Log.l('table = ', that.tableName);
 Log.l('hashKey = ', hashKey);
 Log.l('rangeKey = ', rangeKey);
 		
-		var deferred = Q.defer();
 		var cacheKey = makeCacheKeyFromDbKey(that.cachePrefix, hashKey, rangeKey);
 
 		return Cache.get(cacheKey)
@@ -187,10 +186,10 @@ Log.l('CACHE MISS');
 				.then(function(cacheResult) {
 Log.l(dbResult);
 					return dbResult;
+		
 				});
-				
-			});
 			
+			});
 		});
 
 	};
@@ -378,7 +377,6 @@ Log.l('rangeKey = ', rangeKey);
 
 	var _query = function(hashKey, cacheKey, queryOptions) {
 		var that = this;
-		var deferred = Q.defer();
 
 Log.l('Storage.query');
 Log.l('table = ', that.tableName);
@@ -386,15 +384,16 @@ Log.l('hashKey = ', hashKey);
 Log.l('cacheKey = ', cacheKey);
 Log.l('options = ', queryOptions);
 		
+		var deferred = Q.defer();
+
 		Cache.get(cacheKey)
 		.then(function(cacheResult) {
 
-Log.l(cacheResult);
-			deferred.resolve(cacheResult);
+		 	deferred.resolve(cacheResult);
 
 		})
 		.fail(function(err) {
-			
+
 			var totalItems = [];
 			var totalCount = 0;
 
@@ -426,7 +425,7 @@ Log.l(cacheResult);
 
 				return dbQuery(lastKey)
 				.then(function(queryResult) {
-Log.l('queryResult', queryResult);
+
 					totalItems = totalItems.concat(queryResult.items);
 					totalCount += queryResult.count;
 					var nextKey = queryResult.lastEvaluatedKey;
@@ -438,7 +437,7 @@ Log.l('queryResult', queryResult);
 							.then(function() {
 								recursiveDefer.resolve();
 							});
-						}, Config.DYNAMO_DEFAULT_READ_PER_SEC);
+						}, Config.DYNAMO_BATCH_DELAY);
 						return recursiveDefer.promise;
 
 					}
@@ -454,23 +453,12 @@ Log.l('queryResult', queryResult);
 				.then(function(cacheResult) {
 					
 					deferred.resolve(result);
-				
+
 				});
-			
+
 			})
 			.fail(function(err) {
-
-				if (err.code == Config.DYNAMO_ERROR_NOT_FOUND) {
-
-					var result = { count: totalCount, items: totalItems };
-					deferred.resolve(result);
-
-				} else {
-
-					deferred.reject(err);
-
-				}
-
+				deferred.reject(err);
 			})
 			.end();
 
@@ -576,13 +564,11 @@ Log.l('_batchDelete complete.');
 	*/
 	var _scan = function(scanOptions) {
 		var that = this;
-		var deferred = Q.defer();
+		scanOptions = scanOptions || {};
 
 Log.l('Storage.scan');
 Log.l('table = ', that.tableName);
 Log.l('scanOptions = ', scanOptions);
-
-		scanOptions = scanOptions || {};
 		
 		var scan = function(startKey) {
 			var options = {};
@@ -630,16 +616,12 @@ Log.l('scanOptions = ', scanOptions);
 			});
 		};
 
-		loop()
+		return loop()
 		.then(function() {
-			deferred.resolve({ count: totalCount, items: totalItems });
-		})
-		.fail(function(err) {
-			deferred.reject(err);
-		})
-		.end();
+			var result = { count: totalCount, items: totalItems };
+			return result;
+		});
 
-		return deferred.promise;
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -651,7 +633,7 @@ Log.l('scanOptions = ', scanOptions);
 	///////////////////////////////////////////////////////////////////////////
 	
 	EVENTS_BY_USERID_AND_DAYCODE = {
-		tableName: 'EVENTS_BY_USERID_AND_DAYCODE',
+		tableName: 'DAYZE_EVENTS_BY_USERID_AND_DAYCODE',
 		cachePrefix: '01_',
 		cacheTimeout: 3600,
 		cacheKey: function(item) {
@@ -770,9 +752,9 @@ Log.l('scanOptions = ', scanOptions);
 			event = Utils.removeEmptyStrings(event);
 
 			EVENTS_BY_USERID_AND_DAYCODE.get(user.userId, dayCode)
-			.then(function(eventIds) {
-				
-				eventIds = eventIds || [];
+			.then(function(eventIndex) {
+
+				var eventIds = eventIndex && eventIndex.eventIds || [];
 				eventIds.push(eventId);
 				var eventIndex = {
 					userId: user.userId,
@@ -789,6 +771,7 @@ Log.l('scanOptions = ', scanOptions);
 
 			})
 			.fail(function(err) {
+Log.l('err in Events.createEvent', err);
 				deferred.reject(new ServerError(err));
 			})
 			.end();
