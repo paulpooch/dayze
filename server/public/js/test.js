@@ -55,6 +55,7 @@ require(['app_client', 'test_registry', 'c'], function(App, TestRegistry, C) {
 // By all means put minimal effort in.
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
 module('Forgot Password');
 
 test('forgot password success', function() {
@@ -64,25 +65,25 @@ test('forgot password success', function() {
 	$('#forgot_button').click();
 	equal(1, 1);
 });
+*/
 
 
-/*
 
 module('Create Event');
 
-test('create account success', function() {
+test('create event', function() {
 	$('.day:first').click();
 	var eventName = 'Test Event';
 	$('#addEventText').val(eventName);
 	$('#event_add_button').click();
-	var title = $('#event_view_holder h2:first').text();
+	var title = $('#event_nav h3:first').text();
 	equal(title, eventName);
-	$('#beginTime').val('1:00pm');
-	$('#endTime').val('3:00pm');
-	$('#save_event_button').click();
+	//$('#beginTime').val('1:00pm');
+	//$('#endTime').val('3:00pm');
+	//$('#save_event_button').click();
 });
 
-*/
+
 
 
 /*
@@ -174,5 +175,5 @@ test('login success', function() {
 
 ///////////////////////////////////////////////////////////////////////////////
 	}
-	setTimeout(runTests, 2000);
+	setTimeout(runTests, 1000);
 });

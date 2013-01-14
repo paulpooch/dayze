@@ -33,7 +33,7 @@ define([
 			that.$el.html(that.template(that.model.toJSON()));
 			_$eventForm = that.$el.find('#event_create_form');
 			_eventForm = new SmartForm(that.model, _$eventForm, _appModel.saveEvent);
-			this.$el.scrollspy('refresh');
+			that.reInitScrollSpy();
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -60,6 +60,13 @@ log('WARNING - mapLocation is currently useless.')
 				var loc = $('#location').val();
 			}, 2000);
 		},
+
+		reInitScrollSpy: function() {
+			$('[data-spy="scroll"]').each(function () {
+     			var $spy = $(this)
+      			$spy.scrollspy($spy.data())
+    		});
+		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -70,6 +77,10 @@ log('WARNING - mapLocation is currently useless.')
 			that.model = m;
 			that.render();
 			that.addMap();
+		},
+
+		getModel: function() {
+			return that.model;
 		},
 
 		addMap: function() {

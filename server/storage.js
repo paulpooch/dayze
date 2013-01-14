@@ -154,6 +154,7 @@ Log.e('reconnecting to server: ' + issue.server + ' failed!');
 	var _get = function(hashKey, rangeKey) {
 		var that = this;
 		rangeKey = rangeKey || null;
+
 Log.l('Storage.get');
 Log.l('table = ', that.tableName);
 Log.l('hashKey = ', hashKey);
@@ -322,9 +323,11 @@ Log.l(results);
 
 	var _put = function(item) {
 		var that = this;
+
 Log.l('Storage.put');
 Log.l('table = ', that.tableName);
 Log.l('item = ', item);
+
 		return Q.ncall(
 			ddb.putItem,
 			that,
@@ -342,6 +345,7 @@ Log.l('item = ', item);
 
 	var _delete = function(hashKey, rangeKey) {
 		var that = this;
+
 Log.l('Storage.delete');
 Log.l('table = ', that.tableName);
 Log.l('hashKey = ', hashKey);
@@ -372,53 +376,104 @@ Log.l('rangeKey = ', rangeKey);
 
 	};
 
-	// This is wrong.  Needs to use exclusiveStartKey stuff.
-	// See _scan
-	// FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	var _query = function(hashKey, cacheKey, options) {
+	var _query = function(hashKey, cacheKey, queryOptions) {
 		var that = this;
+		var deferred = Q.defer();
+
 Log.l('Storage.query');
 Log.l('table = ', that.tableName);
 Log.l('hashKey = ', hashKey);
 Log.l('cacheKey = ', cacheKey);
-Log.l('options = ', options);
-
-		var deferred = Q.defer();
-
+Log.l('options = ', queryOptions);
+		
 		Cache.get(cacheKey)
 		.then(function(cacheResult) {
+
 Log.l(cacheResult);
-			cacheResult = cacheResult.items;
 			deferred.resolve(cacheResult);
+
 		})
 		.fail(function(err) {
-			Q.ncall(
-				ddb.query,
-				that,
-				that.tableName,
-				hashKey,
-				options
-			)
-			.then(function(dbResult) {
-				// Is this correct?
-				dbResult = dbResult[0];
-				if (dbResult.count && dbResult.items && dbResult.count > 0) {
-					dbResult = dbResult.items;
-				} else {
-					dbResult = [];
+			
+			var totalItems = [];
+			var totalCount = 0;
+
+			var dbQuery = function(startKey) {
+				var options = {};
+				_.extend(options, queryOptions);
+				if (startKey) {
+					options['exclusiveStartKey'] = startKey;
 				}
-				Cache.set(cacheKey, dbResult, that.cacheTimeout)
+				/** https://github.com/teleportd/node-dynamodb/blob/master/lib/ddb.js
+				* returns a set of Attributes for an item that matches the query
+				* @param table the tableName
+				* @param hash the hashKey
+				* @param options {attributesToGet, limit, consistentRead, count, 
+				*                 rangeKeyCondition, scanIndexForward, exclusiveStartKey}
+				* @param cb callback(err, tables) err is set if an error occured
+				* query = function(table, hash, options, cb) {
+				*/
+				return Q.ncall(
+					ddb.query,
+					that,
+					that.tableName,
+					hashKey,
+					options
+				);
+			};
+
+			var loop = function(lastKey) {
+
+				return dbQuery(lastKey)
+				.then(function(queryResult) {
+Log.l('queryResult', queryResult);
+					totalItems = totalItems.concat(queryResult.items);
+					totalCount += queryResult.count;
+					var nextKey = queryResult.lastEvaluatedKey;
+					if (nextKey && nextKey.hash) {
+
+						var recursiveDefer = Q.defer();
+						setTimeout(function() {
+							loop(nextKey)
+							.then(function() {
+								recursiveDefer.resolve();
+							});
+						}, Config.DYNAMO_DEFAULT_READ_PER_SEC);
+						return recursiveDefer.promise;
+
+					}
+				});
+
+			};
+
+			loop()
+			.then(function() {
+
+				var result = { count: totalCount, items: totalItems };
+				return Cache.set(cacheKey, result, that.cacheTimeout)
 				.then(function(cacheResult) {
-Log.l(dbResult);
-					deferred.resolve(dbResult);
-				})
-				.end();
+					
+					deferred.resolve(result);
+				
+				});
+			
+			})
+			.fail(function(err) {
+
+				if (err.code == Config.DYNAMO_ERROR_NOT_FOUND) {
+
+					var result = { count: totalCount, items: totalItems };
+					deferred.resolve(result);
+
+				} else {
+
+					deferred.reject(err);
+
+				}
+
 			})
 			.end();
+
 		})
 		.end();
 
@@ -521,11 +576,12 @@ Log.l('_batchDelete complete.');
 	*/
 	var _scan = function(scanOptions) {
 		var that = this;
+		var deferred = Q.defer();
+
 Log.l('Storage.scan');
 Log.l('table = ', that.tableName);
 Log.l('scanOptions = ', scanOptions);
 
-		var deferred = Q.defer();
 		scanOptions = scanOptions || {};
 		
 		var scan = function(startKey) {
@@ -570,8 +626,6 @@ Log.l('scanOptions = ', scanOptions);
 					}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
 					return recursiveDefer.promise;
 
-				} else {
-					
 				}
 			});
 		};
@@ -596,19 +650,18 @@ Log.l('scanOptions = ', scanOptions);
 	// Be careful this matches how it is set with put!
 	///////////////////////////////////////////////////////////////////////////
 	
-	EVENTS_BY_USERID_AND_TIME = {
-		tableName: 'DAYZE_EVENTS_BY_USERID_AND_TIME',
+	EVENTS_BY_USERID_AND_DAYCODE = {
+		tableName: 'EVENTS_BY_USERID_AND_DAYCODE',
 		cachePrefix: '01_',
 		cacheTimeout: 3600,
 		cacheKey: function(item) {
-			return this.cachePrefix + item.userId + item.eventTime;
+			return this.cachePrefix + item.userId + item.dayCode;
 		},
 		put: _put,
 		get: _get,
 		query: function(userId, monthCode, options) {
 			var hashKey = userId;
 			var cacheKey = this.cachePrefix + userId + monthCode;
-			// Make sure this object is the context.
 			return _query.call(this, hashKey, cacheKey, options);
 		}
 	};
@@ -704,69 +757,50 @@ Log.l('scanOptions = ', scanOptions);
 		Events.createEvent = function(user, post) {
 			var deferred = Q.defer();
 
-			try {
-				var eventId = Uuid.v4();
-				var eventTime = Utils.makeISOWithDayAndTime(post.dayCode, post.beginTime);
-			} catch (err) {
-				deferred.reject(new ServerError(err));
-			}
+			var eventId = Uuid.v4();
+			var dayCode = post.dayCode;
 
 			var event = {
 				eventId: eventId,
-				eventTime: eventTime,
 				name: post.name,
-				dayCode: post.dayCode,
-				description: post.description,
-				location: post.location,
-				beginTime: post.beginTime,
-				endTime: post.endTime
-			};
+				userId: user.userId,
+				createTime: Utils.getNowIso()
+			};	
 
 			event = Utils.removeEmptyStrings(event);
 
-			EVENTS_BY_USERID_AND_TIME.get(user.userId, eventTime)
-			.then(function(eventsByUserIdAndTime) {
-
-				var eventArr = [];
-				if (eventsByUserIdAndTime) {
-					var existingEvents = eventsByUserIdAndTime.events;
-					if (existingEvents) {
-						eventArr.concat(existingEvents);
-					}
-				}
-				eventArr.push(event.eventId);
-
-				var eventsEntry = {
+			EVENTS_BY_USERID_AND_DAYCODE.get(user.userId, dayCode)
+			.then(function(eventIds) {
+				
+				eventIds = eventIds || [];
+				eventIds.push(eventId);
+				var eventIndex = {
 					userId: user.userId,
-					eventTime: eventTime,
-					events: eventArr
+					dayCode: dayCode,
+					eventIds: eventIds
 				};
 
-				return EVENTS_BY_USERID_AND_TIME.put(eventsEntry)
-				.then(function(result) {
+				return EVENTS_BY_USERID_AND_DAYCODE.put(eventIndex)
+				.then(function(putResult) {
 
-					return EVENTS.put(event)
-					.then(function(result) {
-						deferred.resolve(event);
-					});
+					return EVENTS.put(event);
 
 				});
 
-			})	
+			})
 			.fail(function(err) {
 				deferred.reject(new ServerError(err));
 			})
 			.end();
 
 			return deferred.promise;
-
 		};
 
-		// BEGIN HERE... HOW DO WE QUERY CORRECTLY?
 		Events.getEventsForMonth = function(user, monthCode) {
 			var deferred = Q.defer();
 
 			var eventTimeRange = Utils.makeMonthRange(monthCode);
+Log.l(eventTimeRange);
 
 			var options = {
 				RangeKeyCondition: {
@@ -778,29 +812,29 @@ Log.l('scanOptions = ', scanOptions);
 				}
 			};
 
-			var eventIds = [];
-			// THIS IS PRETTY MUCH GARBAGE.  REDO IT.
-			EVENTS_BY_USERID_AND_TIME.query(user.userId, monthCode, options)
-			.then(function(eventsByTime) {
-				
-				if (eventsByTime.length) {
-					eventsByTime.forEach(function(eventsAtTime) {
-						// Less than optimal.
-						eventIds = eventIds.concat(eventsAtTime.events);
+			EVENTS_BY_USERID_AND_DAYCODE.query(user.userId, monthCode, options)
+			.then(function(eventIndices) {
+				// eventIndices is an array of objects { userId, dayCode, eventIds: [ '123', '124', ... ] }
+Log.l('eventIndices', eventIndices);
+				if (eventIndices.count) {
+
+					var allEventIdsInMonth = [];
+					eventIndices.forEach(function(eventIndex) {
+						allEventIdsInMonth = allEventIdsInMonth.concat(eventIndex.eventIds);
 					});
-					if (eventIds.length) {
-				
-						return EVENTS.batchGet(eventIds)
-						.then(function(events) {
-							deferred.resolve(events);
-						});
-				
-					} else {
-						deferred.resolve([]);
-					}	
+
+					return EVENTS.batchGet(allEventIdsInMonth);					
+
 				} else {
+
 					deferred.resolve([]);
+				
 				}
+
+			})
+			.then(function(events) {
+Log.l('all events this month', events);
+				deferred.resolve(events);
 			})
 			.fail(function(err) {
 				deferred.reject(new ServerError(err));
@@ -905,9 +939,7 @@ Log.l('scanOptions = ', scanOptions);
 
 			var cookieIndex = {
 				cookieId: cookieId,
-				userId: user.userId,
-				createTime: Utils.getNowIso(),
-				lastActivityTime: Utils.getNowIso()
+				userId: user.userId
 			};
 
 			USERS.put(user)
@@ -1019,10 +1051,10 @@ Log.l('scanOptions = ', scanOptions);
 				lastActivityTime: Utils.getNowIso()
 			};
 
-			var emailIndex = {
-				email: account.unconfirmedEmail,
-				userId: account.userId
-			};
+			// var emailIndex = {
+			// 	email: account.unconfirmedEmail,
+			// 	userId: account.userId
+			// };
 
 			USERS.put(account)
 			// This gets called by AccountRest createAccount code.
@@ -1360,10 +1392,8 @@ Log.l('//////////////////////////////////////////////////////////////////');
 
 								return processSlaveItemsOneAtATime();
 
-							} else {
-								return;
 							}
-								
+
 						});
 
 					}

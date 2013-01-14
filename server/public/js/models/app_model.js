@@ -442,9 +442,12 @@ log('Pulled account from server', _accountModel, route);
 
 		// FROM EVENT VIEW ////////////////////////////////////////////////////
 		saveEvent: function() {
+log('saveEvent');
 			if (_accountModel.get('isFullUser')) {
-				var eventCid = _dayModel.get('selectedEventId');
-				var eventModel = _eventCollection.get(eventCid);
+				//var eventCid = _dayModel.get('selectedEventId');
+				//var eventModel = _eventCollection.get(eventCid);
+				var eventModel = _eventView.getModel();
+log('eventModel', eventModel);
 				eventModel.save([], {
 					wait: true,
 					success: function(model, response) {
@@ -453,7 +456,7 @@ log('event saved', model, response);
 					error: that.handleError
 				});
 			} else {
-				_accountView.$el.find('#event_login_modal').modal('show');
+				_accountControlsView.showLoginForm();
 			}
 		},
 		///////////////////////////////////////////////////////////////////////

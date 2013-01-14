@@ -35,7 +35,8 @@ define(function() {
 		secretAccessKey: 'VNdRxsQNUAXYbps8YUAe3jjhTgnrG+sTKFZ8Zyws'
 	};
 
-	Config.DYNAMO_THROUGHPUT_ERROR = 'ProvisionedThroughputExceededException';
+	Config.DYNAMO_ERROR_THROUGHPUT = 'ProvisionedThroughputExceededException';
+	Config.DYNAMO_ERROR_NOT_FOUND = 'ResourceNotFoundException';
 
 	// For aws-sdk.
 	Config.AWS_ACCESS_KEY_ID = 'AKIAINHDEIZ3QVSHQ3PA';

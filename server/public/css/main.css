@@ -256,6 +256,9 @@ h2#day_display_date {
   -webkit-box-shadow:  3px 3px 10px 0 rgba(0, 0, 0, .7);
   box-shadow:  3px 3px 10px 0 rgba(0, 0, 0, .7);
 }
+  #page_holder .nav { 
+    margin-bottom: 0px;
+  }
 
 #blank_holder {
   margin-top: 64px;
@@ -274,6 +277,43 @@ h2#day_display_date {
   background: -ms-linear-gradient(left,  rgba(0,0,0,0) 80%,rgba(0,0,0,0.2) 100%); /* IE10+ */
   background: linear-gradient(to right,  rgba(0,0,0,0) 80%,rgba(0,0,0,0.2) 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#33000000',GradientType=1 ); /* IE6-9 */
+}
+
+.tabs-left > .nav-tabs.event_listing > li > a {
+  color: #555;
+  cursor: pointer;
+  border: 1px solid #666;
+  border-radius: 7px 0px 0px 7px;
+  margin-top: 10px;
+  background: -moz-linear-gradient(left,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(0,0,0,0)), color-stop(100%,rgba(0,0,0,0.4))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* IE10+ */
+  background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#66000000',GradientType=1 ); /* IE6-9 */
+  -webkit-box-shadow:  -2px 1px 5px 0px rgba(0, 0, 0, 0.7);
+          box-shadow:  -2px 1px 5px 0px rgba(0, 0, 0, 0.7);
+}
+
+.tabs-left > .nav-tabs.event_listing > li:first-child {
+  margin-top: 60px;
+}
+.tabs-left > .nav-tabs.event_listing > li > a:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #bbb;
+}
+/* Don't use li.active - bootstrap js auto changes 'active' classes for tabs. */
+.tabs-left > .nav-tabs.event_listing > li.active > a { 
+  color: #555;
+  border-right: none;
+  background: -moz-linear-gradient(left,  rgba(255,255,255,0) 50%, rgba(255,255,255,0.9) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0.9))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* IE10+ */
+  background: linear-gradient(to right,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#e6ffffff',GradientType=1 ); /* IE6-9 */
 }
 
 /* ACCOUNT ------------------------------------------------------------------*/
@@ -331,44 +371,6 @@ div.spinner {
 /*///////////////////////////////////////////////////////////////////////////*/
 /* BOOTSTRAP OVERRIDES */
 /*///////////////////////////////////////////////////////////////////////////*/
-
-#page_holder .nav { margin-bottom: 0px; }
-.tabs-left > .nav-tabs > li > a {
-  color: #555;
-  cursor: pointer;
-  border: 1px solid #666;
-  border-radius: 7px 0px 0px 7px;
-  margin-top: 10px;
-  background: -moz-linear-gradient(left,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(0,0,0,0)), color-stop(100%,rgba(0,0,0,0.4))); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* IE10+ */
-  background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.4) 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#66000000',GradientType=1 ); /* IE6-9 */
--webkit-box-shadow:  -2px 1px 5px 0px rgba(0, 0, 0, 0.7);
-        
-        box-shadow:  -2px 1px 5px 0px rgba(0, 0, 0, 0.7);
-}
-.tabs-left > .nav-tabs > li:first-child {
-  margin-top: 60px;
-}
-.tabs-left > .nav-tabs > li > a:hover {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #bbb;
-}
-/* Don't use li.active - bootstrap js auto changes 'active' classes for tabs. */
-.tabs-left > .nav-tabs > li.activeTab > a { 
-  color: #555;
-  border-right: none;
-  background: -moz-linear-gradient(left,  rgba(255,255,255,0) 50%, rgba(255,255,255,0.9) 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, right top, color-stop(50%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0.9))); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(left,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(left,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* IE10+ */
-  background: linear-gradient(to right,  rgba(255,255,255,0) 50%,rgba(255,255,255,0.9) 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#e6ffffff',GradientType=1 ); /* IE6-9 */
-}
 
 img { 
   max-width: none; /* Was messing up gmaps markers. */

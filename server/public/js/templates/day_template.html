@@ -8,7 +8,7 @@ _.each(todaysEvents, function(item, key, list) {
     var eventName = item.get('name');
     var active = '';
     if (item.cid == selectedEventId) {
-        active = 'class="activeTab"';
+        active = 'class="active"';
     }
 %>
                 <li <%= active %>>

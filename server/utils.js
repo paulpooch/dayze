@@ -86,10 +86,12 @@ define([
 		var year = (dParts.length > 0) ? Number(dParts[0]) : null;
 		var month = (dParts.length > 1) ? Number(dParts[1]) - 1 : null;
 		var endMonth = (month == 11) ? 0 : month + 1;
-		if (year != null && month != null) {
+		if (year != undefined && month != undefined) {
+			var begin = new Date(year, month).toISOString().split('T')[0];
+			var end = new Date(year, endMonth).toISOString().split('T')[0];
 			return { 
-				begin: new Date(year, month).toISOString(),
-				end: new Date(year, endMonth).toISOString()
+				begin: begin,
+				end: end
 			};
 		} else {
 			throw new Error('Utils.makeMonthRange cannot parse monthCode=' + monthCode);

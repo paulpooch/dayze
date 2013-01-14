@@ -44,7 +44,7 @@ define([
 		onDayCodeChange: function() {
 			var dayCode = that.get('dayCode');
 			var parts = dayCode.split('-');
-			that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString());
+			that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toDateString());
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -56,6 +56,7 @@ define([
 			// VARS
 			that = this;
 			_appModel = options.appModel;
+			that.bind('change:dayCode', that.onDayCodeChange);
 		}
 
 	});

@@ -201,7 +201,7 @@ Log.l('sendError', err);
 						return Storage.Events.getEventsForMonth(user, monthCode)
 						.then(function(events) {
 							Log.l('got events for month', events);
-							res.send(events);
+							sendSuccess(res, events, Filter.clientBlacklist.events);
 							return;
 						});
 

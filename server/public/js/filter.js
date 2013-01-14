@@ -229,18 +229,6 @@ Log.l('fail');
 
 	// Regular forms.
 	Filter.fields = {};
-	Filter.fields[C.FilterAction.LinkRead] = [{
-		name: 'linkId',
-		rules: [ Filter.rules.linkId ],
-		immutable: true,
-		required: true
-	}];
-	Filter.fields[C.FilterAction.EventList] = [{
-		name: 'monthCode',
-		rules: [ Filter.rules.monthCode	],
-		immutable: true,
-		required: true
-	}];
 	Filter.fields[C.FilterAction.EventCreate] = [{
 		name: 'name',
 		rules: [ Filter.rules.eventName ],
@@ -257,12 +245,12 @@ Log.l('fail');
 		name: 'beginTime',
 		rules: [ Filter.rules.time ],
 		immutable: false,
-		required: true
+		required: false
 	}, {
 		name: 'endTime',
 		rules: [ Filter.rules.time ],
 		immutable: false,
-		required: true
+		required: false
 	}, {
 		name: 'description',
 		rules: [ Filter.rules.description ],
@@ -273,6 +261,18 @@ Log.l('fail');
 		rules: [ Filter.rules.location ],
 		immutable: false,
 		required: false
+	}];
+	Filter.fields[C.FilterAction.LinkRead] = [{
+		name: 'linkId',
+		rules: [ Filter.rules.linkId ],
+		immutable: true,
+		required: true
+	}];
+	Filter.fields[C.FilterAction.EventList] = [{
+		name: 'monthCode',
+		rules: [ Filter.rules.monthCode	],
+		immutable: true,
+		required: true
 	}];
 	Filter.fields[C.FilterAction.EventAdd] = [{
 		name: 'addEventText',
@@ -541,6 +541,9 @@ Log.l('Cleaned = ', allCleaned);
 		'expiration',
 		'used',
 		'userId'
+	];
+
+	Filter.clientBlacklist.events = [
 	];
 
 	Filter.clientBlacklist.event = [
