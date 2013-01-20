@@ -492,6 +492,7 @@ log('event saved', model, response);
 		},
 
 		login: function() {
+log('AppMode.login');
 			_accountModel.set('state', C.States.Login);
 			_accountModel.save([], {
 				wait: true,

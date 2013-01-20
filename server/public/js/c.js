@@ -13,6 +13,8 @@ define([], function() {
 	C.PULL_EVENTS_FOR_MONTH_DELAY = 1000;
 	C.RESERVED_VERTICAL_SPACE = 90;
 
+	C.KEY_ENTER = 13;
+
 	C.ActiveViews = {};
 	C.ActiveViews.Day = 1;
 	C.ActiveViews.Calendar = 2;

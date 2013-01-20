@@ -37,7 +37,9 @@ define([
 		// enter key
 		$formEl.on('keypress', 'input', function(e) {
 			if (e.which && e.which == 13) {
-				that.$triggerEl.trigger(triggerAction);
+				if (!$(e.target).data('ignore-enter')) {
+					that.$triggerEl.trigger(triggerAction);
+				}
 	    	}
 	  	});
 
@@ -62,7 +64,8 @@ define([
 				model.set(data);
 	  			var loadingText = that.$triggerEl.data('loading-text');
 	  			if (loadingText) {
-	  				that.$triggerEl.text(loadingText);
+	  				var html = '<i class="icon-refresh icon-spin"></i> ' + loadingText;
+	  				that.$triggerEl.html(html);
 	  			}
 	  			that.$triggerEl.attr('disabled', true);
 

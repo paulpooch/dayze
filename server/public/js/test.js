@@ -67,7 +67,12 @@ test('forgot password success', function() {
 });
 */
 
-
+var hitEnter = function(input) {
+	var e = jQuery.Event('keypress');
+	e.which = 13;
+	e.keyCode = 13;
+	$(input).trigger(e);
+};
 
 module('Create Event');
 
@@ -78,6 +83,10 @@ test('create event', function() {
 	$('#event_add_button').click();
 	var title = $('#event_nav h3:first').text();
 	equal(title, eventName);
+	$('#individual_text').val('test@test.com');
+	hitEnter('#individual_text');
+	
+
 	//$('#beginTime').val('1:00pm');
 	//$('#endTime').val('3:00pm');
 	//$('#save_event_button').click();

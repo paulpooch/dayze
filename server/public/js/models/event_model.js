@@ -24,7 +24,8 @@ define([
 			description: null,
 			location: null,
 			beginTime: null,
-			endTime: null
+			endTime: null,
+			invited: {}
 		},
 
 		validate: function() {
@@ -47,6 +48,18 @@ define([
 				beginTime: this.get('beginTime'),
 				endTime: this.get('endTime')
 			};
+		},
+
+		addToInvited: function(nameOrEmail) {
+			var invited = that.get('invited');
+			if (invited.hasOwnProperty(nameOrEmail)) {
+				alert(nameOrEmail + ' is already invited.');
+			} else {
+				invited[nameOrEmail] = 1;
+			}
+			that.set('invited', invited);
+			that.trigger('change:invited');
+log(invited);
 		},
 		
 		// EVENTS /////////////////////////////////////////////////////////////

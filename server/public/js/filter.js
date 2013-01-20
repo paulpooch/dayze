@@ -308,12 +308,12 @@ Log.l('fail');
 		rules: [ Filter.rules.email	],
 		immutable: true,
 		required: true
-	}, {
+	} /*, {
 		name: 'loginRemember',
 		rules: [ Filter.rules.boolean ],
 		immutable: true,
 		required: false
-	}];
+	} */ ];
 	Filter.fields[C.FilterAction.AccountPasswordChange] = [{
 		name: 'password',
 		rules: [ Filter.rules.password ],
@@ -466,6 +466,8 @@ Log.l('WARNING: filterField element ', fieldName, ' not found in during client f
 						allErrors[fieldName] = fieldName + ' was immutable and could only pass the filter with modification.';
 					}
 			 		if (fieldFailed) {
+Log.l('A field failed.');
+Log.l(allErrors);
 			 			allPassed = false;
 			 			allCleaned[fieldName] = null;
 			 			$helpInline.text(allErrors[fieldName]);

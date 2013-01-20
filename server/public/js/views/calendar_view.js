@@ -66,11 +66,18 @@ define([
 		},
 
 		onMonthNameClick: function() {
-			_$monthDropdown.toggle();
+			_$yearDropdown.hide();
+			_$monthDropdown.show();
 		},
 
 		onYearNameClick: function() {
-			_$yearDropdown.toggle();
+			_$monthDropdown.hide();
+			_$yearDropdown.show();
+		},
+
+		hideAllDropdowns: function() {log(2);
+			_$monthDropdown.hide();
+			_$yearDropdown.hide();
 		},
 
 		onScroll: function() {
@@ -139,6 +146,11 @@ define([
 			var direction = 1; // Forward.
 			that.renderXWeeks(start, weekLimit, direction);
 			that.scrollToDay(weekDate);
+
+			// Another mystery delay.
+			setTimeout(function() {
+				that.hideAllDropdowns();
+			}, 100);
 		},
 
 		renderXWeeks: function(startDate, x, direction, alsoRemove) {

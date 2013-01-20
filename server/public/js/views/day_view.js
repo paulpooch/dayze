@@ -35,7 +35,6 @@ define([
 			_eventAddForm = new SmartForm(that.model, _$eventAddForm, that.onAddEventButtonClick);
 			that.$el.css({ height: ($(window).height() - C.RESERVED_VERTICAL_SPACE) + 'px' });
 		},
-
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'change input': 'syncForm',
@@ -66,10 +65,8 @@ define([
 		onAddEventTextKeydown: function(e) {
 			// Make sure 'enter' does what we expect.
 			var code = e.which;
-			if (code == 13) {
-				e.preventDefault();
+			if (code == C.KEY_ENTER) {
 				that.onAddEventButtonClick();
-				return false;
 			}
 		},
 		///////////////////////////////////////////////////////////////////////
