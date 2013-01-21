@@ -225,6 +225,30 @@ Log.l('fail');
 		return result;
 	};
 	
+	Filter.rules.invited = function(t) {
+		var msg = C.FilterErrors.Invited;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			for (var key in t) {
+				if (t.hasOwnProperty(t)) {
+
+					var invitee = t[key];
+					if (typeof invitee == 'string') { // An email address
+
+						invitee = Validator.sanitize(invitee).xss().trim();
+						Validator.check(invitee).isEmail().len(1, 100);
+
+					} else { // A friend model
+
+					}
+
+				}
+			}
+		} catch(e) {
+			result.passed = false;
+		}
+	};
+
 	// FILTER FIELDS //////////////////////////////////////////////////////////
 
 	// Regular forms.
@@ -235,6 +259,12 @@ Log.l('fail');
 		rules: [ Filter.rules.eventName ],
 		immutable: false,
 		required: true,
+		serverOnly: true
+	}, {
+		name: 'invited',
+		rules: [ Filter.rules.invited ],
+		immutable: true,
+		required: false,
 		serverOnly: true
 	}, {
 		name: 'dayCode',

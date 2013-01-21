@@ -74,7 +74,7 @@ define([
 		return results;
 	};
 
-	var AutoSuggest = function(collection, type) {
+	var AutoSuggest = function(collection, type, selectFunction) {
 		_.bindAll(this);
 		this.trie = new Trie();
 		this.resultSet = [];
@@ -83,6 +83,7 @@ define([
 		this.itemTemplate = _.template(AutoSuggestItemTemplate);
 		this.$inputText;
 		this.$resultsBox;
+		this.selectFunction = selectFunction;
 
 		if (type == 'friend') {
 
@@ -128,26 +129,28 @@ define([
 	};
 
 	AutoSuggest.prototype.onTextChange = function(e) {
-		var code = e.which;
+		var code = e && e.which;
 		if (code == C.KEY_ENTER) {
 			this.onEnter();
 		} else {
 log('this', this);
-			var term = $(e.target).val();
 			this.$resultsBox.empty();
 
-			var html = this.newItemHtml(term);
-			this.$resultsBox.append(html);
-			this.resultSet = [ term ];
-
-			var matches = this.search(term);
-log('matches', matches);
-			for (var i = 0; i < matches.length; i++) {
-				var html = this.itemTemplate(matches[i]);
+			if (e) {
+				var term = $(e.target).val();
+				var html = this.newItemHtml(term);
 				this.$resultsBox.append(html);
+				this.resultSet = [ term ];
+
+				var matches = this.search(term);
+	log('matches', matches);
+				for (var i = 0; i < matches.length; i++) {
+					var html = this.itemTemplate(matches[i]);
+					this.$resultsBox.append(html);
+				}
+				this.resultSet = this.resultSet.concat(matches);
+				this.select(0);
 			}
-			this.resultSet = this.resultSet.concat(matches);
-			this.select(0);
 
 		}
 	};
@@ -159,7 +162,10 @@ log('matches', matches);
 	};
 
 	AutoSuggest.prototype.onEnter = function() {
-		//that.model.addToInvited(val);
+		var selectedItem = this.resultSet[this.selectedIndex];
+		this.selectFunction(selectedItem);
+		this.$inputText.val('');
+		this.onTextChange();
 	};
 
 	return AutoSuggest;

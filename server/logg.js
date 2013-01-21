@@ -30,7 +30,7 @@ define([
 			// Re-initiate Log
 			now = new Date();
 			logName = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + '.log';
-			logFile = new Log('debug', FileSystem.createWriteStream('../logs/' + logName, writeFlags));
+			logFile = new Logger('debug', FileSystem.createWriteStream('../logs/' + logName, writeFlags));
 		}
 	}, Config.INTERVAL_LOG_RENAME);
 

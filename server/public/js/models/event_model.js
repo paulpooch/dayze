@@ -46,16 +46,27 @@ define([
 				description: this.get('description'),
 				location: this.get('location'),
 				beginTime: this.get('beginTime'),
-				endTime: this.get('endTime')
+				endTime: this.get('endTime'),
+				invited: this.get('invited')
 			};
 		},
 
-		addToInvited: function(nameOrEmail) {
+		addToInvited: function(invitee) {
+log('addToInvited', invitee);
 			var invited = that.get('invited');
-			if (invited.hasOwnProperty(nameOrEmail)) {
-				alert(nameOrEmail + ' is already invited.');
+			if (invited.hasOwnProperty(invitee)) {
+				alert(invitee + ' is already invited.');
 			} else {
-				invited[nameOrEmail] = 1;
+
+				if (typeof invitee == 'string') { // email
+					// Filter this somehow
+					// Hotfield?
+					
+				} else { // friend model
+
+				}
+
+				invited[invitee] = 1;
 			}
 			that.set('invited', invited);
 			that.trigger('change:invited');

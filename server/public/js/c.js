@@ -170,6 +170,7 @@ define([], function() {
 	C.FilterErrors.EventLocation = 'Location must be 100 or less printable characters.';
 	C.FilterErrors.EventName = 'Name must be 1 to 30 printable characters.';
 	C.FilterErrors.Time = 'Time must be valid (3:30pm).';
+	C.FilterErrors.Invited = 'Invite list contained an invalid entry.';
 
 	C.Links = {};
 	C.Links.Expiration = {};

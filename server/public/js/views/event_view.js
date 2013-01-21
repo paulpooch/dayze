@@ -149,7 +149,8 @@ log('WARNING - mapLocation is currently useless.')
 			_inviteItemTemplate = _.template(InviteItemTemplate);
 			_appModel = options.appModel;
 
-			_friendAutoSuggest = new AutoSuggest(_appModel.get('friendCollection'), 'friend');
+			var selectFunction = that.model.addToInvited;
+			_friendAutoSuggest = new AutoSuggest(_appModel.get('friendCollection'), 'friend', selectFunction);
 		}
 
 	});
