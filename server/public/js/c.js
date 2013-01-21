@@ -23,6 +23,7 @@ define([], function() {
 	C.ActiveViews.Thinking = 5;
 
 	C.FilterAction = {};
+	C.FilterAction.FriendList = 'friend.list';
 	C.FilterAction.LinkRead = 'link.read';
 	C.FilterAction.EventList = 'event.list';
 	C.FilterAction.EventCreate = 'event.create';

@@ -17,35 +17,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // MASTER TODO:
-//
-// Unified exception handling scheme.
-// Maybe let all errors fall through to a single handler per REST request?
-// Also direct all errors to pretty logging solution.
-//
-// Make pullEvents intelligent.  Caching.  Not repull.  Etc.
-//
-// Install memcached to windows.
-// http://www.codeforest.net/how-to-install-memcached-on-windows-machine
-//
-// Automatically update user's last activity time during frontDoor?  maybe login======//
-// Awesome validation framework.
-//
-//
-// Do we really care about model validation?
-//
-// CSRF Tokens
-//
-// Clean up Q flows in Storage
 /*
 
-1. table cleanout script [DONE]
-2. profile pics (John)
-3. forgot password (Paul)
+1. CSRF Tokens
+2. Make pullEvents intelligent.  Caching.  Not repull.  Etc.
 4. login security - does user have permission to do action / is user really logged in (Paul)
 5. event create
 6. show events on cal
-7. table cleanout by expiration
-	// -temp accounts with lastactivity > 1 month
+2. profile pics (John)
 8. remember me
 20. wrap db calls in some kind of over API limit handler - increase capacity temporarily. (DANGEROUS!)
 	maybe just email me instead. and ill do it manually?
@@ -177,10 +156,54 @@ Log.l('sendError', err);
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
+	// FRIEND REST
+	///////////////////////////////////////////////////////////////////////////////
+
+	var FriendRestApi = function(app) {
+		
+		var FriendRestApi = {};
+		var path = Config.REST_PREFIX + 'friend';
+
+		FriendRestApi.list = function(req, res) {
+			Log.l();
+			Log.l('FRIEND LIST ////////////////////');
+			Log.l();
+			frontDoor(req, res)
+			.then(function(user) {
+
+				return filterAction(req, res, C.FilterAction.FriendList)
+				.then(function(clean) {
+
+					return Storage.Friends.getFriends(user.userId)
+					.then(function(friends) {
+
+						// Use user blacklist.
+						sendSuccess(res, friends, Filter.clientBlacklist.user);
+						return;
+					
+					});
+							
+				});
+
+			})	
+			.fail(function(err) {
+				Log.e('Error in FRIEND LIST', err, err.stack);
+				sendError(res, err);
+				return;
+			})
+			.end();
+		};
+
+		app.get('/' + path, FriendRestApi.list);
+	
+		return FriendRestApi;
+
+	};
+
+	///////////////////////////////////////////////////////////////////////////////
 	// EVENT REST
 	///////////////////////////////////////////////////////////////////////////////
 	
-	// CLEANUP THIS SECTION!
 	var EventRestApi = function(app) {
 
 		var EventRestApi = {};
@@ -201,7 +224,7 @@ Log.l('sendError', err);
 						return Storage.Events.getEventsForMonth(user, monthCode)
 						.then(function(events) {
 							Log.l('got events for month', events);
-							sendSuccess(res, events, Filter.clientBlacklist.events);
+							sendSuccess(res, events, Filter.clientBlacklist.event);
 							return;
 						});
 
@@ -767,6 +790,7 @@ Log.l('LOGGING OUT');
 		var accountRestApi = AccountRestApi(app);
 		var eventRestApi = EventRestApi(app);
 		var linkRestApi = LinkRestApi(app);
+		var friendRestApi = FriendRestApi(app);	
 		var adminTools = AdminTools(app);
 
 		// handle requests to roots

@@ -7,8 +7,8 @@ define([
 	'backbone',
 	'google',
 
+	'auto_suggest',
 	'text!templates/event_template.html',
-	'text!templates/autosuggest_item_template.html',
 	'text!templates/invite_item_template.html',
 	'smart_form',
 	'c'
@@ -18,8 +18,8 @@ define([
 	Backbone,
 	Google,
 
+	AutoSuggest,
 	EventTemplate,
-	AutosuggestItemTemplate,
 	InviteItemTemplate,
 	SmartForm,
 	C
@@ -32,8 +32,8 @@ define([
 		_eventForm,
 		_$inviteListCol1,
 		_$inviteListCol2,
-		_autosuggestItemTemplate,
-		_inviteItemTemplate;
+		_inviteItemTemplate,
+		_friendAutoSuggest;
 
 	var EventView = Backbone.View.extend({
 
@@ -41,12 +41,22 @@ define([
 
 		render: function() {
 			that.$el.html(that.template(that.model.toJSON()));
+
 			_$eventForm = that.$el.find('#event_create_form');
 			_eventForm = new SmartForm(that.model, _$eventForm, _appModel.saveEvent);
 			that.reInitScrollSpy();
 
 			_$inviteListCol1 = that.$el.find('.invite_list_col1');
 			_$inviteListCol2 = that.$el.find('.invite_list_col2');
+
+			var inputText = that.$el.find('#individual_text');
+			var resultsBox = that.$el.find('#individual_results');
+			var autoSuggestEls = {
+				inputText: inputText,
+				resultsBox: resultsBox
+			};
+			_friendAutoSuggest.updateEls(autoSuggestEls);
+
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -54,8 +64,7 @@ define([
 			'keyup #location': 'mapLocation',
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
-			'keypress #individual_text': 'onIndividualTextChange',
-			'click #location_button': 'mapLocation',
+			'click #location_button': 'mapLocation'
 		},
 
 		syncForm: function(e) {
@@ -82,17 +91,6 @@ log('WARNING - mapLocation is currently useless.')
     		});
 		},
 
-		onAddIndividualClick: function() {
-			var val = $('#individual_text').val();
-			that.model.addToInvited(val);
-		},
-
-		onIndividualTextChange: function(e) {
-			var code = e.which;
-			if (code == C.KEY_ENTER) {
-				that.onAddIndividualClick();
-			}
-		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -148,9 +146,10 @@ log('WARNING - mapLocation is currently useless.')
 			_.bindAll(this);
 			that = this;
 
-			_autosuggestItemTemplate = _.template(AutosuggestItemTemplate);
 			_inviteItemTemplate = _.template(InviteItemTemplate);
 			_appModel = options.appModel;
+
+			_friendAutoSuggest = new AutoSuggest(_appModel.get('friendCollection'), 'friend');
 		}
 
 	});

@@ -631,7 +631,7 @@ Log.l('scanOptions = ', scanOptions);
 	// Storage.get and others will require cacheKey to be specified.
 	// Be careful this matches how it is set with put!
 	///////////////////////////////////////////////////////////////////////////
-	
+
 	EVENTS_BY_USERID_AND_DAYCODE = {
 		tableName: 'DAYZE_EVENTS_BY_USERID_AND_DAYCODE',
 		cachePrefix: '01_',
@@ -670,6 +670,7 @@ Log.l('scanOptions = ', scanOptions);
 		put: _put,
 		get: _get,
 		scan: _scan,
+		batchGet: _batchGet,
 		batchDelete: _batchDelete
 	};
 
@@ -712,6 +713,21 @@ Log.l('scanOptions = ', scanOptions);
 		batchDelete: _batchDelete
 	};
 
+	FRIENDS = {
+		tableName: 'DAYZE_FRIENDS',
+		cachePrefix: '07_',
+		cachePrefix: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.userId; // Just cache by userId.
+		},		
+		query: function(userId, options) {
+			var hashKey = userId;
+			var cacheKey = this.cachePrefix + userId; // Just cache by userId.
+			return _query.call(this, hashKey, options);
+		}
+	};
+
+
 	///////////////////////////////////////////////////////////////////////////
 	// STORAGE OPERATIONS
 	//
@@ -727,6 +743,49 @@ Log.l('scanOptions = ', scanOptions);
 	//		return deferred.promise;
 	//
 	///////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////////////////////////////////////////////////////
+	// Friends
+	///////////////////////////////////////////////////////////////////////////
+
+	Storage.Friends = (function() {
+
+		var Friends = {};
+
+		Friends.getFriends = function(userId) {
+			var deferred = Q.defer();
+
+			var options = {}; // No RangeKeyCondition.  Get all friends.
+			
+			FRIENDS.query(userId, options)
+			.then(function(friendIndices) {
+
+				if (friendIndices.count) {
+					friendIndices = friendIndices.items;
+					var friendIds = [];
+					friendIndices.forEach(function(item) {
+						friendIds.push(item.friendId);
+					});
+					return USERS.batchGet(friendIds);
+				} else {
+					return [];
+				}
+
+			})
+			.then(function(friends) {
+				deferred.resolve(friends);
+			})
+			.fail(function(err) {
+				deferred.reject(err)
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		return Friends;
+
+	})();
 
 	///////////////////////////////////////////////////////////////////////////
 	// Events

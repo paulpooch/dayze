@@ -229,6 +229,7 @@ Log.l('fail');
 
 	// Regular forms.
 	Filter.fields = {};
+	Filter.fields[C.FilterAction.FriendList] = [];
 	Filter.fields[C.FilterAction.EventCreate] = [{
 		name: 'name',
 		rules: [ Filter.rules.eventName ],
@@ -496,6 +497,7 @@ Log.l(allErrors);
 				}
 			
 				var originalVal = dirtyVal;
+
 				for (var j = 0; j < fieldRules.length; j++) {
 					var fieldRule = fieldRules[j];
 					var ruleResult = fieldRule(dirtyVal);
@@ -545,20 +547,32 @@ Log.l('Cleaned = ', allCleaned);
 		'userId'
 	];
 
-	Filter.clientBlacklist.events = [
-	];
-
-	Filter.clientBlacklist.event = [
-	];
+	Filter.clientBlacklist.event = [];
 
 	Filter.forClient = function(item, blacklist) {
-		for (var i = 0; i < blacklist.length; i++) {
-			var field = blacklist[i];
-			if (item.hasOwnProperty(field)) {
-				delete item[field];
+
+		var cleanItem = function(item) {
+			for (var i = 0; i < blacklist.length; i++) {
+				var field = blacklist[i];
+				if (item.hasOwnProperty(field)) {
+					delete item[field];
+				}
 			}
+			return item;
+		};
+
+		// Is array?
+		if (Object.prototype.toString.call(item) === '[object Array]') {
+			var arr = item;
+			for (var i = 0; i < arr.length; i++) {
+				var item = arr[i];
+				arr[i] = cleanItem(item);
+			}
+			return arr;
+		} else {
+			// Is object.
+			return cleanItem(item);
 		}
-		return item;
 	};
 
 	return Filter;

@@ -10,6 +10,7 @@ define([
 	'views/app_view',
 
 	'collections/event_collection',
+	'collections/friend_collection',
 
 	'models/account_model',
 	'models/calendar_model',
@@ -19,6 +20,7 @@ define([
 	'models/link_model',
 	'models/basic_model',
 	'models/thinking_model',
+	'models/friend_model',
 
 	'views/account_controls_view',
 	'views/account_view',
@@ -38,6 +40,7 @@ define([
 	AppView,
 
 	EventCollection,
+	FriendCollection,
 
 	AccountModel,
 	CalendarModel,
@@ -47,6 +50,7 @@ define([
 	LinkModel,
 	BasicModel,
 	ThinkingModel,
+	FriendModel,
 
 	AccountControlsView,
 	AccountView,
@@ -64,6 +68,7 @@ define([
 		_appView,
 
 		_eventCollection,
+		_friendCollection,
 		
 		_accountModel,
 		_calendarModel,
@@ -229,7 +234,16 @@ log(error);
 					success: function() { 
 log('Pulled account from server', _accountModel, route);
 						_accountControlsView.render();
-						dest();
+
+						_friendCollection.fetch({
+							success: function() {
+log('Pulled friends.', _friendCollection);
+								dest();
+							},
+							error: that.handleError
+
+						});
+
 					},
 					error: that.handleError
 				});
@@ -626,6 +640,9 @@ log(_accountModel);
 
 			_eventCollection = new EventCollection();
 			that.set('eventCollection', _eventCollection);
+
+			_friendCollection = new FriendCollection();
+			that.set('friendCollection', _friendCollection);	
 	
 			_accountModel = new AccountModel({ appModel: that  });
 			_calendarModel = new CalendarModel({ appModel: that });
