@@ -30,6 +30,25 @@ define([
 		Validator.sanitize = sanitize;
 	}
 
+	// MANUAL RULE UTIL ///////////////////////////////////////////////////////
+
+	Filter.check = function($fieldEl, fieldRule) {
+		var $controlGroup = $fieldEl.closest('.control-group');
+		var $helpInline = $controlGroup.find('.help-inline');
+
+		// Reset error/success messages.
+		$controlGroup.attr('class', 'control-group');
+		$helpInline.text('');
+
+		var dirtyVal = $fieldEl.val();
+		var ruleResult = fieldRule(dirtyVal);
+		if (!ruleResult.passed) {
+			$helpInline.text(ruleResult.errorMessage);
+			$controlGroup.addClass('error');
+		}
+		return ruleResult.passed;
+	};
+	
 	// FILTER RULES ///////////////////////////////////////////////////////////
 	/*
 	Returns an object of {
@@ -230,10 +249,11 @@ Log.l('fail');
 		var result = { passed: true, cleanVal: null, errorMessage: msg };
 		try {
 			for (var key in t) {
-				if (t.hasOwnProperty(t)) {
+				if (t.hasOwnProperty(key)) {
 
-					var invitee = t[key];
-					if (typeof invitee == 'string') { // An email address
+					var invitee = key;
+					var entry = t[key]
+					if (entry === C.EmailInvitee) { // An email address
 
 						invitee = Validator.sanitize(invitee).xss().trim();
 						Validator.check(invitee).isEmail().len(1, 100);
@@ -244,9 +264,11 @@ Log.l('fail');
 
 				}
 			}
+			result.cleanVal = t;
 		} catch(e) {
 			result.passed = false;
 		}
+		return result;
 	};
 
 	// FILTER FIELDS //////////////////////////////////////////////////////////

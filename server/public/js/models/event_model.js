@@ -4,11 +4,13 @@
 define([
 	'jquery',
 	'underscore',
-	'backbone'
+	'backbone',
+	'c'
 ], function(
 	jQuery,
 	_,
-	Backbone
+	Backbone,
+	C
 ) {
 
 	var that;
@@ -51,28 +53,36 @@ define([
 			};
 		},
 
+		// TODO:
+		// If email, go to server and see if there's a corresponding account.
 		addToInvited: function(invitee) {
-log('addToInvited', invitee);
 			var invited = that.get('invited');
-			if (invited.hasOwnProperty(invitee)) {
-				alert(invitee + ' is already invited.');
-			} else {
-
-				if (typeof invitee == 'string') { // email
-					// Filter this somehow
-					// Hotfield?
-					
-				} else { // friend model
-
+			if (typeof invitee == 'string') { // email
+				if (invited.hasOwnProperty(invitee)) {
+					alert(invitee + ' is already invited.');
+				} else {
+					invited[invitee] = C.EmailInvitee;
+				} 
+			} else { // friend model
+				var friendId = invitee.get('friendId');
+				if (invited.hasOwnProperty(friendId)) {
+					alert(friendId + ' is already invited.');
+				} else {
+					invited[friendId] = invitee;
 				}
-
-				invited[invitee] = 1;
 			}
 			that.set('invited', invited);
 			that.trigger('change:invited');
 log(invited);
 		},
-		
+
+		removeFromInvited: function(invitee) {
+			var invited = that.get('invited');
+			delete invited[invitee];
+			that.set('invited', invited);
+			that.trigger('change:invited');
+		},
+
 		// EVENTS /////////////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////////////////

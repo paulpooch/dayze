@@ -153,7 +153,8 @@ log('ROUTE: error');
 		overrideATags: function() {
 			$(document).on('click', 'a:not([data-bypass])', function (event) {
 				// intercept all 'a' clicks
-				if ($(event.target).data('ignore')) {
+				
+				if ($(event.target).closest('a').data('ignore')) {
 					return;
 				}
 

@@ -57,6 +57,7 @@ define([
 			};
 			_friendAutoSuggest.updateEls(autoSuggestEls);
 
+			$('[rel=tooltip]').tooltip();
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -64,7 +65,8 @@ define([
 			'keyup #location': 'mapLocation',
 			'change input': 'syncForm',
 			'change textarea': 'syncForm',
-			'click #location_button': 'mapLocation'
+			'click #location_button': 'mapLocation',
+			'click .invite_list .remove_invite': 'onRemoveInviteClick'
 		},
 
 		syncForm: function(e) {
@@ -91,6 +93,10 @@ log('WARNING - mapLocation is currently useless.')
     		});
 		},
 
+		onRemoveInviteClick: function(e) {
+			var id = $(e.target).data('id');
+			that.model.removeFromInvited(id);
+		},
 		///////////////////////////////////////////////////////////////////////
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
@@ -102,7 +108,7 @@ log('WARNING - mapLocation is currently useless.')
 			var invited = that.model.get('invited');
 			invited = _.keys(invited);
 			for (var i = 0; i < invited.length; i++) {
-				var data = { name: invited[i] };
+				var data = { id: invited[i] };
 				var html = _inviteItemTemplate(data);
 				if (i % 2) {
 					_$inviteListCol2.append(html);
@@ -150,7 +156,7 @@ log('WARNING - mapLocation is currently useless.')
 			_appModel = options.appModel;
 
 			var selectFunction = that.model.addToInvited;
-			_friendAutoSuggest = new AutoSuggest(_appModel.get('friendCollection'), 'friend', selectFunction);
+			_friendAutoSuggest = new AutoSuggest(_appModel.get('friendCollection'), C.AutoSuggestType.Friend, selectFunction);
 		}
 
 	});

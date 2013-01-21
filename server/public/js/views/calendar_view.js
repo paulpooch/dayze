@@ -313,8 +313,8 @@ define([
 			_$window.scroll(that.onScroll);
 			_$monthDropdown.on('click', 'li', that.onMonthDropdownSelect);
 			_$yearDropdown.on('click', 'li', that.onYearDropdownSelect);
-			_$monthName.parents('.month_button').on('click', that.onMonthNameClick);
-			_$yearName.parents('.month_button').on('click', that.onYearNameClick);
+			_$monthName.closest('.month_button').on('click', that.onMonthNameClick);
+			_$yearName.closest('.month_button').on('click', that.onYearNameClick);
 			// MODEL EVENTS
 			_eventCollection.on('reset', that.onEventCollectionReset);
 			_appModel.bind('change:activeView', that.onActiveViewChange);

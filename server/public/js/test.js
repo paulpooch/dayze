@@ -68,7 +68,7 @@ test('forgot password success', function() {
 */
 
 var hitEnter = function(input) {
-	var e = jQuery.Event('keypress');
+	var e = jQuery.Event('keyup');
 	e.which = 13;
 	e.keyCode = 13;
 	$(input).trigger(e);
@@ -84,12 +84,19 @@ test('create event', function() {
 	var title = $('#event_nav h3:first').text();
 	equal(title, eventName);
 	$('#individual_text').val('test@test.com');
-	hitEnter('#individual_text');
 	
+	var e = jQuery.Event('keyup');
+	e.which = 77;
+	e.keyCode = 77;
+	$('#individual_text').trigger(e);
+	
+	stop(); // Pause the test 
+    setTimeout(function() {
+		hitEnter('#individual_text');
+    	// Restart the test
+    	start();
+    }, 1000);
 
-	//$('#beginTime').val('1:00pm');
-	//$('#endTime').val('3:00pm');
-	//$('#save_event_button').click();
 });
 
 

@@ -338,7 +338,7 @@ Log.l('item = ', item);
 			return Cache.set(that.cacheKey(item), item, that.cacheTimeout);
 		})
 		.then(function(cacheResult) {
-			return true;
+			return item;
 		});
 	};
 
@@ -557,6 +557,93 @@ Log.l('_batchDelete complete.');
 		return deferred.promise;
 	};
 
+	var _batchPut = function(items) {
+		var that = this;
+		var deferred = Q.defer();
+
+Log.l('Storage.batchPut');
+Log.l('table = ', that.tableName);
+Log.l('items = ', items);
+
+		var remainingItems = items;
+		
+		var putCache = function(item) {
+			return Cache.set(that.cacheKey(item), item, that.cacheTimeout);
+		};
+
+		var dbPut = function(items) {
+			/*
+			batchWriteItem = function(putRequest, deleteRequest, cb) {
+			Put or delete several items across multiple tables
+			@param putRequest dictionnary { 'table': [item1, item2, item3], 'table2': item }
+			@param deleteRequest dictionnary { 'table': [key1, key2, key3], 'table2': [[id1, range1], [id2, range2]] }
+			@param cb callback(err, res, cap) err is set if an error occured
+			*/
+			var putRequest = {};		
+			putRequest[that.tableName] = items;
+Log.l('putRequest', putRequest);
+			return Q.ncall(
+				ddb.batchWriteItem,
+				that,
+				putRequest,
+				{} // deleteRequest
+			);
+		};
+
+		var dbPutInBatches = function() {
+			if (remainingItems.length) {
+
+				var itemsToPut = [];
+				var i = 0;
+				while (i < Config.DYNAMO_DEFAULT_WRITE_PER_SEC && remainingItems.length) {
+					itemsToPut.push(remainingItems.pop());
+					i++;
+				}
+
+				return dbPut(itemsToPut)
+				.then(function(putResult) {
+Log.l('remainingKeys', remainingItems.length);
+					if (remainingItems.length)  {
+						var recursiveDefer = Q.defer();
+						setTimeout(function() {
+							
+							dbPutInBatches()
+							.then(function() {
+								recursiveDefer.resolve();
+							})
+							.fail(function(err) {
+								recursiveDefer.reject(err);
+							})
+							.end();
+
+						}, Config.DYNAMO_BATCH_DELAY); // Delay so we don't crush db
+						return recursiveDefer.promise;
+
+					}
+				});
+
+			}
+		};
+
+		var queue = [];
+		items.forEach(function(item) {
+			queue.push(putCache(item));
+		});
+
+		Q.all(queue)
+		.then(dbPutInBatches)
+		.then(function() {
+Log.l('_batchPut complete.');
+			deferred.resolve();
+		})
+		.fail(function(err) {
+			deferred.reject(err);
+		})
+		.end();
+
+		return deferred.promise;
+	};
+
 	/* 
 	This does not add entries to memcache since it's usually pulling everything which includes a lot of garbage.
 	Like during table cleans.
@@ -671,7 +758,8 @@ Log.l('scanOptions = ', scanOptions);
 		get: _get,
 		scan: _scan,
 		batchGet: _batchGet,
-		batchDelete: _batchDelete
+		batchDelete: _batchDelete,
+		batchPut: _batchPut
 	};
 
 	USERS_BY_COOKIE = {
@@ -697,7 +785,9 @@ Log.l('scanOptions = ', scanOptions);
 		put: _put,
 		get: _get,
 		scan: _scan,
-		batchDelete: _batchDelete
+		batchGet: _batchGet,
+		batchDelete: _batchDelete,
+		batchPut: _batchPut
 	}
 		
 	CUSTOM_LINKS = {
@@ -722,11 +812,49 @@ Log.l('scanOptions = ', scanOptions);
 		},		
 		query: function(userId, options) {
 			var hashKey = userId;
-			var cacheKey = this.cachePrefix + userId; // Just cache by userId.
+			var cacheKey = this.cachePrefix + hashKey; // Just cache by userId.
 			return _query.call(this, hashKey, options);
 		}
 	};
 
+	INVITES = {
+		tableName: 'DAYZE_INVITES',
+		cachePrefix: '08_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.inviteId;
+		},			
+		put: _put,
+		get: _get
+	};
+	
+	INVITES_BY_USERID_AND_EVENTID = {
+		tableName: 'DAYZE_INVITES_BY_USERID_AND_EVENTID',
+		cachePrefix: '09_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.userId + item.eventId;
+		},
+		query: function(userId, options) {
+			var hashKey = userId;
+			var cacheKey = this.cachePrefix + hashKey;
+			return _query.call(this, hashKey, options);
+		}
+	};
+
+	INVITES_BY_EVENTID_AND_USERID = {
+		tableName: 'DAYZE_INVITES_BY_EVENTID_AND_USERID',
+		cachePrefix: '10_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.eventId + item.userId;
+		},
+		query: function(eventId, options) {
+			var hashKey = eventId;
+			var cacheKey = this.cachePrefix + hashKey;
+			return _query.call(this, hashKey, options);
+		}
+	};
 
 	///////////////////////////////////////////////////////////////////////////
 	// STORAGE OPERATIONS
@@ -788,6 +916,54 @@ Log.l('scanOptions = ', scanOptions);
 	})();
 
 	///////////////////////////////////////////////////////////////////////////
+	// Invites
+	///////////////////////////////////////////////////////////////////////////
+
+	Storage.Invites = (function() {
+
+		var Invites = {};
+
+		// This should prob batchput a bunch of shit.
+		Invites.createInvite = function(eventId, userId) {
+			var deferred = Q.defer();
+			var inviteId = Uuid.v4();
+
+			var invite = {
+				inviteId: inviteId,
+				eventId: eventId,
+				userId: userId,
+				responded: 0,
+				response: 0,
+				emailed: 0
+			};
+
+			var inviteIndex = {
+				userId: userId,
+				eventId: eventId,
+				inviteId: inviteId
+			};
+
+			INVITES_BY_EVENTID_AND_USERID.put(inviteIndex)
+			.then(INVITES_BY_USERID_AND_EVENTID.put)
+			.then(function(inviteIndex) {
+				return INVITES.put(invite);
+			})
+			.then(function(invite) {
+				deferred.resolve(invite);
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+
+			return deferred.promise;
+		};	
+		
+		return Invites;
+
+	})();
+
+	///////////////////////////////////////////////////////////////////////////
 	// Events
 	///////////////////////////////////////////////////////////////////////////
 
@@ -795,15 +971,17 @@ Log.l('scanOptions = ', scanOptions);
 
 		var Events = {};
 
-		Events.createEvent = function(user, post) {
+		// We do a lot of low level db interaction to make sure performance is good.
+		// Lot's of batchPuts and stuff instead of using single item creation functions.		
+		Events.createEvent = function(user, clean) {
 			var deferred = Q.defer();
 
 			var eventId = Uuid.v4();
-			var dayCode = post.dayCode;
+			var dayCode = clean.dayCode;
 
 			var event = {
 				eventId: eventId,
-				name: post.name,
+				name: clean.name,
 				userId: user.userId,
 				createTime: Utils.getNowIso()
 			};	
@@ -819,7 +997,7 @@ Log.l('scanOptions = ', scanOptions);
 					userId: user.userId,
 					dayCode: dayCode,
 					eventIds: eventIds
-				};
+				};				
 
 				return EVENTS_BY_USERID_AND_DAYCODE.put(eventIndex)
 				.then(function(putResult) {
@@ -829,11 +1007,103 @@ Log.l('scanOptions = ', scanOptions);
 				});
 
 			})
+			.then(function(event) {
+
+				var invitees = clean.invited;
+				var emailsToGetUserIdsFor = [];
+				var userIdsByEmail = {};
+
+				_.each(invitees, function(val, key) {
+					if (val == C.EmailInvitee) {
+						emailsToGetUserIdsFor.push(key);
+					}
+				});
+				
+	Log.l('emailsToGetUserIdsFor', emailsToGetUserIdsFor);
+				return USERS_BY_EMAIL.batchGet(emailsToGetUserIdsFor)
+				.then(function(users) {
+	Log.l(users);
+					users.forEach(function(user) {
+						userIdsByEmail[user.email] = user.userId;
+					});
+
+					var usersToCreate = [];
+					var userIndicesToCreate = [];
+
+					emailsToGetUserIdsFor.forEach(function(email) {
+						if (!userIdsByEmail.hasOwnProperty(email)) {
+
+							// Create an account.
+							var userId = Uuid.v4();
+							var user = {
+								userId: userId,
+								unconfirmedEmail: email
+							};
+							var userIndex = {
+								userId: userId,
+								email: email
+							};
+							usersToCreate.push(user);
+							userIndicesToCreate.push(userIndex);
+							userIdsByEmail[email] = userId;
+
+						}
+					});
+
+					return USERS_BY_EMAIL.batchPut(userIndicesToCreate)
+					.then(function(batchPutResult) {
+
+						return USERS.batchPut(usersToCreate);
+
+					});
+
+				})
+				.then(function(batchPutResults) {
+
+					var invitesToCreate = [];
+					var inviteIndicesToCreate = [];
+
+					_.each(invitees, function(val, key) {
+						var userId;
+						if (val == C.EmailInvitee) {
+							userId = userIdsByEmail[key];
+						} else {
+							userId = val.friendId;
+						}
+
+						var inviteId = Uuid.v4();
+						var invite = {
+							inviteId: inviteId,
+							eventId: eventId,
+							userId: userId,
+							responded: 0,
+							response: 0,
+							emailed: 0
+						};
+						var inviteIndex = {
+							inviteId: inviteId,
+							eventId: eventId,
+							userId: userId
+						};
+						invitesToCreate.push(invite);
+						inviteIndicesToCreate.push(inviteIndex);
+
+					});
+
+Log.l('inviteIndicesToCreate', inviteIndicesToCreate);
+
+				});
+
+			})
 			.fail(function(err) {
 Log.l('err in Events.createEvent', err);
 				deferred.reject(new ServerError(err));
 			})
 			.end();
+
+			/*
+			
+			*/
 
 			return deferred.promise;
 		};
@@ -1068,11 +1338,11 @@ Log.l('all events this month', events);
 			return deferred.promise;
 		};
 
-		Users.createAccount = function(user, post) {
+		Users.createAccount = function(user, clean) {
 			var deferred = Q.defer();
 			// Nobody will ever know this password.
 			// It will just get reset once user creates their own via verify email link.
-			var unconfirmedEmail = post['unconfirmedEmail'];
+			var unconfirmedEmail = clean['unconfirmedEmail'];
 			//var password = Utils.generatePassword();
 			//var salt = Utils.generatePassword(16);
 			//var pwHash = Utils.hashSha512(password + salt);

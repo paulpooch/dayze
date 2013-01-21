@@ -15,6 +15,12 @@ define([], function() {
 
 	C.KEY_ENTER = 13;
 
+	C.EmailInvitee = 1;
+
+	C.AutoSuggestType = {};
+	C.AutoSuggestType.Friend = 1;
+	C.AutoSuggestType.Plan = 2;
+
 	C.ActiveViews = {};
 	C.ActiveViews.Day = 1;
 	C.ActiveViews.Calendar = 2;

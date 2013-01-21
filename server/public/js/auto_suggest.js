@@ -3,11 +3,13 @@ define([
 	'c',
 	'collections/friend_collection',
 	'text!templates/auto_suggest_item_template.html',
+	'filter'
 ], function(
 	_,
 	C,
 	FriendCollection,
-	AutoSuggestItemTemplate
+	AutoSuggestItemTemplate,
+	Filter
 ) {
 
 	var Trie = function() {
@@ -84,8 +86,9 @@ define([
 		this.$inputText;
 		this.$resultsBox;
 		this.selectFunction = selectFunction;
+		this.type = type;
 
-		if (type == 'friend') {
+		if (this.type == C.AutoSuggestType.Friend) {
 
 			var onCollectionAdd = function(friendModel) {
 				var email = friendModel.get('email');
@@ -106,14 +109,14 @@ define([
 
 			this.newItemHtml = function(term) {
 				return html = [
-					'<div class="auto_suggest_item">',
+					'<div class="auto_suggest_item" data-type="email" data-id="', term, '">',
 					'	<div class="row-fluid"><strong>New Friend</strong></div>',
 					'	<div class="row-fluid">', term, '</div>',
 					'</div>'
 				].join('');
 			};
-
 		}
+
 
 		collection.on('add', onCollectionAdd);
 	};
@@ -133,7 +136,7 @@ define([
 		if (code == C.KEY_ENTER) {
 			this.onEnter();
 		} else {
-log('this', this);
+
 			this.$resultsBox.empty();
 
 			if (e) {
@@ -143,7 +146,6 @@ log('this', this);
 				this.resultSet = [ term ];
 
 				var matches = this.search(term);
-	log('matches', matches);
 				for (var i = 0; i < matches.length; i++) {
 					var html = this.itemTemplate(matches[i]);
 					this.$resultsBox.append(html);
@@ -163,9 +165,17 @@ log('this', this);
 
 	AutoSuggest.prototype.onEnter = function() {
 		var selectedItem = this.resultSet[this.selectedIndex];
-		this.selectFunction(selectedItem);
-		this.$inputText.val('');
-		this.onTextChange();
+
+		if (this.type == C.AutoSuggestType.Friend) {
+			if (typeof selectedItem == 'string') {
+				if (Filter.check(this.$inputText, Filter.rules.email)) {
+					this.selectFunction(selectedItem);
+					this.$inputText.val('');
+					this.onTextChange();
+				}
+			}
+		}
+		
 	};
 
 	return AutoSuggest;
