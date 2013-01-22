@@ -26,7 +26,8 @@ define([
 			location: null,
 			beginTime: null,
 			endTime: null,
-			invited: {}
+			invited: {},
+			inviteCollection: null
 		},
 
 		validate: function() {
@@ -48,7 +49,8 @@ define([
 				location: this.get('location'),
 				beginTime: this.get('beginTime'),
 				endTime: this.get('endTime'),
-				invited: this.get('invited')
+				invited: this.get('invited'),
+				inviteCollection: this.get('inviteCollection')
 			};
 		},
 

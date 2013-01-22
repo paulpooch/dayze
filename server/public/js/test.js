@@ -77,7 +77,7 @@ var hitEnter = function(input) {
 module('Create Event');
 
 test('create event', function() {
-	$('.day:first').click();
+	$('.day:eq(4)').click();
 	var eventName = 'Test Event';
 	$('#addEventText').val(eventName);
 	$('#event_add_button').click();

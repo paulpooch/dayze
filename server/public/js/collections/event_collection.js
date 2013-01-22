@@ -38,7 +38,9 @@ define([
 			}
 			eventModel.fetch({
 				success: function() {
-					callback();
+log('eventModel', eventModel);
+					that.add(eventModel);
+					callback(eventModel);
 				},
 				error: that.handleError
 			});
@@ -57,6 +59,9 @@ define([
 		// TODO: This should be intelligent.
 		// Not repull a million times.
 		fetchEventsForMonth: function(monthCode, callback) {
+			/*
+			TURNED OFF FOR NOW TO SAVE $$
+			
 			that.fetch({ 
 				data: $.param({ monthCode: monthCode }), 
 				success: function() {
@@ -64,6 +69,7 @@ define([
 				},
 				error: that.handleError
 			});
+			*/
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////

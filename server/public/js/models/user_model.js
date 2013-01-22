@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// INVITE MODEL
+// USER MODEL
 ///////////////////////////////////////////////////////////////////////////////
 define([
 	'underscore',
@@ -16,34 +16,25 @@ define([
 	var that,
 		_appModel;
 
-	var InviteModel = Backbone.Model.extend({
+	var UserModel = Backbone.Model.extend({
 
-		urlRoot: '/rest/invite',
-		idAttribute: 'inviteId',
+		idAttribute: 'userId',
 
 		defaults: {
-			inviteId: null,
-			userId: null, 
-			eventId: null,
-			responded: null, // Did user respond?  0 or 1
-			response: null, // 0-100 (%)
-			emailed: null, // Was user already emailed invite?  0 or 1 - prevents spam.
-			userModel: null
+			userId: null,
+			email: null,
+			displayName: null
 		},
-
+		
 		validate: function(attrs) {
 
 		},
 
 		toJSON: function() {
 			return {
-				inviteId: that.get('inviteId'),
 				userId: that.get('userId'),
-				eventId: that.get('eventId'),
-				responded: that.get('responded'),
-				response: that.get('response'),
-				emailed: that.get('emailed'),
-				userModel: that.get('userModel'),
+				email: that.get('email'),
+				displayName: that.get('displayName')
 			};
 		},
 
@@ -55,12 +46,13 @@ define([
 			that = this;
 			_.bindAll(that);
 
-			_appModel = options.appModel;		
+			_appModel = options.appModel;
+		
 			// EVENTS
 		}
 
 	});
 
-	return InviteModel;
+	return UserModel;
 
 });

@@ -121,7 +121,7 @@ define([
 		collection.on('add', onCollectionAdd);
 	};
 
-	AutoSuggest.prototype.updateEls = function(els) {log('els', els);
+	AutoSuggest.prototype.updateEls = function(els) {
 		this.$inputText = els.inputText;
 		this.$resultsBox = els.resultsBox;
 		this.$inputText.on('keyup', this.onTextChange);

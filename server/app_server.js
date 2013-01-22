@@ -336,9 +336,9 @@ Log.l('event created successfully', event);
 
 		app.get('/' + path, EventRestApi.list);
 		app.post('/' + path, EventRestApi.create);
-		app.get('/' + path + '/:id', EventRestApi.read);
-		app.put('/' + path + '/:id', EventRestApi.update);
-		app.del('/' + path + '/:id', EventRestApi.delete);
+		app.get('/' + path + '/:eventId', EventRestApi.read);
+		app.put('/' + path + '/:eventId', EventRestApi.update);
+		app.del('/' + path + '/:eventId', EventRestApi.delete);
 		
 		return EventRestApi;
 

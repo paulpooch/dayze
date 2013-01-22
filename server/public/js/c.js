@@ -34,6 +34,7 @@ define([], function() {
 	C.FilterAction.EventList = 'event.list';
 	C.FilterAction.EventCreate = 'event.create';
 	C.FilterAction.EventAdd = 'event.add';
+	C.FilterAction.EventRead = 'event.read';
 	C.FilterAction.AccountList = 'account.list';
 	C.FilterAction.AccountCreate = 'account.create';
 	C.FilterAction.AccountLogin = 'account.login';

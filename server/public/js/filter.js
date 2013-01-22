@@ -276,6 +276,12 @@ Log.l('fail');
 	// Regular forms.
 	Filter.fields = {};
 	Filter.fields[C.FilterAction.FriendList] = [];
+	Filter.fields[C.FilterAction.EventRead] = [{
+		name: 'eventId',
+		rules: [ Filter.rules.uuid ],
+		immutable: true,
+		required: true
+	}];
 	Filter.fields[C.FilterAction.EventCreate] = [{
 		name: 'name',
 		rules: [ Filter.rules.eventName ],

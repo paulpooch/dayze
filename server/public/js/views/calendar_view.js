@@ -105,7 +105,7 @@ define([
 		onEventCollectionReset: function() {
 			var alreadyResetDays = {};
 			_eventCollection.each(function(event) {
-				var dayCode = event.get('eventTime').split('T')[0];
+				var dayCode = event.get('dayCode');
 				var dayEl = $('.day[data-day-code=' + dayCode + ']');
 				if (!alreadyResetDays[dayCode]) {
 					alreadyResetDays[dayCode] = 1;

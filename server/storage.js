@@ -19,11 +19,7 @@ define([
 	'logg',
 	'email',
 	'server_error',
-	'c',
-	'models/event_model',
-	'models/friend_model',
-	'models/invite_model',
-	'collections/invite_collection'
+	'c'
 ], function(
 	_,
 
@@ -38,11 +34,7 @@ define([
 	Log,
 	Email,
 	ServerError,
-	C,
-	EventModel,
-	FriendModel,
-	InviteModel,
-	InviteCollection
+	C
 ) {
 
 	var Storage = {};
@@ -273,7 +265,7 @@ Log.l('batchReq', batchReq);
 				.then(function(getResult) {
 					var dbResults = getResult[0].items;
 					// DB RESULTS
-					results.concat(dbResults);
+					results = results.concat(dbResults);
 
 					if (remainingKeys.length)  {
 
@@ -452,7 +444,7 @@ Log.l('options = ', queryOptions);
 
 				return dbQuery(lastKey)
 				.then(function(queryResult) {
-
+					queryResult = queryResult[0];
 					totalItems = totalItems.concat(queryResult.items);
 					totalCount += queryResult.count;
 					var nextKey = queryResult.lastEvaluatedKey;
@@ -474,17 +466,20 @@ Log.l('options = ', queryOptions);
 
 			loop()
 			.then(function() {
-
-				var result = { count: totalCount, items: totalItems };
+Log.l('then');
+				//var result = { count: totalCount, items: totalItems };
+				var result = totalItems;
+Log.l('result', result);
 				return Cache.set(cacheKey, result, that.cacheTimeout)
 				.then(function(cacheResult) {
-					
+Log.l('result', result);
 					deferred.resolve(result);
 
 				});
 
 			})
 			.fail(function(err) {
+Log.l('fail in _query', err);
 				deferred.reject(err);
 			})
 			.end();
@@ -747,7 +742,8 @@ Log.l('scanOptions = ', scanOptions);
 
 		return loop()
 		.then(function() {
-			var result = { count: totalCount, items: totalItems };
+			//var result = { count: totalCount, items: totalItems };
+			var result = totalItems;
 			return result;
 		});
 
@@ -831,7 +827,7 @@ Log.l('scanOptions = ', scanOptions);
 		batchGet: _batchGet,
 		batchDelete: _batchDelete,
 		batchPut: _batchPut
-	}
+	};
 		
 	CUSTOM_LINKS = {
 		tableName: 'DAYZE_CUSTOM_LINKS',
@@ -856,7 +852,7 @@ Log.l('scanOptions = ', scanOptions);
 		query: function(userId, options) {
 			var hashKey = userId;
 			var cacheKey = this.cachePrefix + hashKey; // Just cache by userId.
-			return _query.call(this, hashKey, options);
+			return _query.call(this, hashKey, cacheKey, options);
 		}
 	};
 
@@ -869,7 +865,8 @@ Log.l('scanOptions = ', scanOptions);
 		},			
 		put: _put,
 		get: _get,
-		batchPut: _batchPut
+		batchPut: _batchPut,
+		batchGet: _batchGet
 	};
 	
 	INVITES_BY_USERID_AND_EVENTID = {
@@ -882,7 +879,7 @@ Log.l('scanOptions = ', scanOptions);
 		query: function(userId, options) {
 			var hashKey = userId;
 			var cacheKey = this.cachePrefix + hashKey;
-			return _query.call(this, hashKey, options);
+			return _query.call(this, hashKey, cacheKey, options);
 		},
 		batchPut: _batchPut
 	};
@@ -897,7 +894,7 @@ Log.l('scanOptions = ', scanOptions);
 		query: function(eventId, options) {
 			var hashKey = eventId;
 			var cacheKey = this.cachePrefix + hashKey;
-			return _query.call(this, hashKey, options);
+			return _query.call(this, hashKey, cacheKey, options);
 		},
 		batchPut: _batchPut
 	};
@@ -929,13 +926,12 @@ Log.l('scanOptions = ', scanOptions);
 		Friends.getFriends = function(userId) {
 			var deferred = Q.defer();
 
-			var options = {}; // No RangeKeyCondition.  Get all friends.
+			var options = {}; // No rangeKeyCondition.  Get all friends.
 			
 			FRIENDS.query(userId, options)
 			.then(function(friendIndices) {
 
-				if (friendIndices.count) {
-					friendIndices = friendIndices.items;
+				if (friendIndices.length) {
 					var friendIds = [];
 					friendIndices.forEach(function(item) {
 						friendIds.push(item.friendId);
@@ -1078,14 +1074,17 @@ Log.l('scanOptions = ', scanOptions);
 					var usersToCreate = [];
 					var userIndicesToCreate = [];
 
-					emailsToGetUserIdsFor.forEach(function(email) {
-						if (!userIdsByEmail.hasOwnProperty(email)) {
+					_.each(emailsToGetUserIdsFor, function(email) {
+						if (!userIdsByEmail.email) {
 
 							// Create an account.
 							var userId = Uuid.v4();
+							var displayName = email.split('@')[0];
+							
 							var user = {
 								userId: userId,
-								unconfirmedEmail: email
+								unconfirmedEmail: email,
+								displayName: displayName
 							};
 							var userIndex = {
 								userId: userId,
@@ -1112,6 +1111,7 @@ Log.l('scanOptions = ', scanOptions);
 					var inviteIndicesToCreate = [];
 
 					_.each(invitees, function(val, key) {
+
 						var userId;
 						if (val == C.EmailInvitee) {
 							userId = userIdsByEmail[key];
@@ -1122,7 +1122,7 @@ Log.l('scanOptions = ', scanOptions);
 						var inviteId = Uuid.v4();
 						var invite = {
 							inviteId: inviteId,
-							eventId: eventId,
+							eventId: event.eventId,
 							userId: userId,
 							responded: 0,
 							response: 0,
@@ -1130,7 +1130,7 @@ Log.l('scanOptions = ', scanOptions);
 						};
 						var inviteIndex = {
 							inviteId: inviteId,
-							eventId: eventId,
+							eventId: event.eventId,
 							userId: userId
 						};
 						invitesToCreate.push(invite);
@@ -1174,12 +1174,8 @@ Log.l('err in Events.createEvent', err);
 			var eventTimeRange = Utils.makeMonthRange(monthCode);
 			
 			var rangeOptions = {
-				RangeKeyCondition: {
-					ComparisonOperator: 'BETWEEN',
-					AttributeValueList: [
-						eventTimeRange.begin,
-						eventTimeRange.end
-					]
+				rangeKeyCondition: {
+					'between': [ eventTimeRange.begin, eventTimeRange.end ]
 				}
 			};
 
@@ -1189,9 +1185,8 @@ Log.l('err in Events.createEvent', err);
 		Events.getEventsForDay = function(user, dayCode) {
 
 			var rangeOptions = {
-				RangeKeyCondition: {
-					ComparisonOperator: 'EQ',
-					AttributeValueList: [ dayCode ]
+				rangeKeyCondition: {
+					'eq': dayCode
 				}
 			};
 
@@ -1211,7 +1206,7 @@ Log.l(rangeOptions);
 			EVENTS_BY_USERID_AND_DAYCODE.query(user.userId, cacheCode, rangeOptions)
 			.then(function(eventIndices) {
 				// eventIndices is an array of objects { userId, dayCode, eventIds: [ '123', '124', ... ] }
-				if (eventIndices.count) {
+				if (eventIndices.length) {
 
 					var allEventIdsInMonth = [];
 					eventIndices.forEach(function(eventIndex) {
@@ -1242,25 +1237,59 @@ Log.l(rangeOptions);
 		Events.getEventDetails = function(eventId) {
 			var deferred = Q.defer();
 
-			return EVENTS.get(eventId)
+			var invitesByUserId = {};
+			var inviteCollection = {};
+
+			EVENTS.get(eventId)
 			.then(function(event) {
 
-				return INVITES_BY_EVENTID_AND_USERID.query(eventId)
-				.then(function(invites) {
+Log.l('event', event);
+				return INVITES_BY_EVENTID_AND_USERID.query(event.eventId)
+				.then(function(inviteIndices) {
+Log.l('inviteIndices', inviteIndices);
 
-					var usersToPull = [];
-					_.each(invites, function(invite) {
-						usersToPull.push(invite.userId);
+					var inviteIds = [];
+					_.each(inviteIndices, function(inviteIndex) {
+						inviteIds.push(inviteIndex.inviteId)
 					});
-					
-					return USERS.batchGet(usersToPull)
-					.then(function(users) {
+				
+Log.l('inviteIds', inviteIds);
+					return INVITES.batchGet(inviteIds)
+					.then(function(invites) {
 
-						var eventModel = new EventModel();
-						deferred.resolve(eventModel);
+						var usersToPull = [];
+						_.each(invites, function(invite) {
+							usersToPull.push(invite.userId);
+							invitesByUserId[invite.userId] = invite;
+						});
+						
+						return USERS.batchGet(usersToPull)
+						.then(function(users) {
+Log.l('event', event);
+							_.each(users, function(user) {
+
+								// EventModel has a InviteCollection.
+								// InviteCollection is composed of InviteModel.
+								// InviteModel has a UserModel.
+								var userModel = {
+									userId: user.userId,
+									email: user.email || user.unconfirmedEmail,
+									displayName: user.displayName
+								};
+
+								var invite = invitesByUserId[user.userId];
+								invite.userModel = userModel;
+								inviteCollection[invite.userId] = invite;					
+
+							});
+
+							event.inviteCollection = inviteCollection;
+Log.l('event', event);
+							deferred.resolve(event);
+
+						});
 
 					});
-
 
 				});
 
@@ -1829,8 +1858,7 @@ Log.l('//////////////////////////////////////////////////////////////////');
 				};
 
 				SLAVE.scan({ limit: Config.DYNAMO_SCAN_CHUNK_SIZE })
-				.then(function(result) {
-					slaveItems = result.items;
+				.then(function(slaveItems) {
 Log.l('slaveItems', slaveItems);
 					
 					return processSlaveItemsOneAtATime();	
@@ -1893,10 +1921,9 @@ Log.l('//////////////////////////////////////////////////////////////////');
 				cutoffDate = now - cutoffDate;
 
 				MASTER.scan({ limit: Config.DYNAMO_SCAN_CHUNK_SIZE })
-				.then(function(result) {
+				.then(function(masterItems) {
 
-Log.l('scan result', result);
-					masterItems = result.items;
+Log.l('scan result', masterItems);
 					masterItems.forEach(function(item) {
 						
 						var alreadyDeleted = false;

@@ -172,7 +172,6 @@ log(error);
 
 		// Only instantiate as needed.
 		buildDayModel: function() {
-log('buildDayModel', _eventCollection);
 			if (!_dayModel) {
 				_dayModel = new DayModel({ appModel: that, eventCollection: _eventCollection });
 				that.set('dayModel', _dayModel);
@@ -354,7 +353,7 @@ log('Pulled friends.', _friendCollection);
 			if (eventId) {
 				// Single Event.
 
-				_eventCollection.fetchSingleEvent(eventId, function() {
+				_eventCollection.fetchSingleEvent(eventId, function(eventModel) {
 					that.setSelectedEvent(eventId);
 					that.showView(C.ActiveViews.Day);
 				});
@@ -425,7 +424,6 @@ log('Pulled friends.', _friendCollection);
 		setSelectedEvent: function(eventId) {
 			if (eventId) {
 				var selectedEventModel = _eventCollection.get(eventId);
-log('selectedEventModel', selectedEventModel);
 				_eventView.setModel(selectedEventModel);
 				_dayModel.set('selectedEventId', selectedEventModel.cid);
 			} else {
