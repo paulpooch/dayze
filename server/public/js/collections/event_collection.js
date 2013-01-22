@@ -1,3 +1,6 @@
+///////////////////////////////////////////////////////////////////////////////
+// EVENT COLLECTION
+///////////////////////////////////////////////////////////////////////////////
 define([
 	'jquery',
 	'underscore',
@@ -15,7 +18,8 @@ define([
 	var that,
 		_app,
 		_appModel,
-		_eventsByDay;
+		_eventsByDay,
+		_eventsByMonth;
 
 	var EventCollection = Backbone.Collection.extend({
 	
@@ -24,6 +28,42 @@ define([
 
 		getEventsWithDayCode: function(dayCode) {
 			return _eventsByDay[dayCode] || [];
+		},
+
+		// Gets details.
+		fetchSingleEvent: function(eventId, callback) {
+			var eventModel = this.get(eventId);
+			if (!eventModel) {
+				eventModel = new EventModel({ eventId: eventId });
+			}
+			eventModel.fetch({
+				success: function() {
+					callback();
+				},
+				error: that.handleError
+			});
+		},
+
+		fetchEventsForDay: function(dayCode, callback) {
+			that.fetch({ 
+				data: $.param({ dayCode: dayCode }), 
+				success: function() {
+					callback();
+				},
+				error: that.handleError
+			});
+		},
+
+		// TODO: This should be intelligent.
+		// Not repull a million times.
+		fetchEventsForMonth: function(monthCode, callback) {
+			that.fetch({ 
+				data: $.param({ monthCode: monthCode }), 
+				success: function() {
+					callback();
+				},
+				error: that.handleError
+			});
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////
@@ -46,8 +86,10 @@ define([
 			_.bindAll(this);
 			that = this;
 
-			// BINDINGS
 			_eventsByDay = {};
+			_eventsByMonth = {};
+
+			// BINDINGS
 			that.on('add', that.onAdd);
 			that.on('change', that.onChange);
 			that.on('reset', that.onReset);

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// FRIEND MODEL
+// INVITE MODEL
 ///////////////////////////////////////////////////////////////////////////////
 define([
 	'underscore',
@@ -16,16 +16,19 @@ define([
 	var that,
 		_appModel;
 
-	var FriendModel = Backbone.Model.extend({
+	var InviteModel = Backbone.Model.extend({
 
-		urlRoot: '/rest/friend',
-		idAttribute: 'friendId',
+		urlRoot: '/rest/invite',
+		idAttribute: 'inviteId',
 
 		defaults: {
-			userId: null,
-			friendId: null,
-			eventsTogether: 0,
-			appModel: null
+			inviteId: null,
+			userId: null, 
+			eventId: null,
+			responded: null, // Did user respond?  0 or 1
+			response: null, // 0-100 (%)
+			emailed: null, // Was user already emailed invite?  0 or 1 - prevents spam.
+			friendModel: null
 		},
 
 		validate: function(attrs) {
@@ -34,9 +37,13 @@ define([
 
 		toJSON: function() {
 			return {
+				inviteId: that.get('inviteId'),
 				userId: that.get('userId'),
-				friendId: that.get('friendId'),
-				eventsTogether: that.get('eventsTogether')
+				eventId: that.get('eventId'),
+				responded: that.get('responded'),
+				response: that.get('response'),
+				emailed: that.get('emailed'),
+				friendModel: that.get('friendModel'),
 			};
 		},
 
@@ -48,13 +55,12 @@ define([
 			that = this;
 			_.bindAll(that);
 
-			_appModel = options.appModel;
-		
+			_appModel = options.appModel;		
 			// EVENTS
 		}
 
 	});
 
-	return FriendModel;
+	return InviteModel;
 
 });

@@ -1,0 +1,40 @@
+///////////////////////////////////////////////////////////////////////////////
+// INVITE COLLECTION
+///////////////////////////////////////////////////////////////////////////////
+define([
+	'underscore',
+	'backbone',
+
+	'models/invite_model'
+], function(
+	_,
+	Backbone,
+	
+	InviteModel
+) {
+
+	var that,
+		_app,
+		_appModel;
+
+	var InviteCollection = Backbone.Collection.extend({
+	
+		model: InviteModel,
+		url: '/invite/friend',
+
+		// EVENTS /////////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+
+		initialize: function() {
+			_.bindAll(this);
+			that = this;
+
+			// BINDINGS
+		}
+
+	});
+
+	return InviteCollection;
+
+});

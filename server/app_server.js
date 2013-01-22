@@ -53,6 +53,12 @@ requirejs.config({
 	packages: [{
 		name: 'filter',
 		location: __dirname + '/public/js/filter'
+	}, {
+		name: 'collections',
+		location: __dirname + '/public/js/collections'
+	}, {
+		name: 'models',
+		location: __dirname + '/public/js/models'
 	}]
 });
 
@@ -218,14 +224,29 @@ Log.l('sendError', err);
 
 				return filterAction(req, res, C.FilterAction.EventList)
 				.then(function(clean) {
+
+					var dayCode = clean['dayCode'];
 					var monthCode = clean['monthCode'];
-					if (monthCode) {
+					if (dayCode) {
+
+						return Storage.Events.getEventsForDay(user, dayCode)
+						.then(function(events) {
+
+							Log.l('got events for day', events);
+							sendSuccess(res, events, Filter.clientBlacklist.event);
+							return;
+						
+						});
+
+					} else if (monthCode) {
 					
 						return Storage.Events.getEventsForMonth(user, monthCode)
 						.then(function(events) {
+
 							Log.l('got events for month', events);
 							sendSuccess(res, events, Filter.clientBlacklist.event);
 							return;
+						
 						});
 
 					}			
@@ -274,6 +295,31 @@ Log.l('event created successfully', event);
 			Log.l();
 			Log.l('EVENT READ ////////////////////');
 			Log.l();
+
+			frontDoor(req, res)
+			.then(function() {
+
+				return filterAction(req, res, C.FilterAction.EventRead)
+				.then(function(clean) {
+
+					var eventId = clean.eventId;
+					return Storage.Events.getEventDetails(eventId)
+					.then(function(event) {
+
+						sendSuccess(res, event, Filter.clientBlacklist.event);
+						return;
+
+					});
+
+				});
+
+			})
+			.fail(function(err) {
+				Log.e('Error in EVENT READ', err, err.stack);
+				sendError(res, err);
+			})
+			.end();
+
 		};
 
 		EventRestApi.update = function(req, res) {

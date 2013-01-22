@@ -12,7 +12,8 @@ define([
 ) {
 
 	var that,
-		_appModel;
+		_appModel,
+		_eventCollection;
 
 	var DayModel = Backbone.Model.extend({
 
@@ -42,9 +43,12 @@ define([
 
 		// EVENTS /////////////////////////////////////////////////////////////
 		onDayCodeChange: function() {
+log('onDayCodeChange');
 			var dayCode = that.get('dayCode');
 			var parts = dayCode.split('-');
 			that.set('displayDate', new Date(parts[0], parts[1] - 1, parts[2]).toDateString());
+			var todaysEvents = _eventCollection.getEventsWithDayCode(dayCode);
+			that.set('todaysEvents', todaysEvents);
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -56,6 +60,8 @@ define([
 			// VARS
 			that = this;
 			_appModel = options.appModel;
+			_eventCollection = options.eventCollection;
+log('_eventCollection', _eventCollection);
 			that.bind('change:dayCode', that.onDayCodeChange);
 		}
 

@@ -172,8 +172,9 @@ log(error);
 
 		// Only instantiate as needed.
 		buildDayModel: function() {
+log('buildDayModel', _eventCollection);
 			if (!_dayModel) {
-				_dayModel = new DayModel({ appModel: that });
+				_dayModel = new DayModel({ appModel: that, eventCollection: _eventCollection });
 				that.set('dayModel', _dayModel);
 				_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
 			}
@@ -345,15 +346,27 @@ log('Pulled friends.', _friendCollection);
 			that.showView(C.ActiveViews.Calendar); 
 		},
 
-		routeDay: function(dayCode) {
+		routeDay: function(dayCode, eventId) {
 			that.buildDayModel();
 			
 			_dayModel.set('dayCode', dayCode);
-			var daysEvents = that.getCurrentDaysEvents();
-			that.setSelectedEvent(daysEvents.length && daysEvents[0].cid);
 
-			// Trigger modal in app_view.
-			that.showView(C.ActiveViews.Day);
+			if (eventId) {
+				// Single Event.
+
+				_eventCollection.fetchSingleEvent(eventId, function() {
+					that.setSelectedEvent(eventId);
+					that.showView(C.ActiveViews.Day);
+				});
+
+			} else {
+				// Days Events.
+
+				_eventCollection.fetchEventsForDay(dayCode, function() {
+					that.showView(C.ActiveViews.Day);
+				});
+
+			}
 		},
 
 		routeOAuth: function(response) {
@@ -405,14 +418,14 @@ log('Pulled friends.', _friendCollection);
 			// Begin here creating event model.
 			var event = new EventModel({ app: this, appModel: that, name: eventName, dayCode: eventDayCode });
 			_eventCollection.add(event);
-			that.getCurrentDaysEvents();
 			that.setSelectedEvent(event.cid);
 			return event.cid;
 		},
 
-		setSelectedEvent: function(cid) {
-			if (cid) {
-				var selectedEventModel = _eventCollection.get(cid);
+		setSelectedEvent: function(eventId) {
+			if (eventId) {
+				var selectedEventModel = _eventCollection.get(eventId);
+log('selectedEventModel', selectedEventModel);
 				_eventView.setModel(selectedEventModel);
 				_dayModel.set('selectedEventId', selectedEventModel.cid);
 			} else {
@@ -420,12 +433,6 @@ log('Pulled friends.', _friendCollection);
 				_eventView.setModel(blankEventModel);
 				_dayModel.set('selectedEventId', null);
 			}
-		},
-
-		getCurrentDaysEvents: function() {	
-			var evtColl =  _eventCollection.getEventsWithDayCode(_dayModel.get('dayCode'));
-			_dayModel.set('todaysEvents', evtColl);
-			return evtColl;
 		},
 		///////////////////////////////////////////////////////////////////////
 
@@ -466,6 +473,10 @@ log('eventModel', eventModel);
 					wait: true,
 					success: function(model, response) {
 log('event saved', model, response);
+						var dayCode = eventModel.get('dayCode');
+						var eventId = eventModel.get('eventId');
+						var url = 'day/' + dayCode + '/event/' + eventId;
+						_router.navigate(url, { trigger: true });
 					},
 					error: that.handleError
 				});
@@ -612,24 +623,11 @@ log(_accountModel);
 
 
 		// FROM CALENDAR MODEL ////////////////////////////////////////////////
-		// TODO: This should be intelligent.
-		// Not repull a million times.
-		pullEventsForMonth: function(monthCode) {
-			if (!that.get('SUPPRESS_SERVER_CALLS')) {
-				if (_accountModel.get('isLoggedIn')) {
-					_eventCollection.fetch({ 
-						data: $.param({ monthCode: monthCode }), 
-						success: function() {
-							_calendarView.onMonthLoaded(monthCode);
-						},
-						error: that.handleError
-					});
-				}
-			}
-		},
+
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
+log('appModel.initialize');
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);

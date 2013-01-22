@@ -26,16 +26,17 @@ define([
 	var App = Backbone.Router.extend({
 
 		routes: {
-			'day/:dayCode':				'day',
-			'calendar':					'calendar',
-			'oauth': 					'oauth',
-			'link/:linkId': 			'link',
-			'error': 					'error',
-			'account/:action/:linkId': 	'account',
-			'account/:action': 			'account',
-			'account':  				'account',
-			'logout':  					'logout',
-			'*path':  					'catchall'
+			'day/:dayCode':					'day',
+			'day/:dayCode/event/:eventId': 	'day',
+			'calendar':						'calendar',
+			'oauth': 						'oauth',
+			'link/:linkId': 				'link',
+			'error': 						'error',
+			'account/:action/:linkId': 		'account',
+			'account/:action': 				'account',
+			'account':  					'account',
+			'logout':  						'logout',
+			'*path':  						'catchall'
 		},
 
 		catchall: function() {
@@ -59,11 +60,11 @@ log('ROUTE: catchall');
 			_appModel.route(route);
 		},
 
-		day: function(dayCode) {
-log('ROUTE: day', dayCode);
+		day: function(dayCode, eventId) {
+log('ROUTE: day', dayCode, eventId);
 			var route = {
 				dest: function() { 
-					_appModel.routeDay(dayCode);
+					_appModel.routeDay(dayCode, eventId);
 				},
 				pullAccountFirst: true
 			}

@@ -325,7 +325,12 @@ Log.l('fail');
 		name: 'monthCode',
 		rules: [ Filter.rules.monthCode	],
 		immutable: true,
-		required: true
+		required: false
+	}, {
+		name: 'dayCode',
+		rules: [ Filter.rules.dayCode	],
+		immutable: true,
+		required: false
 	}];
 	Filter.fields[C.FilterAction.EventAdd] = [{
 		name: 'addEventText',

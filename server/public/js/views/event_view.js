@@ -124,6 +124,7 @@ log('WARNING - mapLocation is currently useless.')
 			that.model = m;
 			that.render();
 			that.addMap();
+log('EventView.setModel', m);
 
 			// BINDINGS
 			that.model.bind('change:invited', that.renderInvited);

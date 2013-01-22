@@ -2,12 +2,10 @@
 // EVENT MODEL
 ///////////////////////////////////////////////////////////////////////////////
 define([
-	'jquery',
 	'underscore',
 	'backbone',
 	'c'
 ], function(
-	jQuery,
 	_,
 	Backbone,
 	C
@@ -21,6 +19,7 @@ define([
 		idAttribute: 'eventId',
 
 		defaults: {
+			eventId: null,
 			name: null,
 			dayCode: null,
 			description: null,

@@ -19,7 +19,11 @@ define([
 	'logg',
 	'email',
 	'server_error',
-	'c'
+	'c',
+	'models/event_model',
+	'models/friend_model',
+	'models/invite_model',
+	'collections/invite_collection'
 ], function(
 	_,
 
@@ -34,7 +38,11 @@ define([
 	Log,
 	Email,
 	ServerError,
-	C
+	C,
+	EventModel,
+	FriendModel,
+	InviteModel,
+	InviteCollection
 ) {
 
 	var Storage = {};
@@ -151,6 +159,10 @@ Log.e('reconnecting to server: ' + issue.server + ' failed!');
 		}
 	};
 	
+	/////////////////////////////////////////////////////////////////////////////
+	// GET
+	/////////////////////////////////////////////////////////////////////////////
+
 	var _get = function(hashKey, rangeKey) {
 		var that = this;
 		rangeKey = rangeKey || null;
@@ -194,7 +206,10 @@ Log.l(dbResult);
 
 	};
 
-	// COMPLETELY UNTESTED :)
+	/////////////////////////////////////////////////////////////////////////////
+	// BATCH GET
+	/////////////////////////////////////////////////////////////////////////////
+
 	var _batchGet = function(keys) {
 		var that = this;
 		var deferred = Q.defer();
@@ -320,6 +335,10 @@ Log.l(results);
 		return deferred.promise;
 	};
 
+	/////////////////////////////////////////////////////////////////////////////
+	// PUT
+	/////////////////////////////////////////////////////////////////////////////
+
 	var _put = function(item) {
 		var that = this;
 
@@ -341,6 +360,10 @@ Log.l('item = ', item);
 			return item;
 		});
 	};
+
+	/////////////////////////////////////////////////////////////////////////////
+	// DELETE
+	/////////////////////////////////////////////////////////////////////////////
 
 	var _delete = function(hashKey, rangeKey) {
 		var that = this;
@@ -374,6 +397,10 @@ Log.l('rangeKey = ', rangeKey);
 		});
 
 	};
+
+	/////////////////////////////////////////////////////////////////////////////
+	// QUERY
+	/////////////////////////////////////////////////////////////////////////////
 
 	var _query = function(hashKey, cacheKey, queryOptions) {
 		var that = this;
@@ -468,6 +495,10 @@ Log.l('options = ', queryOptions);
 		return deferred.promise;
 	};
 
+	/////////////////////////////////////////////////////////////////////////////
+	// BATCH DELETE
+	/////////////////////////////////////////////////////////////////////////////
+
 	var _batchDelete = function(keys) {
 		var that = this;
 		var deferred = Q.defer();
@@ -557,6 +588,10 @@ Log.l('_batchDelete complete.');
 		return deferred.promise;
 	};
 
+	/////////////////////////////////////////////////////////////////////////////
+	// BATCH PUT
+	/////////////////////////////////////////////////////////////////////////////
+
 	var _batchPut = function(items) {
 		var that = this;
 		var deferred = Q.defer();
@@ -644,7 +679,14 @@ Log.l('_batchPut complete.');
 		return deferred.promise;
 	};
 
+	/////////////////////////////////////////////////////////////////////////////
+	// SCAN
+	/////////////////////////////////////////////////////////////////////////////
 	/* 
+	DO NOT USE FOR CLIENT FACING CODE.
+	ONLY FOR ADMIN UTILS.
+	IF YOU NEED TO SCAN YOU'RE DOING IT WRONG.  ADD AN INDEX TABLE.
+
 	This does not add entries to memcache since it's usually pulling everything which includes a lot of garbage.
 	Like during table cleans.
 	If you need it to dump to cache build that.
@@ -728,9 +770,10 @@ Log.l('scanOptions = ', scanOptions);
 		},
 		put: _put,
 		get: _get,
-		query: function(userId, monthCode, options) {
+		// Need seperate functions so we can cache correctly.
+		query: function(userId, cacheCode, options) {
 			var hashKey = userId;
-			var cacheKey = this.cachePrefix + userId + monthCode;
+			var cacheKey = this.cachePrefix + userId + cacheCode;
 			return _query.call(this, hashKey, cacheKey, options);
 		}
 	};
@@ -825,7 +868,8 @@ Log.l('scanOptions = ', scanOptions);
 			return this.cachePrefix + item.inviteId;
 		},			
 		put: _put,
-		get: _get
+		get: _get,
+		batchPut: _batchPut
 	};
 	
 	INVITES_BY_USERID_AND_EVENTID = {
@@ -839,7 +883,8 @@ Log.l('scanOptions = ', scanOptions);
 			var hashKey = userId;
 			var cacheKey = this.cachePrefix + hashKey;
 			return _query.call(this, hashKey, options);
-		}
+		},
+		batchPut: _batchPut
 	};
 
 	INVITES_BY_EVENTID_AND_USERID = {
@@ -853,7 +898,8 @@ Log.l('scanOptions = ', scanOptions);
 			var hashKey = eventId;
 			var cacheKey = this.cachePrefix + hashKey;
 			return _query.call(this, hashKey, options);
-		}
+		},
+		batchPut: _batchPut
 	};
 
 	///////////////////////////////////////////////////////////////////////////
@@ -971,6 +1017,7 @@ Log.l('scanOptions = ', scanOptions);
 
 		var Events = {};
 
+		// CAREFUL: This logic only works on first save!
 		// We do a lot of low level db interaction to make sure performance is good.
 		// Lot's of batchPuts and stuff instead of using single item creation functions.		
 		Events.createEvent = function(user, clean) {
@@ -983,7 +1030,8 @@ Log.l('scanOptions = ', scanOptions);
 				eventId: eventId,
 				name: clean.name,
 				userId: user.userId,
-				createTime: Utils.getNowIso()
+				createTime: Utils.getNowIso(),
+				dayCode: dayCode
 			};	
 
 			event = Utils.removeEmptyStrings(event);
@@ -1091,9 +1139,23 @@ Log.l('scanOptions = ', scanOptions);
 					});
 
 Log.l('inviteIndicesToCreate', inviteIndicesToCreate);
+					return INVITES_BY_EVENTID_AND_USERID.batchPut(inviteIndicesToCreate)
+					.then(function(batchPutResult) {
+
+						return INVITES_BY_USERID_AND_EVENTID.batchPut(inviteIndicesToCreate);
+
+					})
+					.then(function(batchPutResult) {
+
+						return INVITES.batchPut(invitesToCreate);
+
+					});
 
 				});
 
+			})
+			.then(function() {
+				deferred.resolve(event);
 			})
 			.fail(function(err) {
 Log.l('err in Events.createEvent', err);
@@ -1109,12 +1171,9 @@ Log.l('err in Events.createEvent', err);
 		};
 
 		Events.getEventsForMonth = function(user, monthCode) {
-			var deferred = Q.defer();
-
 			var eventTimeRange = Utils.makeMonthRange(monthCode);
-Log.l(eventTimeRange);
-
-			var options = {
+			
+			var rangeOptions = {
 				RangeKeyCondition: {
 					ComparisonOperator: 'BETWEEN',
 					AttributeValueList: [
@@ -1124,10 +1183,34 @@ Log.l(eventTimeRange);
 				}
 			};
 
-			EVENTS_BY_USERID_AND_DAYCODE.query(user.userId, monthCode, options)
+			return Events.getEventsForTimeRange(user, monthCode, rangeOptions);
+		};
+
+		Events.getEventsForDay = function(user, dayCode) {
+
+			var rangeOptions = {
+				RangeKeyCondition: {
+					ComparisonOperator: 'EQ',
+					AttributeValueList: [ dayCode ]
+				}
+			};
+
+			return Events.getEventsForTimeRange(user, dayCode, rangeOptions);
+		};
+
+		// This DOES NOT get details.  Does not get:
+		// -Invites
+		// -Plans
+		// TODO:
+		// Expand this to get all events you're invited to.
+		// Eventually all events your friends are invited to.  Or whatever top 10 filter thing we decide.
+		Events.getEventsForTimeRange = function(user, cacheCode, rangeOptions) {
+			var deferred = Q.defer();
+			
+Log.l(rangeOptions);
+			EVENTS_BY_USERID_AND_DAYCODE.query(user.userId, cacheCode, rangeOptions)
 			.then(function(eventIndices) {
 				// eventIndices is an array of objects { userId, dayCode, eventIds: [ '123', '124', ... ] }
-Log.l('eventIndices', eventIndices);
 				if (eventIndices.count) {
 
 					var allEventIdsInMonth = [];
@@ -1145,8 +1228,42 @@ Log.l('eventIndices', eventIndices);
 
 			})
 			.then(function(events) {
-Log.l('all events this month', events);
 				deferred.resolve(events);
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		// TODO: Add Plans
+		Events.getEventDetails = function(eventId) {
+			var deferred = Q.defer();
+
+			return EVENTS.get(eventId)
+			.then(function(event) {
+
+				return INVITES_BY_EVENTID_AND_USERID.query(eventId)
+				.then(function(invites) {
+
+					var usersToPull = [];
+					_.each(invites, function(invite) {
+						usersToPull.push(invite.userId);
+					});
+					
+					return USERS.batchGet(usersToPull)
+					.then(function(users) {
+
+						var eventModel = new EventModel();
+						deferred.resolve(eventModel);
+
+					});
+
+
+				});
+
 			})
 			.fail(function(err) {
 				deferred.reject(new ServerError(err));

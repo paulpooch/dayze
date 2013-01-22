@@ -30,13 +30,24 @@ define([
 		onMonthCodeChange: function() {
 			var delay = null;
 			return function() {
-				if (delay) {
-					clearTimeout(delay);
+				if (_appModel.get('activeView') == C.ActiveViews.Calendar) {
+
+					if (delay) {
+						clearTimeout(delay);
+					}
+					delay = setTimeout(function() {
+						// Let's not do this while we develop.
+						// This may belong somewhere else.
+						// Should be a binding.
+						_eventCollection.fetchEventsForMonth(that.get('monthCode'), function() {
+							// Anything to do in callback?
+							// Somehow do?
+							//_calendarView.onMonthLoaded(monthCode);
+						});
+						delay = null;
+					}, C.PULL_EVENTS_FOR_MONTH_DELAY);
+
 				}
-				delay = setTimeout(function() {
-					_appModel.pullEventsForMonth(that.get('monthCode'));
-					delay = null;
-				}, C.PULL_EVENTS_FOR_MONTH_DELAY);
 			};			
 		}(),
 
