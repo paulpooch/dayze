@@ -271,6 +271,18 @@ Log.l('fail');
 		return result;
 	};
 
+	Filter.rules.oauthToken = function(t) {
+		var msg = C.FilterErrors.LinkId;
+		var result = { passed: true, cleanVal: null, errorMessage: msg };
+		try {
+			t = Validator.sanitize(t).xss().trim();
+			result.cleanVal = t;
+		} catch (e) {
+			result.passed = false;
+		}
+		return result;
+	};
+
 	// FILTER FIELDS //////////////////////////////////////////////////////////
 
 	// Regular forms.
@@ -401,6 +413,13 @@ Log.l('fail');
 		rules: [ Filter.rules.displayName	],
 		immutable: true,
 		required: false,
+		serverOnly: true
+	}];
+	Filter.fields[C.FilterAction.AccountOAuthGoogleLogin] = [{
+		name: 'googleToken',
+		rules: [ Filter.rules.oauthToken ],
+		immutable: true,
+		required: true,
 		serverOnly: true
 	}];
 
@@ -599,6 +618,8 @@ Log.l('Cleaned = ', allCleaned);
 		'createTime',
 		'passwordHash',
 		'passwordSalt',
+		'googleId',
+		'facebookId',
 		'lastActivityTime'
 	];
 

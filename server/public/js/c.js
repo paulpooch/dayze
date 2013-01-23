@@ -38,6 +38,7 @@ define([], function() {
 	C.FilterAction.AccountList = 'account.list';
 	C.FilterAction.AccountCreate = 'account.create';
 	C.FilterAction.AccountLogin = 'account.login';
+	C.FilterAction.AccountOAuthGoogleLogin = 'account.oAuthGoogleLogin';
 	C.FilterAction.AccountPasswordChange = 'account.password';
 	C.FilterAction.AccountForgot = 'account.forgot';
 
@@ -75,7 +76,8 @@ define([], function() {
 	C.ErrorCodes.LinkUsed = 22;
 	C.ErrorCodes.LinkExpired = 23;
 	C.ErrorCodes.LinkInvalid = 24;
-	
+	C.ErrorCodes.InvalidOAuthToken = 25;
+
 	// SPECIAL CASE ERRORS
 	C.Errors[C.ErrorCodes.External] = {
 		code: C.ErrorCodes.External,
@@ -154,7 +156,13 @@ define([], function() {
 		code: C.ErrorCodes.LinkInvalid,
 		httpCode: C.HttpCodes.NotFound,
 		message: 'LinkId was invalid.'
-	}
+	};
+
+	C.Errors[C.ErrorCodes.InvalidOAuthToken] = {
+		code: C.ErrorCodes.LinkInvalid,
+		httpCode: C.HttpCodes.BadRequest,
+		message: 'Invalid oAuth token.'
+	};
 
 	C.Strings = {};
 	C.Strings.ResetPassword = function(p) {
@@ -177,6 +185,7 @@ define([], function() {
 	C.FilterErrors.EventLocation = 'Location must be 100 or less printable characters.';
 	C.FilterErrors.EventName = 'Name must be 1 to 30 printable characters.';
 	C.FilterErrors.Time = 'Time must be valid (3:30pm).';
+	C.FilterErrors.OAuthToken = 'Invalid oAuth token format';
 	C.FilterErrors.Invited = 'Invite list contained an invalid entry.';
 
 	C.Links = {};
@@ -195,6 +204,8 @@ define([], function() {
 	C.States.PasswordReset = 'passwordReset';
 	C.States.Logout = 'logout';
 	C.States.Login = 'login';
+	C.States.GoogleLogin = 'googleLogin';
+	C.States.FacebookLogin = 'facebookLogin';
 	// Not really States... just used for frontDoor.
 	C.States.AccountList = 'accountList';
 	C.States.Link = 'link';

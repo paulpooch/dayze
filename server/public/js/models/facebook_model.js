@@ -19,7 +19,7 @@ define([
 
 		defaults: {
 			accountModel: null,
-			isLoggedIn: false,
+			isConnected: false,
 			accessToken: '',
 			userId: '',
 			isReady: false

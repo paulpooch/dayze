@@ -68,7 +68,9 @@ define([
 				displayName: that.get('displayName'),
 				isFullUser: that.get('isFullUser'),
 				unconfirmedEmail: that.get('unconfirmedEmail'),
+				googleId: _googleModel.get('id'),
 				googleToken: _googleModel.get('accessToken'),
+				facebookId: _facebookModel.get('id'),
 				facebookToken: _facebookModel.get('accessToken'),
 				email: that.get('email'),
 				message: that.get('message'),
@@ -84,7 +86,7 @@ define([
 		},
 
 		oauth: function(response) {
-			that.get('googleModel').oauth(response);
+			that.get('googleModel').fetchedToken(response);
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////
@@ -102,8 +104,8 @@ define([
 			_.bindAll(that);
 
 			_appModel = options.appModel;
-			_googleModel = new GoogleModel({ accountModel: that });
-			_facebookModel = new FacebookModel({ accountModel: that });
+			_googleModel = new GoogleModel({ appModel: _appModel, accountModel: that });
+			_facebookModel = new FacebookModel({ appModel: _appModel, accountModel: that });
 
 			that.set('googleModel', _googleModel);
 			that.set('facebookModel', _facebookModel);

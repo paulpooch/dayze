@@ -46,8 +46,10 @@ define([
 
 		_$userEmail,
 
-		_$googleButton,
-		_$facebookButton;
+		_$googleLoginButton,
+		_$facebookLoginButton,
+		_$googleCreateButton,
+		_$facebookCreateButton;
 
 	var AccountControlsView = Backbone.View.extend({
 
@@ -66,8 +68,10 @@ define([
 			_$feedbackLogin = that.$el.find('.feedback_message_login');
 			_$feedbackCreate = that.$el.find('.feedback_message_create');
 			_$feedbackForgot = that.$el.find('.feedback_message_reset');
-   	        _$googleButton = that.$el.find('#google_button');
-   	        _$facebookButton = that.$el.find('#facebook_button');
+ 	        _$googleLoginButton = that.$el.find('#google_login_button');
+   	        _$facebookLoginButton = that.$el.find('#facebook_login_button');
+   	        _$googleCreateButton = that.$el.find('#google_create_button');
+   	        _$facebookCreateButton = that.$el.find('#facebook_create_button');
 
 	        _accountModel = that.model;
 	        _googleModel = that.model.get('googleModel');
@@ -79,19 +83,25 @@ define([
 			_$userModal.bind('show', that.onUserModalShow);
 			_$userModal.bind('hide', that.onUserModalHide);
 
+			if (_googleModel.get('isLoggedIn')) {
+				_$googleLoginButton.html('Log out of Google');
+			} else {
+				_$googleLoginButton.html('Use Google');
+			}
+
 			_googleModel.bind('change:isLoggedIn', function() {
 				if (_googleModel.get('isLoggedIn')) {
-					_$googleButton.html('Log out of Google');
+					_$googleLoginButton.html('Log out of Google');
 				} else {
-					_$facebookButton.html('Use Google');
+					_$googleLoginButton.html('Use Google');
 				}
 	        });
 
 			_facebookModel.bind('change:isLoggedIn', function(facebook) {
 				if (_facebookModel.get('isLoggedIn')) {
-					_$facebookButton.html('Log out of Facebook');
+					_$facebookLoginButton.html('Log out of Facebook');
 				} else {
-					_$facebookButton.html('Use Facebook');
+					_$facebookLoginButton.html('Use Facebook');
 				}
 			});
 		},
@@ -127,8 +137,10 @@ define([
 		// VIEW EVENTS ////////////////////////////////////////////////////////
 		events: {
 			'click #user_button': 'onUserButtonClick',
-			'click #google_button': 'onGoogleButtonClick',
-			'click #facebook_button': 'onFacebookButtonClick',
+			'click #google_login_button': 'onGoogleLoginButtonClick',
+			'click #facebook_login_button': 'onFacebookLoginButtonClick',
+			'click #google_create_button': 'onGoogleCreateButtonClick',
+			'click #facebook_create_button': 'onFacebookCreateButtonClick',
 			'click #show_login_button': 'showLoginForm',
 			'click #show_create_button': 'showCreateAccountForm',
 			'click #controls_create_account_button': 'showCreateAccountForm',
@@ -142,16 +154,28 @@ define([
 	        _appModel.routeAccount();
 	    },
 
- 		onGoogleButtonClick: function() {
- 			_googleModel.login();
+ 		onGoogleLoginButtonClick: function() {
+			if (_googleModel.get('isLoggedIn')) {
+				_googleModel.logout();
+			} else {
+				_googleModel.login();
+			}
 		},
 
-		onFacebookButtonClick: function() {
+		onFacebookLoginButtonClick: function() {
 			if (_facebookModel.get('isLoggedIn')) {
 				_facebookModel.logout();
 			} else {
 				_facebookModel.login();
 			}
+		},
+
+		onGoogleCreateButtonClick: function() {
+			_googleModel.create();
+		},
+
+		onFacebookCreateButtonClick: function() {
+			_facebookModel.create();
 		},
 
 		showLoginForm: function() {

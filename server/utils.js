@@ -4,9 +4,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 define([
+	'https',
 	'q',
 	'crypto'
 ], function(
+	https,
 	Q,
 	Crypto
 ) {
@@ -108,6 +110,28 @@ define([
 			}
 		}
 		return obj;
+	};
+
+	Utils.qHttpsRequest = function(options) {
+		var deferred = 	Q.defer();
+
+		var callback = function(response) {
+		  var str = '';
+		  response.on('data', function (chunk) {
+		    str += chunk;
+		  });
+		  response.on('end', function () {
+		  	var response = JSON.parse(str);
+			return deferred.resolve(response);
+		  });
+		  response.on('error', function(error) {
+		  	return deferred.reject(error);
+		  });
+		}
+
+		https.request(options, callback).end();
+
+		return deferred.promise;
 	};
 
   	return Utils;

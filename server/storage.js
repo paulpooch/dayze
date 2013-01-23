@@ -826,6 +826,19 @@ Log.l('scanOptions = ', scanOptions);
 		batchDelete: _batchDelete,
 		batchPut: _batchPut
 	};
+
+	USERS_BY_GOOGLEID = {
+		tableName: 'DAYZE_USERS_BY_GOOGLEID',
+		cachePrefix: '11_',
+		cacheTimeout: 3600,
+		cacheKey: function(item) {
+			return this.cachePrefix + item.googleId;
+		},
+		put: _put,
+		get: _get,
+		scan: _scan,
+		batchDelete: _batchDelete
+	};
 		
 	CUSTOM_LINKS = {
 		tableName: 'DAYZE_CUSTOM_LINKS',
@@ -1410,6 +1423,89 @@ Log.l('event', event);
 			})
 			.end();
 
+			return deferred.promise;
+		};
+
+		Users.updateAndAutoLogin = function(user, res) {
+
+			user.isLoggedIn = 1;
+
+			return Users.setCookie(user)
+			.then(function(setCookieResult) {
+Log.l('logged in yo');
+Log.l(cookieId);
+Log.l('^^^^');
+				var cookieId = setCookieResult.cookieId;
+				res.cookie('cookieId', cookieId, { signed: true });
+				return user;
+
+			});
+		};
+
+		Users.createGoogleAccount = function(token, id, email) {
+			
+			var deferred = Q.defer();
+
+			var cookieId = Utils.generatePassword(20, 2);
+			var userId = Uuid.v4();
+			var displayName = email.split('@')[0];
+
+			var account = { 
+				userId: userId,
+				cookieId: cookieId,
+				isFullUser: 1,
+				createTime: Utils.getNowIso(),
+				missingPassword: 1,
+				//unconfirmedEmail: null,
+				displayName: displayName,
+				email: email,
+				googleId: id,
+				googleToken: token,
+				facebookId: 0,
+				facebookToken: 0,
+				lastActivityTime: Utils.getNowIso()
+			};
+
+			var emailIndex = {
+				email: email,
+			 	userId: userId
+			};
+
+			var googleIdIndex = {
+				googleId: id,
+				userId: userId
+			};
+
+			USERS.put(account)
+			.then(function(result) {
+			 	return USERS_BY_EMAIL.put(emailIndex);
+			})
+			.then(function(result) {
+			 	return USERS_BY_GOOGLEID.put(googleIdIndex);
+			})
+			.then(function(result) {
+				deferred.resolve(account);
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
+		Users.getUserWithGoogleId = function(googleId) {
+			var deferred = Q.defer();
+
+			USERS_BY_GOOGLEID.get(googleId)
+			.then(function(user) {
+				deferred.resolve(user);
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+			
 			return deferred.promise;
 		};
 

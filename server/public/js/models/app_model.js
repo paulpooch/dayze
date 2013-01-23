@@ -543,6 +543,31 @@ log(_accountModel);
 			})
 		},
 
+		googleLogin: function() {
+			_accountModel.set('state', C.States.GoogleLogin);
+			_accountModel.save([], {
+				wait: true,
+				success: function(model, response) {
+log('GOOGLE LOGIN SUCCESS');
+log(model);
+log(response);
+log(_accountModel);
+					_accountControlsView.hideUserModal();
+					_accountControlsView.render();
+				},
+				error: function(model, response) {
+					if (response.responseText) {
+						var error = JSON.parse(response.responseText);
+						if (error.code == C.ErrorCodes.AccountLoginPassword) {
+							_accountControlsView.handleError(error);
+						} else {
+							that.handleError(model, response);
+						}
+					}
+				}
+			})
+		},
+
 		logout: function() {
 			_accountModel.set('state', C.States.Logout);
 			_accountModel.save([], {

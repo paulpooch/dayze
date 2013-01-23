@@ -585,6 +585,89 @@ Log.l('logged in yo');
 
 					});
 
+				} else if (state == C.States.GoogleLogin) {
+				 	// https://developers.google.com/accounts/docs/OAuth2UserAgent
+
+					var token = null;
+
+					return filterAction(req, res, C.FilterAction.AccountOAuthGoogleLogin)
+					.then(function(clean) {
+
+						// validate oauth token
+						var deferred = 	Q.defer();
+
+						token = clean['googleToken'];
+
+						var options = {
+						  host: 'www.googleapis.com',
+						  path: '/oauth2/v1/tokeninfo?access_token=' + token
+						};
+
+						return Utils.qHttpsRequest(options);
+
+					}).then(function(response) {
+Log.l(response);
+						// fetch user id and email
+						if (response.error === undefined &&
+						response.error_description === undefined &&
+						response.audience == Config.GOOGLE_CLIENT_ID) {
+
+							var id = response.user_id,
+								email = response.email;
+
+							// check for user with google id
+							return Storage.Users.getUserWithGoogleId(id)
+							.then(function(user) {
+
+								if (user) {
+									// update token and login
+Log.l('getUserWithGoogleId', email, user);
+Log.l('success');
+Log.l(user);
+									user.googleToken = token;
+
+									/* TODO: broken.
+									return Storage.Users.updateAndAutoLogin(user, res)
+									.then(function(user) {
+
+										sendSuccess(res, user, Filter.clientBlacklist.user);
+										return;
+
+									});*/
+
+								} else {
+
+									// create account with google id
+Log.l('createGoogleAccount');
+Log.l('token: ' + token);
+Log.l('id: ' + id);
+Log.l('email: ' + email);
+									return Storage.Users.createGoogleAccount(token, id, email)
+									.then(function(user) {
+									
+										/* TODO: broken.	
+										return Storage.Users.updateAndAutoLogin(user, res)
+										.then(function(user) {
+
+											sendSuccess(res, user, Filter.clientBlacklist.user);
+											return;
+
+										});*/
+
+									});
+
+								}
+
+							});
+
+						} else {
+
+							sendError(res, new ServerError(C.ErrorCodes.InvalidOAuthToken));
+							return;
+						}
+					});	
+
+
 				} else if (state == C.States.Logout) {
 Log.l('LOGGING OUT');
 					res.clearCookie('cookieId');

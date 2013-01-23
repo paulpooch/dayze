@@ -44,6 +44,8 @@ define(function() {
 
 	Config.EMAIL_FROM_ADDRESS = 'daypaint@gmail.com';
 
+	Config.GOOGLE_CLIENT_ID = '495360231026.apps.googleusercontent.com';
+	
 	return Config;
 
 });
