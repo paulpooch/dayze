@@ -9,7 +9,6 @@ define([
 	'underscore',
 
 	'dynamodb',
-	//'aws-sdk',
 	'node-uuid',
 	'q',
 	'memcached',
@@ -24,7 +23,6 @@ define([
 	_,
 
 	DynamoDB,
-	//AWS,
 	Uuid,
 	Q,
 	Memcached,
