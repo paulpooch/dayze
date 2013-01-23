@@ -113,7 +113,7 @@ log('ROUTE: oauth');
 					window.history.replaceState(null, null, '/');
 					_appModel.routeOAuth(response);
 				},
-				pullAccountFirst: false
+				pullAccountFirst: true
 			};
 			_appModel.route(route);
 		},

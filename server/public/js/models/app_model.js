@@ -545,6 +545,7 @@ log(_accountModel);
 
 		googleLogin: function() {
 			_accountModel.set('state', C.States.GoogleLogin);
+log('googleLogin accountModel', _accountModel);
 			_accountModel.save([], {
 				wait: true,
 				success: function(model, response) {
@@ -552,8 +553,10 @@ log('GOOGLE LOGIN SUCCESS');
 log(model);
 log(response);
 log(_accountModel);
-					_accountControlsView.hideUserModal();
 					_accountControlsView.render();
+					alert('John route to account/created if new account or calendar if existing.')
+					_router.navigate('account/created', { trigger: true });
+
 				},
 				error: function(model, response) {
 					if (response.responseText) {

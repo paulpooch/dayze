@@ -550,10 +550,10 @@ Log.l('getUserWithEmail', email, user);
 Log.l('success');
 										user.isLoggedIn = 1;
 
-										Storage.Users.setCookie(user)
-										.then(function(setCookieResult) {
+										return Storage.Users.setCookie(user)
+										.then(function(cookieIndex) {
 Log.l('logged in yo');						
-											var cookieId = setCookieResult.cookieId;
+											var cookieId = cookieIndex.cookieId;
 											res.cookie('cookieId', cookieId, { signed: true });
 											sendSuccess(res, user, Filter.clientBlacklist.user);
 											return;
@@ -626,7 +626,18 @@ Log.l('success');
 Log.l(user);
 									user.googleToken = token;
 
-									/* TODO: broken.
+									user.isLoggedIn = 1;
+
+									return Storage.Users.setCookie(user)
+									.then(function(cookieIndex) {
+Log.l('logged in yo');						
+											var cookieId = cookieIndex.cookieId;
+											res.cookie('cookieId', cookieId, { signed: true });
+											sendSuccess(res, user, Filter.clientBlacklist.user);
+											return;
+
+									});
+/*
 									return Storage.Users.updateAndAutoLogin(user, res)
 									.then(function(user) {
 

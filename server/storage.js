@@ -1416,7 +1416,7 @@ Log.l('event', event);
 				return USERS_BY_COOKIE.put(cookieIndex);
 			})
 			.then(function(userByCookiePutResult) {
-				deferred.resolve(user);
+				deferred.resolve(cookieIndex);
 			})
 			.fail(function(err) {
 				deferred.reject(new ServerError(err));
@@ -1424,22 +1424,6 @@ Log.l('event', event);
 			.end();
 
 			return deferred.promise;
-		};
-
-		Users.updateAndAutoLogin = function(user, res) {
-
-			user.isLoggedIn = 1;
-
-			return Users.setCookie(user)
-			.then(function(setCookieResult) {
-Log.l('logged in yo');
-Log.l(cookieId);
-Log.l('^^^^');
-				var cookieId = setCookieResult.cookieId;
-				res.cookie('cookieId', cookieId, { signed: true });
-				return user;
-
-			});
 		};
 
 		Users.createGoogleAccount = function(token, id, email) {
@@ -1498,14 +1482,13 @@ Log.l('^^^^');
 			var deferred = Q.defer();
 
 			USERS_BY_GOOGLEID.get(googleId)
-			.then(function(user) {
-				deferred.resolve(user);
-			})
-			.fail(function(err) {
-				deferred.reject(new ServerError(err));
-			})
-			.end();
-			
+			.then(function(googleIndex) {
+				return USERS.get(googleIndex.userId)
+				.then(function(user) {
+					deferred.resolve(user);
+				});
+			});
+
 			return deferred.promise;
 		};
 
