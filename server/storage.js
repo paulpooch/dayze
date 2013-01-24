@@ -367,7 +367,9 @@ Log.l('rangeKey = ', rangeKey);
 		var options = {}; // Implement options support if we ever need that.
 					      // Can support expected value.
 
-		var deleteFromTable = function() {
+		return Cache.remove(cacheKey)
+		.then(function(result) {
+
 			return Q.ncall(
 				ddb.deleteItem,
 				that,
@@ -375,15 +377,8 @@ Log.l('rangeKey = ', rangeKey);
 				hashKey,
 				rangeKey,
 				options
-			)
-			.then(function(deleteResult) {
-				deferred.resolve(deleteResult);
-			});
-		};
-
-		return Cache.remove(cacheKey)
-		.then(function(result) {
-			return deleteFromTable();
+			);
+			
 		});
 
 	};
@@ -796,7 +791,8 @@ Log.l('scanOptions = ', scanOptions);
 		scan: _scan,
 		batchGet: _batchGet,
 		batchDelete: _batchDelete,
-		batchPut: _batchPut
+		batchPut: _batchPut,
+		remove: _delete
 	};
 
 	USERS_BY_COOKIE = {
@@ -824,7 +820,8 @@ Log.l('scanOptions = ', scanOptions);
 		scan: _scan,
 		batchGet: _batchGet,
 		batchDelete: _batchDelete,
-		batchPut: _batchPut
+		batchPut: _batchPut,
+		remove: _delete
 	};
 
 	USERS_BY_GOOGLEID = {
@@ -1323,6 +1320,28 @@ Log.l('event', event);
 	Storage.Users = (function() {
 	
 		var Users = {};
+
+		Users.updateAndAutoLogin = function(user, res) {
+			var deferred = Q.defer();
+
+			user.isLoggedIn = 1;
+
+			Storage.Users.setCookie(user)
+			.then(function(cookieIndex) {
+Log.l('Logged in.');
+				var cookieId = cookieIndex.cookieId;
+				res.cookie('cookieId', cookieId, { signed: true });
+				return { user: user, res: res };
+
+			})
+			.fail(function(err) {
+				deferred.reject(new ServerError(err));
+			})
+			.end();
+
+			return deferred.promise;
+		};
+
 		
 		Users.updateWithEmail = function(user) {
 			var deferred = Q.defer();
@@ -1817,11 +1836,28 @@ Log.l('DONE');
 			})
 			.fail(function(err) {
 Log.l('FAIL', err);
-				deferred.reject();
+				deferred.reject(err);
 			})
 			.end();
 
 			return deferred.promise;
+		};
+
+		AdminTools.deleteUserByEmail = function(email) {
+
+			return Storage.Users.getUserWithEmail(email)
+			.then(function(user) {
+				var userId = user.userId;
+				
+				return USERS_BY_EMAIL.remove(email)
+				.then(function() {
+
+					return USERS.remove(userId);
+
+				});
+
+			});
+
 		};
 
 		AdminTools.cleanTables = function() {

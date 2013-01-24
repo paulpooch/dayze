@@ -16,6 +16,8 @@ define([
 	var that,
 		_appModel;
 
+	// For use inside InviteModel.
+	// Otherwise use Account or Friend.
 	var UserModel = Backbone.Model.extend({
 
 		idAttribute: 'userId',
@@ -44,10 +46,8 @@ define([
 
 		initialize: function(options) {
 			that = this;
-			_.bindAll(that);
 
 			_appModel = options.appModel;
-		
 			// EVENTS
 		}
 

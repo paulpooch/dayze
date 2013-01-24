@@ -27,7 +27,7 @@ define([
 		message: 'Account was created successfully.<br/>Please check your email and click the confirmation link to finish registration.'
 	};
 	states[C.States.InitialPasswordSet] = {
-		message: 'Thanks for confirming your email.<br/>You can set a password now if you want.'
+		message: 'Thanks for confirming your email.<br/>Please set a password now.'
 	};
 	states[C.States.Saved] = {
 		message: 'Your account has been updated.'

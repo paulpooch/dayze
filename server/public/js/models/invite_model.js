@@ -5,16 +5,17 @@ define([
 	'underscore',
 	'backbone',
 
-	'c'
+	'c',
+	'models/user_model'
 ], function(
 	_,
 	Backbone,
 
-	C
+	C,
+	UserModel
 ) {
 
-	var that,
-		_appModel;
+	var that;
 
 	var InviteModel = Backbone.Model.extend({
 
@@ -51,11 +52,16 @@ define([
 		
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(options) {
+		initialize: function(attrs) {
 			that = this;
-			_.bindAll(that);
 
-			_appModel = options.appModel;		
+			log('InviteModel.initialize', attrs);
+			if (attrs.userModel) {
+				var userModel = new UserModel(attrs.userModel);
+				that.set('userModel', userModel);
+log('userModel', userModel);
+			}
+
 			// EVENTS
 		}
 

@@ -548,13 +548,11 @@ Log.l('getUserWithEmail', email, user);
 									var attemptedPwHash = Utils.hashSha512(pw + salt);
 									if (attemptedPwHash === user.passwordHash) {
 Log.l('success');
-										user.isLoggedIn = 1;
+										return Storage.Users.updateAndAutoLogin(user, res)
+										.then(function(userResPair) {
 
-										return Storage.Users.setCookie(user)
-										.then(function(cookieIndex) {
-Log.l('logged in yo');						
-											var cookieId = cookieIndex.cookieId;
-											res.cookie('cookieId', cookieId, { signed: true });
+											var user = userResPair.user;
+											var res = userResPair.res;
 											sendSuccess(res, user, Filter.clientBlacklist.user);
 											return;
 
@@ -626,25 +624,15 @@ Log.l('success');
 Log.l(user);
 									user.googleToken = token;
 
-									user.isLoggedIn = 1;
-
-									return Storage.Users.setCookie(user)
-									.then(function(cookieIndex) {
-Log.l('logged in yo');						
-											var cookieId = cookieIndex.cookieId;
-											res.cookie('cookieId', cookieId, { signed: true });
-											sendSuccess(res, user, Filter.clientBlacklist.user);
-											return;
-
-									});
-/*
 									return Storage.Users.updateAndAutoLogin(user, res)
-									.then(function(user) {
+									.then(function(userResPair) {
 
+										var user = userResPair.user;
+										var res = userResPair.res;
 										sendSuccess(res, user, Filter.clientBlacklist.user);
 										return;
 
-									});*/
+									});
 
 								} else {
 
@@ -863,7 +851,25 @@ Log.l('LOGGING OUT');
 
 		};
 
+		AdminTools.deleteUserByEmail = function(req, res) {
+
+Log.l('Delete account for ', req.params.email);
+			Storage.AdminTools.deleteUserByEmail(req.params.email)
+			.then(function(result) {
+				sendSuccess(res, result);
+				return;
+			})
+			.fail(function(err) {
+				Log.e('Error in AdminTools.deleteUserByEmail', err, err.stack);
+				sendError(res, err);
+				return;
+			})
+			.end();
+
+		};
+
 		app.get('/admin/clean_tables', AdminTools.cleanTables);
+		app.get('/admin/delete_user_by_email/:email', AdminTools.deleteUserByEmail);
 		// Let's disable this.
 		//app.get('/admin/create_garbage', AdminTools.createGarbage);
 

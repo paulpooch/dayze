@@ -27,7 +27,6 @@ define([
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function() {
-			_.bindAll(this);
 			that = this;
 
 			// BINDINGS

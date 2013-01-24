@@ -4,11 +4,15 @@
 define([
 	'underscore',
 	'backbone',
-	'c'
+	'c',
+	'collections/invite_collection',
+	'models/invite_model'
 ], function(
 	_,
 	Backbone,
-	C
+	C,
+	InviteCollection,
+	InviteModel
 ) {
 
 	var that;
@@ -50,8 +54,25 @@ define([
 				beginTime: this.get('beginTime'),
 				endTime: this.get('endTime'),
 				invited: this.get('invited'),
-				inviteCollection: this.get('inviteCollection')
+				inviteCollection: null
 			};
+		},
+
+		parse: function(json) {
+log('EventModel.parse', json);
+			if (json.inviteCollection) {
+				var inviteModels = [];
+				_.each(json.inviteCollection, function(val, key) {
+					var inviteModel = new InviteModel(val);
+log('inviteModel', inviteModel);
+					inviteModels.push(inviteModel);
+				});
+				var inviteCollection = that.get('inviteCollection');
+				inviteCollection.update(inviteModels);
+				this.set('inviteCollection', inviteCollection);
+				delete json.inviteCollection;
+			}
+			return json;
 		},
 
 		// TODO:
@@ -93,7 +114,9 @@ log(invited);
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 			that = this;
-				
+
+			that.set('inviteCollection', new InviteCollection());
+
 		}
 
 	});

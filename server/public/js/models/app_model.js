@@ -262,6 +262,7 @@ log('Pulled friends.', _friendCollection);
 
 		routeAccount: function(action, linkId) {
 			switch (action) {
+
 				case C.Links.EmailConfirmation:
 					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
 					that.showView(C.ActiveViews.Thinking);
@@ -275,7 +276,6 @@ log('Pulled friends.', _friendCollection);
 											// Reflect that we logged user in.
 											_accountControlsView.render();
 											_accountModel.set('state', C.States.InitialPasswordSet);
-											_accountControlsView.render();
 											that.showView(C.ActiveViews.Account);
 											setTimeout(function() {
 												_accountView.$el.find('[data-focus=1]').focus();
@@ -293,6 +293,7 @@ log('Pulled friends.', _friendCollection);
 						error: that.handleError				
 					});
 					break;
+
 				case C.Links.ResetPassword:
 					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
 					that.showView(C.ActiveViews.Thinking);
@@ -319,12 +320,13 @@ log('Pulled friends.', _friendCollection);
 						error: that.handleError				
 					});
 					break;
+
 				case C.States.Created:
 					_accountModel.fetch({
 						success: function() {
 							_accountModel.set('state', C.States.Created);
-							_accountControlsView.hideUserModal();
 							_accountControlsView.render();
+							_accountControlsView.hideUserModal();
 							that.showView(C.ActiveViews.Account);
 						},
 						error: that.handleError
