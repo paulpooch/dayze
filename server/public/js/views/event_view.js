@@ -40,7 +40,12 @@ define([
 		template: _.template(EventTemplate),
 
 		render: function() {
-			that.$el.html(that.template(that.model.toJSON()));
+			var renderData = { 
+				event: that.model.toJSON(),
+				account: _appModel.get('accountModel').toJSON(),
+				friendCollection: _appModel.get('friendCollection').toJSON()
+			};
+			that.$el.html(that.template(renderData));
 
 			_$eventForm = that.$el.find('#event_create_form');
 			_eventForm = new SmartForm(that.model, _$eventForm, _appModel.saveEvent);

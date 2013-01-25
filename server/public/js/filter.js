@@ -423,6 +423,8 @@ Log.l('fail');
 		serverOnly: true
 	}];
 
+
+	// FILTER HOT FIELDS //////////////////////////////////////////////////////
 	// Will require a matching patch filter above.
 	// Probably could be combined.
 	// See how things shake out first.
@@ -438,6 +440,10 @@ Log.l('fail');
 		'password': {
 			rules: [ Filter.rules.password ],
 			immutable: true
+		},
+		'name': {
+			rules: [ Filter.rules.eventName ],
+			immutable: false
 		}
 	};
 

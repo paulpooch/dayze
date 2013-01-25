@@ -553,6 +553,7 @@ Log.l('success');
 
 											var user = userResPair.user;
 											var res = userResPair.res;
+Log.l('sendSuccess', user);
 											sendSuccess(res, user, Filter.clientBlacklist.user);
 											return;
 

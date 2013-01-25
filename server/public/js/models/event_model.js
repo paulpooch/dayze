@@ -31,7 +31,8 @@ define([
 			beginTime: null,
 			endTime: null,
 			invited: {},
-			inviteCollection: null
+			inviteCollection: null,
+			userId: null
 		},
 
 		validate: function() {
@@ -46,15 +47,16 @@ define([
 		// Line 235 of backbone.js
 		toJSON: function() {
 			return {
-				eventId: this.get('eventId'),
-				name: this.get('name'),
-				dayCode: this.get('dayCode'),
-				description: this.get('description'),
-				location: this.get('location'),
-				beginTime: this.get('beginTime'),
-				endTime: this.get('endTime'),
-				invited: this.get('invited'),
-				inviteCollection: null
+				eventId: that.get('eventId'),
+				name: that.get('name'),
+				dayCode: that.get('dayCode'),
+				description: that.get('description'),
+				location: that.get('location'),
+				beginTime: that.get('beginTime'),
+				endTime: that.get('endTime'),
+				invited: that.get('invited'),
+				inviteCollection: that.get('inviteCollection').toJSON(),
+				userId: that.get('userId'),
 			};
 		},
 
@@ -69,7 +71,7 @@ log('inviteModel', inviteModel);
 				});
 				var inviteCollection = that.get('inviteCollection');
 				inviteCollection.update(inviteModels);
-				this.set('inviteCollection', inviteCollection);
+				that.set('inviteCollection', inviteCollection);
 				delete json.inviteCollection;
 			}
 			return json;

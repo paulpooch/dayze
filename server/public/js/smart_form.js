@@ -112,6 +112,7 @@ log(this.$formEl.find('input'));
 					$trigger.show();
 				});
 				$fieldEl.on('save', function(e, params) {
+log('hotField save');
 					//var prevVal = $fieldEl.data('editable').value;
 					var newVal = params.newValue;
 					var oldVal = model.get(fieldName);
@@ -125,7 +126,8 @@ log(this.$formEl.find('input'));
 						ignoreOldVal = true;
 					}
 
-					var result = Filter.cleanHotField(fieldName, newVal, $fieldEl);					
+					var result = Filter.cleanHotField(fieldName, newVal, $fieldEl);
+log('hotField filter result', result);
 					if (result.passed) {					
 						model.set(fieldName, newVal);
 						if (ignoreOldVal || oldVal != newVal) {
@@ -160,7 +162,7 @@ log("Unhandled Error: SmartForm couldn't save model to server.");
 							});
 						}
 					} else {
-
+						// Handled in Filter.cleanHotField
 					}
 				});
 				var hotField = {

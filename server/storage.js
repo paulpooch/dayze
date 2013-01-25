@@ -1331,7 +1331,7 @@ Log.l('event', event);
 Log.l('Logged in.');
 				var cookieId = cookieIndex.cookieId;
 				res.cookie('cookieId', cookieId, { signed: true });
-				return { user: user, res: res };
+				deferred.resolve({ user: user, res: res });
 
 			})
 			.fail(function(err) {

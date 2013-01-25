@@ -98,13 +98,13 @@ define([
 			PAST_WEEKS_TO_SHOW: C.PAST_WEEKS_TO_SHOW,
 			
 			activeView: '',
-			accountCollection: null,
 			eventCollection: null,
 			accountModel: null,
 			calendarModel: null,
 			dayModel: null,
 			eventModel: null,
-			notificationModel: null
+			notificationModel: null,
+			friendCollection: null
 		},
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
