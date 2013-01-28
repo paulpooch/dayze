@@ -6,13 +6,15 @@ define([
 	'backbone',
 	'c',
 	'collections/invite_collection',
-	'models/invite_model'
+	'models/invite_model',
+	'models/user_model'
 ], function(
 	_,
 	Backbone,
 	C,
 	InviteCollection,
-	InviteModel
+	InviteModel,
+	UserModel
 ) {
 
 	var that;
@@ -31,20 +33,10 @@ define([
 			beginTime: null,
 			endTime: null,
 			invited: {},
-			inviteCollection: null,
+			inviteCollection: new InviteCollection(),
 			userId: null
 		},
 
-		validate: function() {
-			// Only return errors.
-			var errors = [];
-
-			if (errors.length) return errors;
-		},
-
-		// Without this, somehow .save() fails.
-		// Related to underscore's clone method I think.
-		// Line 235 of backbone.js
 		toJSON: function() {
 			return {
 				eventId: that.get('eventId'),
@@ -54,24 +46,22 @@ define([
 				location: that.get('location'),
 				beginTime: that.get('beginTime'),
 				endTime: that.get('endTime'),
-				invited: that.get('invited'),
 				inviteCollection: that.get('inviteCollection').toJSON(),
 				userId: that.get('userId'),
 			};
 		},
 
 		parse: function(json) {
-log('EventModel.parse', json);
 			if (json.inviteCollection) {
 				var inviteModels = [];
 				_.each(json.inviteCollection, function(val, key) {
 					var inviteModel = new InviteModel(val);
-log('inviteModel', inviteModel);
 					inviteModels.push(inviteModel);
 				});
 				var inviteCollection = that.get('inviteCollection');
 				inviteCollection.update(inviteModels);
 				that.set('inviteCollection', inviteCollection);
+				that.trigger('change:inviteCollection');
 				delete json.inviteCollection;
 			}
 			return json;
@@ -80,31 +70,45 @@ log('inviteModel', inviteModel);
 		// TODO:
 		// If email, go to server and see if there's a corresponding account.
 		addToInvited: function(invitee) {
-			var invited = that.get('invited');
-			if (typeof invitee == 'string') { // email
-				if (invited.hasOwnProperty(invitee)) {
-					alert(invitee + ' is already invited.');
-				} else {
-					invited[invitee] = C.EmailInvitee;
-				} 
-			} else { // friend model
-				var friendId = invitee.get('friendId');
-				if (invited.hasOwnProperty(friendId)) {
-					alert(friendId + ' is already invited.');
-				} else {
-					invited[friendId] = invitee;
-				}
+
+			var inviteCollection = that.get('inviteCollection');
+			if (typeof invitee == 'string') { // email not friendModel 
+
+				// TODO: check pre-existing
+				var inviteModel = new InviteModel();
+				var userModel = inviteModel.get('userModel');
+				userModel.set('email', invitee);
+				inviteModel.set('userModel', userModel);
+				inviteCollection.add(inviteModel);
+				
 			}
-			that.set('invited', invited);
-			that.trigger('change:invited');
-log(invited);
+			that.set('inviteCollection', inviteCollection);
+			that.trigger('change:inviteCollection');
+
+			// var invited = that.get('invited');
+			// if (typeof invitee == 'string') { // email
+			// 	if (invited.hasOwnProperty(invitee)) {
+			// 		alert(invitee + ' is already invited.');
+			// 	} else {
+			// 		invited[invitee] = C.EmailInvitee;
+			// 	} 
+			// } else { // friend model
+			// 	var friendId = invitee.get('friendId');
+			// 	if (invited.hasOwnProperty(friendId)) {
+			// 		alert(friendId + ' is already invited.');
+			// 	} else {
+			// 		invited[friendId] = invitee;
+			// 	}
+			// }
+			// that.set('invited', invited);
+			//that.trigger('change:invited');
 		},
 
 		removeFromInvited: function(invitee) {
-			var invited = that.get('invited');
-			delete invited[invitee];
-			that.set('invited', invited);
-			that.trigger('change:invited');
+			// var invited = that.get('invited');
+			// delete invited[invitee];
+			// that.set('invited', invited);
+			// that.trigger('change:invited');
 		},
 
 		// EVENTS /////////////////////////////////////////////////////////////
@@ -116,8 +120,6 @@ log(invited);
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
 			that = this;
-
-			that.set('inviteCollection', new InviteCollection());
 
 		}
 

@@ -655,7 +655,6 @@ log(_accountModel);
 		///////////////////////////////////////////////////////////////////////
 
 		initialize: function(options) {
-log('appModel.initialize');
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);

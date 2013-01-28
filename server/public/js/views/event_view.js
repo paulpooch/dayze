@@ -63,6 +63,8 @@ define([
 			_friendAutoSuggest.updateEls(autoSuggestEls);
 
 			$('[rel=tooltip]').tooltip();
+
+			that.renderInvited();
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -106,32 +108,33 @@ log('WARNING - mapLocation is currently useless.')
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		renderInvited: function() {
-
+log('renderInvited');
 			_$inviteListCol1.empty();
 			_$inviteListCol2.empty();
 
-			var invited = that.model.get('invited');
-			invited = _.keys(invited);
-			for (var i = 0; i < invited.length; i++) {
-				var data = { id: invited[i] };
+			var i = 0;
+			var inviteModels = that.model.get('inviteCollection').models;
+log('inviteModels', inviteModels);
+			_.each(inviteModels, function(inviteModel) {
+				var data = inviteModel.toJSON();
 				var html = _inviteItemTemplate(data);
-				if (i % 2) {
+				if (i++ % 2) {
 					_$inviteListCol2.append(html);
 				} else {
 					_$inviteListCol1.append(html);
 				}
-			}
+			});
 
 		},
 		///////////////////////////////////////////////////////////////////////
 
 		setModel: function(m) {
 			that.model = m;
-			that.render();
+			//that.render();
 			that.addMap();
 
 			// BINDINGS
-			that.model.bind('change:invited', that.renderInvited);
+			that.model.bind('change:inviteCollection', that.renderInvited);
 		},
 
 		getModel: function() {

@@ -77,7 +77,7 @@ var hitEnter = function(input) {
 module('Create Event');
 
 test('create event', function() {
-	$('.day:eq(5)').click();
+	$('.day:eq(1)').click();
 	var eventName = 'Test Event';
 	$('#addEventText').val(eventName);
 	$('#event_add_button').click();
@@ -92,7 +92,7 @@ test('create event', function() {
 	
 	stop(); // Pause the test 
     setTimeout(function() {
-		hitEnter('#individual_text');
+	//	hitEnter('#individual_text');
     	// Restart the test
     	start();
     }, 1000);

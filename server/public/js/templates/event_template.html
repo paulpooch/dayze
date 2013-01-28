@@ -20,7 +20,8 @@ if (_state == States.Edit || _state == States.Create) {
 	<% 
 	} else { 
 	%>
-
+	
+state = <%= _state %><br/>
 <form id="event_create_form"
 data-filter="event.create" 
 onsubmit="return false;"

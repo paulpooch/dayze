@@ -38,7 +38,6 @@ define([
 			}
 			eventModel.fetch({
 				success: function() {
-log('eventModel', eventModel);
 					that.add(eventModel);
 					callback(eventModel);
 				},

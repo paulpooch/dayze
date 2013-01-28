@@ -13,8 +13,7 @@ define([
 	C
 ) {
 
-	var that,
-		_appModel;
+	var that;
 
 	// For use inside InviteModel.
 	// Otherwise use Account or Friend.
@@ -40,15 +39,8 @@ define([
 			};
 		},
 
-		// EVENTS /////////////////////////////////////////////////////////////
-		
-		///////////////////////////////////////////////////////////////////////
-
 		initialize: function(options) {
 			that = this;
-
-			_appModel = options.appModel;
-			// EVENTS
 		}
 
 	});

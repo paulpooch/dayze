@@ -29,11 +29,7 @@ define([
 			responded: null, // Did user respond?  0 or 1
 			response: null, // 0-100 (%)
 			emailed: null, // Was user already emailed invite?  0 or 1 - prevents spam.
-			userModel: null
-		},
-
-		validate: function(attrs) {
-
+			userModel: new UserModel()
 		},
 
 		toJSON: function() {
@@ -44,7 +40,7 @@ define([
 				responded: that.get('responded'),
 				response: that.get('response'),
 				emailed: that.get('emailed'),
-				userModel: that.get('userModel'),
+				userModel: that.get('userModel').toJSON()
 			};
 		},
 
@@ -55,11 +51,9 @@ define([
 		initialize: function(attrs) {
 			that = this;
 
-			log('InviteModel.initialize', attrs);
-			if (attrs.userModel) {
+			if (attrs && attrs.userModel && !(attrs.userModel instanceof UserModel)) { // Is it a json object instead of a real model?
 				var userModel = new UserModel(attrs.userModel);
 				that.set('userModel', userModel);
-log('userModel', userModel);
 			}
 
 			// EVENTS

@@ -75,7 +75,7 @@ define([
 			_$yearDropdown.show();
 		},
 
-		hideAllDropdowns: function() {log(2);
+		hideAllDropdowns: function() {
 			_$monthDropdown.hide();
 			_$yearDropdown.hide();
 		},

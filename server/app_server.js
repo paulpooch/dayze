@@ -291,6 +291,30 @@ Log.l('event created successfully', event);
 
 		};
 
+		EventRestApi.update = function(req, res) {
+			Log.l();
+			Log.l('EVENT UPDATE ////////////////////');
+			Log.l();
+		
+			frontDoor(req, res)
+			.then(function(user) {
+
+				return filterAction(req, rew, C.FilterAction.EventUpdate)
+				.then(function(clean) {
+
+Log.l('event update clean = ', clean);
+				
+				});
+
+			})
+			.fail(function(err) {
+				Log.e('Error in EVENT UPDATE', err, err.stack);
+				sendError(res, err);
+			})
+			.end();
+
+		};
+
 		EventRestApi.read = function(req, res) {
 			Log.l();
 			Log.l('EVENT READ ////////////////////');
@@ -320,12 +344,6 @@ Log.l('event created successfully', event);
 			})
 			.end();
 
-		};
-
-		EventRestApi.update = function(req, res) {
-			Log.l();
-			Log.l('EVENT UPDATE ////////////////////');
-			Log.l();
 		};
 
 		EventRestApi.delete = function(req, res) {
