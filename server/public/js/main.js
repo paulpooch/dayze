@@ -39,7 +39,7 @@ require.config({
 		jquery: 'vendor/jquery/jquery.min',
 		jqueryui: 'vendor/jquery/jquery-ui.min',
 		underscore: 'vendor/underscore/underscore.min',
-		backbone: 'vendor/backbone/backbone.min',
+		backbone: 'vendor/backbone/backbone',
 		text: 'vendor/require/text',
 		modernizr: 'vendor/modernizr/modernizr',
 		bootstrap: 'vendor/bootstrap/bootstrap',

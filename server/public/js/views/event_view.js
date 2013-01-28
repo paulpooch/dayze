@@ -135,6 +135,7 @@ log('inviteModels', inviteModels);
 
 			// BINDINGS
 			that.model.bind('change:inviteCollection', that.renderInvited);
+log('setModel');
 		},
 
 		getModel: function() {

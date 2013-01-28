@@ -32,7 +32,6 @@ define([
 			location: null,
 			beginTime: null,
 			endTime: null,
-			invited: {},
 			inviteCollection: new InviteCollection(),
 			userId: null
 		},
@@ -74,8 +73,11 @@ define([
 			var inviteCollection = that.get('inviteCollection');
 			if (typeof invitee == 'string') { // email not friendModel 
 
+				// HUGE BUG!
+				// WHY IS THE USERMODEL BEING REUSED ACROSS INVITEMODELS?  WTF
+
 				// TODO: check pre-existing
-				var inviteModel = new InviteModel();
+				var inviteModel = new InviteModel({ emailed: invitee });
 				var userModel = inviteModel.get('userModel');
 				userModel.set('email', invitee);
 				inviteModel.set('userModel', userModel);
