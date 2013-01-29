@@ -77,10 +77,10 @@ define([
 				// WHY IS THE USERMODEL BEING REUSED ACROSS INVITEMODELS?  WTF
 
 				// TODO: check pre-existing
-				var inviteModel = new InviteModel({ userModel: new UserModel(), emailed: invitee }, {});
-				var userModel = inviteModel.get('userModel');
-				userModel.set('email', invitee);
-				inviteModel.set('userModel', userModel);
+				var inviteModel = new InviteModel({ emailed: invitee }, {});//{ userModel: new UserModel(), emailed: invitee }
+				//var userModel = inviteModel.get('userModel');
+				//userModel.set('email', invitee);
+				//inviteModel.set('userModel', userModel);
 				inviteCollection.add(inviteModel);
 				log('json', inviteModel.toJSON());
 

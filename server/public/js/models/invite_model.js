@@ -28,8 +28,8 @@ define([
 			eventId: null,
 			responded: null, // Did user respond?  0 or 1
 			response: null, // 0-100 (%)
-			emailed: null, // Was user already emailed invite?  0 or 1 - prevents spam.
-			userModel: null
+			emailed: null // Was user already emailed invite?  0 or 1 - prevents spam.
+			//userModel: null
 		},
 
 		toJSON: function() {
@@ -39,8 +39,8 @@ define([
 				eventId: that.get('eventId'),
 				responded: that.get('responded'),
 				response: that.get('response'),
-				emailed: that.get('emailed'),
-				userModel: that.get('userModel').toJSON()
+				emailed: that.get('emailed')
+				//userModel: that.get('userModel').toJSON()
 			};
 		},
 

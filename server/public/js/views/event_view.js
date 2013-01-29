@@ -111,12 +111,28 @@ log('renderInvited');
 			_$inviteListCol1.empty();
 			_$inviteListCol2.empty();
 
+			var inviteModels = that.model.get('inviteCollection').models;
+			
+			if (inviteModels.length > 0) {
+				log(inviteModels[0]);
+			}
+			if (inviteModels.length > 1) {
+				log(inviteModels[1]);
+			}
+
+			for (var x = 0; x < inviteModels.length; x++) {
+				var m = inviteModels[x];
+				log('model ', x, m);
+				var data = m.toJSON();
+				log('data ', x, data);
+			}
+
 			//var inviteModels = that.model.get('inviteCollection').models;
 
-log('inviteModels 1', that.model.get('inviteCollection').models);
-			_.each(that.model.get('inviteCollection').models, function(inviteModel) {
-				var data = inviteModel.toJSON();
-				log(data);
+			//log('inviteModels 1', that.model.get('inviteCollection').models);
+			//that.model.get('inviteCollection').each(function(inviteModel) {
+			//	var data = inviteModel.toJSON();
+				
 				//var html = _inviteItemTemplate(data);
 				//alert(html);
 				//_$inviteListCol1.append(JSON.stringify(inviteModel.toJSON()));
@@ -126,7 +142,7 @@ log('inviteModels 1', that.model.get('inviteCollection').models);
 				} else {
 					_$inviteListCol1.append(html);
 				}*/
-			});
+			//});
 
 log('inviteModels 2', that.model.get('inviteCollection').models);
 			
