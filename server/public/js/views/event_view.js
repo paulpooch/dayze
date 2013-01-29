@@ -111,11 +111,10 @@ log('renderInvited');
 			_$inviteListCol1.empty();
 			_$inviteListCol2.empty();
 
-			var inviteModels = that.model.get('inviteCollection').models;
-			var arr = _.clone(inviteModels);
+			//var inviteModels = that.model.get('inviteCollection').models;
 
-log('inviteModels 1', inviteModels);
-			_.each(arr, function(inviteModel) {
+log('inviteModels 1', that.model.get('inviteCollection').models);
+			_.each(that.model.get('inviteCollection').models, function(inviteModel) {
 				var data = inviteModel.toJSON();
 				log(data);
 				//var html = _inviteItemTemplate(data);
@@ -129,7 +128,7 @@ log('inviteModels 1', inviteModels);
 				}*/
 			});
 
-log('inviteModels 2', inviteModels);
+log('inviteModels 2', that.model.get('inviteCollection').models);
 			
 
 		},
