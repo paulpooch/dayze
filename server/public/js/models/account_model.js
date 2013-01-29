@@ -99,13 +99,13 @@ define([
 		},
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(options) {
+		initialize: function(attrs, options) {
 			that = this;
 			_.bindAll(that);
 
 			_appModel = options.appModel;
-			_googleModel = new GoogleModel({ appModel: _appModel, accountModel: that });
-			_facebookModel = new FacebookModel({ appModel: _appModel, accountModel: that });
+			_googleModel = new GoogleModel({}, { appModel: _appModel, accountModel: that });
+			_facebookModel = new FacebookModel({}, { appModel: _appModel, accountModel: that });
 
 			that.set('googleModel', _googleModel);
 			that.set('facebookModel', _facebookModel);

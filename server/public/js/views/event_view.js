@@ -63,8 +63,6 @@ define([
 			_friendAutoSuggest.updateEls(autoSuggestEls);
 
 			$('[rel=tooltip]').tooltip();
-
-			that.renderInvited();
 		},
 
 		// VIEW EVENTS ////////////////////////////////////////////////////////
@@ -108,22 +106,31 @@ log('WARNING - mapLocation is currently useless.')
 
 		// MODEL EVENTS ///////////////////////////////////////////////////////
 		renderInvited: function() {
+
 log('renderInvited');
 			_$inviteListCol1.empty();
 			_$inviteListCol2.empty();
 
-			var i = 0;
 			var inviteModels = that.model.get('inviteCollection').models;
-log('inviteModels', inviteModels);
-			_.each(inviteModels, function(inviteModel) {
+			var arr = _.clone(inviteModels);
+
+log('inviteModels 1', inviteModels);
+			_.each(arr, function(inviteModel) {
 				var data = inviteModel.toJSON();
-				var html = _inviteItemTemplate(data);
-				if (i++ % 2) {
+				log(data);
+				//var html = _inviteItemTemplate(data);
+				//alert(html);
+				//_$inviteListCol1.append(JSON.stringify(inviteModel.toJSON()));
+				/*
+				if (i++ % 2 == 0) {
 					_$inviteListCol2.append(html);
 				} else {
 					_$inviteListCol1.append(html);
-				}
+				}*/
 			});
+
+log('inviteModels 2', inviteModels);
+			
 
 		},
 		///////////////////////////////////////////////////////////////////////
@@ -161,8 +168,8 @@ log('setModel');
 			_.bindAll(this);
 			that = this;
 
-			_inviteItemTemplate = _.template(InviteItemTemplate);
 			_appModel = options.appModel;
+			_inviteItemTemplate = _.template(InviteItemTemplate);
 
 			var selectFunction = that.model.addToInvited;
 			_friendAutoSuggest = new AutoSuggest(_appModel.get('friendCollection'), C.AutoSuggestType.Friend, selectFunction);

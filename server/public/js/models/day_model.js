@@ -51,7 +51,7 @@ define([
 		},
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(options) {
+		initialize: function(attrs, options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);

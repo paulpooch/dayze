@@ -54,7 +54,7 @@ define([
 			if (json.inviteCollection) {
 				var inviteModels = [];
 				_.each(json.inviteCollection, function(val, key) {
-					var inviteModel = new InviteModel(val);
+					var inviteModel = new InviteModel(val, {});
 					inviteModels.push(inviteModel);
 				});
 				var inviteCollection = that.get('inviteCollection');
@@ -77,12 +77,13 @@ define([
 				// WHY IS THE USERMODEL BEING REUSED ACROSS INVITEMODELS?  WTF
 
 				// TODO: check pre-existing
-				var inviteModel = new InviteModel({ emailed: invitee });
+				var inviteModel = new InviteModel({ userModel: new UserModel(), emailed: invitee }, {});
 				var userModel = inviteModel.get('userModel');
 				userModel.set('email', invitee);
 				inviteModel.set('userModel', userModel);
 				inviteCollection.add(inviteModel);
-				
+				log('json', inviteModel.toJSON());
+
 			}
 			that.set('inviteCollection', inviteCollection);
 			that.trigger('change:inviteCollection');
@@ -117,7 +118,7 @@ define([
 
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(options) {
+		initialize: function(attrs, options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);

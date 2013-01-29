@@ -34,7 +34,7 @@ define([
 		fetchSingleEvent: function(eventId, callback) {
 			var eventModel = this.get(eventId);
 			if (!eventModel) {
-				eventModel = new EventModel({ eventId: eventId });
+				eventModel = new EventModel({ eventId: eventId }, {});
 			}
 			eventModel.fetch({
 				success: function() {

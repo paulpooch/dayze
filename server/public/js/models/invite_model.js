@@ -29,7 +29,7 @@ define([
 			responded: null, // Did user respond?  0 or 1
 			response: null, // 0-100 (%)
 			emailed: null, // Was user already emailed invite?  0 or 1 - prevents spam.
-			userModel: new UserModel()
+			userModel: null
 		},
 
 		toJSON: function() {
@@ -48,13 +48,13 @@ define([
 		
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(attrs) {
+		initialize: function(attrs, options) {
 			that = this;
 
-			if (attrs && attrs.userModel && !(attrs.userModel instanceof UserModel)) { // Is it a json object instead of a real model?
-				var userModel = new UserModel(attrs.userModel);
-				that.set('userModel', userModel);
-			}
+			// if (attrs && attrs.userModel && !(attrs.userModel instanceof UserModel)) { // Is it a json object instead of a real model?
+			// 	var userModel = new UserModel(attrs.userModel, {});
+			// 	that.set('userModel', userModel);
+			// }
 
 			// EVENTS
 		}

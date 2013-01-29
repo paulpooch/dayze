@@ -173,7 +173,7 @@ log(error);
 		// Only instantiate as needed.
 		buildDayModel: function() {
 			if (!_dayModel) {
-				_dayModel = new DayModel({ appModel: that, eventCollection: _eventCollection });
+				_dayModel = new DayModel({}, { appModel: that, eventCollection: _eventCollection });
 				that.set('dayModel', _dayModel);
 				_dayView = new DayView({ model: that.get('dayModel'), appModel: that, el: $('#page_holder') });
 			}
@@ -181,7 +181,7 @@ log(error);
 
 		buildEventModel: function() {
 			if (!_eventModel) {
-				_eventModel = new EventModel({ appModel: that });
+				_eventModel = new EventModel({}, { appModel: that });
 				that.set('eventModel', _eventModel);
 				_eventView = new EventView({ model: that.get('eventModel'), appModel: that, el: $('#event_view_holder') });
 			}	
@@ -189,7 +189,7 @@ log(error);
 
 		buildNotificationModel: function() {
 			if (!_notificationModel) {
-				_notificationModel = new NotificationModel({ appModel: that });
+				_notificationModel = new NotificationModel({}, { appModel: that });
 				that.set('notificationModel', _notificationModel);
 				_notificationView = new NotificationView({ model: that.get('notificationModel'), appModel: that, el: $('#account_view_holder') });
 			}
@@ -197,7 +197,7 @@ log(error);
 
 		buildBasicModel: function() {
 			if (!_basicModel) {
-				_basicModel = new BasicModel({ appModel: that });
+				_basicModel = new BasicModel({}, { appModel: that });
 				that.set('basicModel', _basicModel);
 				_basicView = new BasicView({ model: that.get('basicModel'), appModel: that, el: $('#page_holder') });
 			}
@@ -211,7 +211,7 @@ log(error);
 
 		buildThinkingModel: function() {
 			if (!_thinkingModel) {
-				_thinkingModel = new ThinkingModel({ appModel: that });
+				_thinkingModel = new ThinkingModel({}, { appModel: that });
 				that.set('thinkingModel', _thinkingModel);
 				_thinkingView = new ThinkingView({ model: that.get('thinkingModel'), appModel: that, el: $('#blank_holder') });
 			}
@@ -264,7 +264,7 @@ log('Pulled friends.', _friendCollection);
 			switch (action) {
 
 				case C.Links.EmailConfirmation:
-					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
+					var linkModel = new LinkModel({ linkId: linkId }, { appModel: that });
 					that.showView(C.ActiveViews.Thinking);
 					linkModel.fetch({
 						success: function() {
@@ -295,7 +295,7 @@ log('Pulled friends.', _friendCollection);
 					break;
 
 				case C.Links.ResetPassword:
-					var linkModel = new LinkModel({ appModel: that, linkId: linkId });
+					var linkModel = new LinkModel({ linkId: linkId }, { appModel: that });
 					that.showView(C.ActiveViews.Thinking);
 					linkModel.fetch({
 						success: function() {
@@ -375,7 +375,7 @@ log('Pulled friends.', _friendCollection);
 		},
 
 		routeLink: function(linkId) {
-			var linkModel = new LinkModel({ appModel: that, id: linkId });
+			var linkModel = new LinkModel({ linkId: linkId }, { appModel: that });
 			log('fetch link');
 			linkModel.fetch({
 				success: function() {
@@ -417,7 +417,7 @@ log('Pulled friends.', _friendCollection);
 
 		addEvent: function(eventName, eventDayCode) {
 			// Begin here creating event model.
-			var event = new EventModel({ app: this, appModel: that, name: eventName, dayCode: eventDayCode });
+			var event = new EventModel({ name: eventName, dayCode: eventDayCode }, { app: this, appModel: that });
 			_eventCollection.add(event);
 			that.setSelectedEvent(event.cid);
 			return event.cid;
@@ -429,7 +429,7 @@ log('Pulled friends.', _friendCollection);
 				_eventView.setModel(selectedEventModel);
 				_dayModel.set('selectedEventId', selectedEventModel.cid);
 			} else {
-				var blankEventModel = new EventModel({ appModel: that });
+				var blankEventModel = new EventModel({}, { appModel: that });
 				_eventView.setModel(blankEventModel);
 				_dayModel.set('selectedEventId', null);
 			}
@@ -654,7 +654,7 @@ log(_accountModel);
 
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(options) {
+		initialize: function(attrs, options) {
 			// This is really important.
 			// Binds all event callbacks to 'this'.
 			_.bindAll(this);
@@ -669,8 +669,8 @@ log(_accountModel);
 			_friendCollection = new FriendCollection();
 			that.set('friendCollection', _friendCollection);	
 	
-			_accountModel = new AccountModel({ appModel: that  });
-			_calendarModel = new CalendarModel({ appModel: that });
+			_accountModel = new AccountModel({}, { appModel: that  });
+			_calendarModel = new CalendarModel({}, { appModel: that });
 			
 			that.set('accountModel', _accountModel);
 			that.set('calendarModel', _calendarModel);

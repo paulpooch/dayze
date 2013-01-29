@@ -144,7 +144,7 @@ log('ROUTE: error');
 		initialize: function(options) {
 			that = this;
 			
-			_appModel = new AppModel({ router: that });
+			_appModel = new AppModel({}, { router: that });
 			var pushState = (options && options.pushState) || 'true';
 			// Check for hash tag changes.
 			Backbone.history.start({ pushState: pushState });

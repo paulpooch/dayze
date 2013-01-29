@@ -1,5 +1,5 @@
 <div class="invite_item row-fluid">
-	<div class="invite_item_label span8" data-type="model"><%= userModel.displayName || userModel.email %></div>
+	<div class="invite_item_label span8" data-type="model"><%= emailed || userModel.email %></div>
 	<div class="span4">
 		<button type="button" data-id="<%= userModel.userId %>" class="remove_invite btn btn-warning icon-2x icon-remove-sign"/>
 	</div>

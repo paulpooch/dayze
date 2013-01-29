@@ -32,7 +32,7 @@ define([
 
 		///////////////////////////////////////////////////////////////////////
 
-		initialize: function(options) {
+		initialize: function(attrs, options) {
 			that = this;
 			_.bindAll(that);
 

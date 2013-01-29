@@ -22,7 +22,7 @@ define([
 			accessToken: null,
 		},
 
-		initialize: function(options) {
+		initialize: function(attrs, options) {
 			that = this;
 			_.bindAll(that);
 			_appModel = that.get('appModel');
