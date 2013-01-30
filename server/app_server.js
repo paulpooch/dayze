@@ -642,6 +642,7 @@ Log.l('getUserWithGoogleId', email, user);
 Log.l('success');
 Log.l(user);
 									user.googleToken = token;
+									user.state = C.States.GoogleLogin;
 
 									return Storage.Users.updateAndAutoLogin(user, res)
 									.then(function(userResPair) {
@@ -663,14 +664,19 @@ Log.l('email: ' + email);
 									return Storage.Users.createGoogleAccount(token, id, email)
 									.then(function(user) {
 									
-										/* TODO: broken.	
+										user.state = C.States.GoogleCreated;
+
+										// TODO: broken.	
 										return Storage.Users.updateAndAutoLogin(user, res)
-										.then(function(user) {
+										.then(function(userResPair) {
+
+											var user = userResPair.user;
+											var res = userResPair.res;
 
 											sendSuccess(res, user, Filter.clientBlacklist.user);
 											return;
 
-										});*/
+										});
 
 									});
 

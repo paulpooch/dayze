@@ -205,6 +205,7 @@ define([], function() {
 	C.States.Logout = 'logout';
 	C.States.Login = 'login';
 	C.States.GoogleLogin = 'googleLogin';
+	C.States.GoogleCreated = 'googleCreated';
 	C.States.FacebookLogin = 'facebookLogin';
 	// Not really States... just used for frontDoor.
 	C.States.AccountList = 'accountList';

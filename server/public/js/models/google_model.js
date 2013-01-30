@@ -25,8 +25,8 @@ define([
 		initialize: function(attrs, options) {
 			that = this;
 			_.bindAll(that);
-			_appModel = that.get('appModel');
-			_accountModel = that.get('accountModel');
+			_appModel = options.appModel;
+			_accountModel = options.accountModel;
 		},
 
 		fetchToken: function(callback) {

@@ -555,9 +555,19 @@ log('GOOGLE LOGIN SUCCESS');
 log(model);
 log(response);
 log(_accountModel);
+
 					_accountControlsView.render();
-					alert('John route to account/created if new account or calendar if existing.')
-					_router.navigate('account/created', { trigger: true });
+					switch(model.get('state')) {
+
+						case C.States.GoogleLogin:
+							_router.navigate('calendar', { trigger: true });
+						break;
+
+						case C.States.GoogleCreated:
+							_router.navigate('account/created', { trigger: true });
+						break;
+
+					}
 
 				},
 				error: function(model, response) {
